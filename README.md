@@ -6,6 +6,9 @@ This repository contains the Go SDK for integrating with [Sourcegraph Accounts M
 go get github.com/sourcegraph/sourcegraph-accounts-sdk-go
 ```
 
+> [!note]
+> Please submit all issues to the [`sourcegraph/sourcegraph-accounts` repository](https://github.com/sourcegraph/sourcegraph-accounts/issues) 
+
 ## Clients API v1
 
 ```go
