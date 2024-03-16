@@ -1,0 +1,68 @@
+name: Go
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**.go'
+      - 'go.mod'
+      - '.golangci.yml'
+      - '.github/workflows/go.yml'
+  pull_request:
+  # Disable path matching so required jobs are always run on pull requests
+  # paths:
+  #   - '**.go'
+  #   - 'go.mod'
+  #   - '.golangci.yml'
+  #   - '.github/workflows/go.yml'
+env:
+  GOPROXY: "https://proxy.golang.org"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.22.x
+      - name: Check Go module tidiness
+        shell: bash
+        run: |
+          go mod tidy
+          STATUS=$(git status --porcelain)
+          if [ ! -z "$STATUS" ]; then
+            echo "Unstaged files:"
+            echo $STATUS
+            echo "Run 'go mod tidy' and commit them"
+            exit 1
+          fi
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout=30m
+
+  test:
+    name: Test
+    strategy:
+      matrix:
+        go-version: [ 1.22.x ]
+        platform: [ ubuntu-latest ]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Run tests with coverage
+        run: go test -shuffle=on -v -race -coverprofile=coverage -covermode=atomic ./...
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v1.5.0
+        with:
+          file: ./coverage
+          flags: unittests
