@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package clients.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1;clientsv1";
+
+service UsersService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse);
+  rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse);
+}
+
+message GetUserRequest {
+  //  The user's external ID.
+  string id = 1;
+}
+
+message User {
+  // The external ID.
+  string id = 1;
+  // The display name.
+  string name = 2;
+  // The primary email address.
+  string email = 3;
+  // Whether the email address has been verified.
+  bool email_verified = 4;
+  // The profile avatar URL.
+  string avatar_url = 5;
+  // The time the user was created.
+  google.protobuf.Timestamp created_at = 6;
+  // The time the user information was last updated.
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message GetUsersRequest {
+  // The user's external IDs.
+  repeated string ids = 1;
+}
+
+message GetUsersResponse {
+  repeated User users = 1;
+}
+
+message GetUserRolesRequest {
+  // The user's external ID.
+  string id = 1;
+  // The service slug.
+  string service = 2;
+}
+
+message GetUserRolesResponse {
+  repeated string roles = 1;
+}
+
+service SessionsService {
+  rpc GetSession(GetSessionRequest) returns (GetSessionResponse);
+}
+
+message GetSessionRequest {
+  // The session's ID.
+  string id = 1;
+}
+
+message Session {
+  // The session's ID.
+  string id = 1;
+  // When not empty, the authenticated user.
+  optional User user = 2;
+}
+
+message GetSessionResponse {
+  Session session = 1;
+}
