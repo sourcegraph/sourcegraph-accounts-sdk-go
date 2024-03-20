@@ -57,7 +57,10 @@ func (s *TokensServiceV1) IntrospectToken(ctx context.Context, token string) (*I
 	basicAuth := base64.StdEncoding.EncodeToString([]byte(credentialStr))
 	req.Header.Set("Authorization", "Basic "+basicAuth)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	resp, err := http.DefaultClient.Do(req)
+	// NOTE: Always create a new client to avoid unintended global idle connection
+	// sharing (http.DefaultClient).
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "request introspection endpoint")
 	}
