@@ -87,4 +87,7 @@ func (c *ClientV1) TokenSource() oauth2.TokenSource {
 	return c.clientCredentialsConfig.TokenSource(context.Background())
 }
 
-var ErrNotFound = errors.New("not found")
+var (
+	ErrNotFound       = errors.New("not found")
+	ErrRecordMismatch = errors.New("record mismatch")
+)
