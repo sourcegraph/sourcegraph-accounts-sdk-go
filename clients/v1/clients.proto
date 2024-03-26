@@ -13,7 +13,7 @@ service UsersService {
 }
 
 message GetUserRequest {
-  //  The user's external ID.
+  // The user's external ID.
   string id = 1;
 }
 
@@ -60,6 +60,7 @@ message GetUserRolesResponse {
 
 service SessionsService {
   rpc GetSession(GetSessionRequest) returns (GetSessionResponse);
+  rpc SignOutSession(SignOutSessionRequest) returns (SignOutSessionResponse);
 }
 
 message GetSessionRequest {
@@ -77,3 +78,12 @@ message Session {
 message GetSessionResponse {
   Session session = 1;
 }
+
+message SignOutSessionRequest {
+  // The session's ID.
+  string id = 1;
+  // The user's external ID.
+  string user_id = 2;
+}
+
+message SignOutSessionResponse {}

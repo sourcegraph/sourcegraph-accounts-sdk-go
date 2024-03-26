@@ -45,16 +45,20 @@ const (
 	// SessionsServiceGetSessionProcedure is the fully-qualified name of the SessionsService's
 	// GetSession RPC.
 	SessionsServiceGetSessionProcedure = "/clients.v1.SessionsService/GetSession"
+	// SessionsServiceSignOutSessionProcedure is the fully-qualified name of the SessionsService's
+	// SignOutSession RPC.
+	SessionsServiceSignOutSessionProcedure = "/clients.v1.SessionsService/SignOutSession"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	usersServiceServiceDescriptor             = v1.File_clients_v1_clients_proto.Services().ByName("UsersService")
-	usersServiceGetUserMethodDescriptor       = usersServiceServiceDescriptor.Methods().ByName("GetUser")
-	usersServiceGetUsersMethodDescriptor      = usersServiceServiceDescriptor.Methods().ByName("GetUsers")
-	usersServiceGetUserRolesMethodDescriptor  = usersServiceServiceDescriptor.Methods().ByName("GetUserRoles")
-	sessionsServiceServiceDescriptor          = v1.File_clients_v1_clients_proto.Services().ByName("SessionsService")
-	sessionsServiceGetSessionMethodDescriptor = sessionsServiceServiceDescriptor.Methods().ByName("GetSession")
+	usersServiceServiceDescriptor                 = v1.File_clients_v1_clients_proto.Services().ByName("UsersService")
+	usersServiceGetUserMethodDescriptor           = usersServiceServiceDescriptor.Methods().ByName("GetUser")
+	usersServiceGetUsersMethodDescriptor          = usersServiceServiceDescriptor.Methods().ByName("GetUsers")
+	usersServiceGetUserRolesMethodDescriptor      = usersServiceServiceDescriptor.Methods().ByName("GetUserRoles")
+	sessionsServiceServiceDescriptor              = v1.File_clients_v1_clients_proto.Services().ByName("SessionsService")
+	sessionsServiceGetSessionMethodDescriptor     = sessionsServiceServiceDescriptor.Methods().ByName("GetSession")
+	sessionsServiceSignOutSessionMethodDescriptor = sessionsServiceServiceDescriptor.Methods().ByName("SignOutSession")
 )
 
 // UsersServiceClient is a client for the clients.v1.UsersService service.
@@ -180,6 +184,7 @@ func (UnimplementedUsersServiceHandler) GetUserRoles(context.Context, *connect.R
 // SessionsServiceClient is a client for the clients.v1.SessionsService service.
 type SessionsServiceClient interface {
 	GetSession(context.Context, *connect.Request[v1.GetSessionRequest]) (*connect.Response[v1.GetSessionResponse], error)
+	SignOutSession(context.Context, *connect.Request[v1.SignOutSessionRequest]) (*connect.Response[v1.SignOutSessionResponse], error)
 }
 
 // NewSessionsServiceClient constructs a client for the clients.v1.SessionsService service. By
@@ -198,12 +203,19 @@ func NewSessionsServiceClient(httpClient connect.HTTPClient, baseURL string, opt
 			connect.WithSchema(sessionsServiceGetSessionMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		signOutSession: connect.NewClient[v1.SignOutSessionRequest, v1.SignOutSessionResponse](
+			httpClient,
+			baseURL+SessionsServiceSignOutSessionProcedure,
+			connect.WithSchema(sessionsServiceSignOutSessionMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // sessionsServiceClient implements SessionsServiceClient.
 type sessionsServiceClient struct {
-	getSession *connect.Client[v1.GetSessionRequest, v1.GetSessionResponse]
+	getSession     *connect.Client[v1.GetSessionRequest, v1.GetSessionResponse]
+	signOutSession *connect.Client[v1.SignOutSessionRequest, v1.SignOutSessionResponse]
 }
 
 // GetSession calls clients.v1.SessionsService.GetSession.
@@ -211,9 +223,15 @@ func (c *sessionsServiceClient) GetSession(ctx context.Context, req *connect.Req
 	return c.getSession.CallUnary(ctx, req)
 }
 
+// SignOutSession calls clients.v1.SessionsService.SignOutSession.
+func (c *sessionsServiceClient) SignOutSession(ctx context.Context, req *connect.Request[v1.SignOutSessionRequest]) (*connect.Response[v1.SignOutSessionResponse], error) {
+	return c.signOutSession.CallUnary(ctx, req)
+}
+
 // SessionsServiceHandler is an implementation of the clients.v1.SessionsService service.
 type SessionsServiceHandler interface {
 	GetSession(context.Context, *connect.Request[v1.GetSessionRequest]) (*connect.Response[v1.GetSessionResponse], error)
+	SignOutSession(context.Context, *connect.Request[v1.SignOutSessionRequest]) (*connect.Response[v1.SignOutSessionResponse], error)
 }
 
 // NewSessionsServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -228,10 +246,18 @@ func NewSessionsServiceHandler(svc SessionsServiceHandler, opts ...connect.Handl
 		connect.WithSchema(sessionsServiceGetSessionMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	sessionsServiceSignOutSessionHandler := connect.NewUnaryHandler(
+		SessionsServiceSignOutSessionProcedure,
+		svc.SignOutSession,
+		connect.WithSchema(sessionsServiceSignOutSessionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/clients.v1.SessionsService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case SessionsServiceGetSessionProcedure:
 			sessionsServiceGetSessionHandler.ServeHTTP(w, r)
+		case SessionsServiceSignOutSessionProcedure:
+			sessionsServiceSignOutSessionHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -243,4 +269,8 @@ type UnimplementedSessionsServiceHandler struct{}
 
 func (UnimplementedSessionsServiceHandler) GetSession(context.Context, *connect.Request[v1.GetSessionRequest]) (*connect.Response[v1.GetSessionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.SessionsService.GetSession is not implemented"))
+}
+
+func (UnimplementedSessionsServiceHandler) SignOutSession(context.Context, *connect.Request[v1.SignOutSessionRequest]) (*connect.Response[v1.SignOutSessionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.SessionsService.SignOutSession is not implemented"))
 }

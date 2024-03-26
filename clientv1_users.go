@@ -25,6 +25,8 @@ func (s *UsersServiceV1) newClient(ctx context.Context) clientsv1connect.UsersSe
 
 // GetUserByID returns the SAMS user with the given ID. It returns ErrNotFound
 // if no such user exists.
+//
+// Required scope: profile
 func (s *UsersServiceV1) GetUserByID(ctx context.Context, id string) (*clientsv1.User, error) {
 	req := &clientsv1.GetUserRequest{Id: id}
 	client := s.newClient(ctx)
@@ -39,6 +41,8 @@ func (s *UsersServiceV1) GetUserByID(ctx context.Context, id string) (*clientsv1
 //
 // NOTE: It silently ignores any invalid user IDs, i.e. the length of the return
 // slice may be less than the length of the input slice.
+//
+// Required scopes: profile
 func (s *UsersServiceV1) GetUsersByIDs(ctx context.Context, ids []string) ([]*clientsv1.User, error) {
 	req := &clientsv1.GetUsersRequest{Ids: ids}
 	client := s.newClient(ctx)
@@ -51,6 +55,8 @@ func (s *UsersServiceV1) GetUsersByIDs(ctx context.Context, ids []string) ([]*cl
 
 // GetUserRolesByID returns all roles that have been assigned to the SAMS user
 // with the given ID and scoped by the service.
+//
+// Required scopes: sams::user.roles::read
 func (s *UsersServiceV1) GetUserRolesByID(ctx context.Context, userID, service string) ([]string, error) {
 	req := &clientsv1.GetUserRolesRequest{
 		Id:      userID,
