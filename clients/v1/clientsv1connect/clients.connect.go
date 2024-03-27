@@ -63,8 +63,22 @@ var (
 
 // UsersServiceClient is a client for the clients.v1.UsersService service.
 type UsersServiceClient interface {
+	// GetUser returns the SAMS user with the given ID. It returns connect.CodeNotFound
+	// if no such user exists.
+	//
+	// Required scope: profile
 	GetUser(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error)
+	// GetUsers returns the list of SAMS users matching the provided IDs.
+	//
+	// NOTE: It silently ignores any invalid user IDs, i.e. the length of the return
+	// slice may be less than the length of the input slice.
+	//
+	// Required scopes: profile
 	GetUsers(context.Context, *connect.Request[v1.GetUsersRequest]) (*connect.Response[v1.GetUsersResponse], error)
+	// GetUserRoles returns all roles that have been assigned to the SAMS user
+	// with the given ID and scoped by the service.
+	//
+	// Required scopes: sams::user.roles::read
 	GetUserRoles(context.Context, *connect.Request[v1.GetUserRolesRequest]) (*connect.Response[v1.GetUserRolesResponse], error)
 }
 
@@ -123,8 +137,22 @@ func (c *usersServiceClient) GetUserRoles(ctx context.Context, req *connect.Requ
 
 // UsersServiceHandler is an implementation of the clients.v1.UsersService service.
 type UsersServiceHandler interface {
+	// GetUser returns the SAMS user with the given ID. It returns connect.CodeNotFound
+	// if no such user exists.
+	//
+	// Required scope: profile
 	GetUser(context.Context, *connect.Request[v1.GetUserRequest]) (*connect.Response[v1.GetUserResponse], error)
+	// GetUsers returns the list of SAMS users matching the provided IDs.
+	//
+	// NOTE: It silently ignores any invalid user IDs, i.e. the length of the return
+	// slice may be less than the length of the input slice.
+	//
+	// Required scopes: profile
 	GetUsers(context.Context, *connect.Request[v1.GetUsersRequest]) (*connect.Response[v1.GetUsersResponse], error)
+	// GetUserRoles returns all roles that have been assigned to the SAMS user
+	// with the given ID and scoped by the service.
+	//
+	// Required scopes: sams::user.roles::read
 	GetUserRoles(context.Context, *connect.Request[v1.GetUserRolesRequest]) (*connect.Response[v1.GetUserRolesResponse], error)
 }
 
@@ -183,7 +211,19 @@ func (UnimplementedUsersServiceHandler) GetUserRoles(context.Context, *connect.R
 
 // SessionsServiceClient is a client for the clients.v1.SessionsService service.
 type SessionsServiceClient interface {
+	// GetSession returns the SAMS session with the given ID. It returns
+	// connect.CodeNotFound if no such session exists. The session's `User` field is
+	// populated if the session is authenticated by a user.
+	//
+	// Required scope: sams::session::read
 	GetSession(context.Context, *connect.Request[v1.GetSessionRequest]) (*connect.Response[v1.GetSessionResponse], error)
+	// SignOutSession revokes the authenticated state of the session with the given
+	// ID for the given user. It does not return error if the session does not exist
+	// or is not authenticated. It returns clientsv1.ErrorRecordMismatch in the
+	// error detail if the session is authenticated by a different user than the
+	// given user.
+	//
+	// Required scope: sams::session::write
 	SignOutSession(context.Context, *connect.Request[v1.SignOutSessionRequest]) (*connect.Response[v1.SignOutSessionResponse], error)
 }
 
@@ -230,7 +270,19 @@ func (c *sessionsServiceClient) SignOutSession(ctx context.Context, req *connect
 
 // SessionsServiceHandler is an implementation of the clients.v1.SessionsService service.
 type SessionsServiceHandler interface {
+	// GetSession returns the SAMS session with the given ID. It returns
+	// connect.CodeNotFound if no such session exists. The session's `User` field is
+	// populated if the session is authenticated by a user.
+	//
+	// Required scope: sams::session::read
 	GetSession(context.Context, *connect.Request[v1.GetSessionRequest]) (*connect.Response[v1.GetSessionResponse], error)
+	// SignOutSession revokes the authenticated state of the session with the given
+	// ID for the given user. It does not return error if the session does not exist
+	// or is not authenticated. It returns clientsv1.ErrorRecordMismatch in the
+	// error detail if the session is authenticated by a different user than the
+	// given user.
+	//
+	// Required scope: sams::session::write
 	SignOutSession(context.Context, *connect.Request[v1.SignOutSessionRequest]) (*connect.Response[v1.SignOutSessionResponse], error)
 }
 
