@@ -87,3 +87,5 @@ message SignOutSessionRequest {
 }
 
 message SignOutSessionResponse {}
+
+message ErrorRecordMismatch{}
