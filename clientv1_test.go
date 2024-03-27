@@ -37,7 +37,7 @@ func TestParseResponseAndError(t *testing.T) {
 			err: func() error {
 				detail, err := connect.NewErrorDetail(&clientsv1.ErrorRecordMismatch{})
 				require.NoError(t, err)
-				grpcErr := connect.NewError(connect.CodeUnknown, nil)
+				grpcErr := connect.NewError(connect.CodeFailedPrecondition, nil)
 				grpcErr.AddDetail(detail)
 				return grpcErr
 			},
