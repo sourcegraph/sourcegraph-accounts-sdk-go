@@ -664,6 +664,8 @@ func (*SignOutSessionResponse) Descriptor() ([]byte, []int) {
 	return file_clients_v1_clients_proto_rawDescGZIP(), []int{11}
 }
 
+// ErrorRecordMismatch is returned in the error details when the record does not match the expected record,
+// e.g. the desired user ID does not match the actual user ID.
 type ErrorRecordMismatch struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

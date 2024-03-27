@@ -88,4 +88,6 @@ message SignOutSessionRequest {
 
 message SignOutSessionResponse {}
 
-message ErrorRecordMismatch{}
+// ErrorRecordMismatch is returned in the error details when the record does not match the expected record,
+// e.g. the desired user ID does not match the actual user ID.
+message ErrorRecordMismatch {}
