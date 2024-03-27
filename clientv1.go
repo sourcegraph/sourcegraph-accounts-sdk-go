@@ -10,6 +10,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
+	clientsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
 )
 
@@ -45,13 +46,30 @@ func NewClientV1(url, clientID, clientSecret string, scopeList []scopes.Scope) (
 
 func parseResponseAndError[T any](resp *connect.Response[T], err error) (*connect.Response[T], error) {
 	var connectErr *connect.Error
-	if errors.As(err, &connectErr) {
-		switch connectErr.Code() {
-		case connect.CodeNotFound:
-			return resp, ErrNotFound
-		}
+	if !errors.As(err, &connectErr) {
+		// Not an error that we can extract information from.
 		return resp, err
 	}
+
+	if connectErr.Code() == connect.CodeNotFound {
+		return nil, ErrNotFound
+	}
+
+	// Cannot determine action solely based on status code, let's look at the error
+	// details.
+	for _, detail := range connectErr.Details() {
+		value, err := detail.Value()
+		if err != nil {
+			return nil, errors.Wrap(err, "extract error detail value")
+		}
+
+		switch value.(type) {
+		case *clientsv1.ErrorRecordMismatch:
+			return nil, ErrRecordMismatch
+		}
+	}
+
+	// Nothing juicy, return as-is.
 	return resp, err
 }
 

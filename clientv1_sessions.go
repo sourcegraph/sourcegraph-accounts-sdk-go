@@ -40,8 +40,8 @@ func (s *SessionsServiceV1) GetSessionByID(ctx context.Context, id string) (*cli
 
 // SignOutSession revokes the authenticated state of the session with the given
 // ID for the given user. It does not return error if the session does not exist
-// or is not authenticated. It returns ErrRecordMismatch if the session is not
-// authenticated by the given user.
+// or is not authenticated. It returns ErrRecordMismatch if the session is
+// authenticated by a different user than the given user.
 //
 // Required scope: sams::session::write
 func (s *SessionsServiceV1) SignOutSession(ctx context.Context, sessionID, userID string) error {
