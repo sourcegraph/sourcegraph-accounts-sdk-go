@@ -6,7 +6,7 @@ import (
 	"connectrpc.com/connect"
 	"golang.org/x/oauth2"
 
-	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
+	clientsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1/clientsv1connect"
 )
 
@@ -20,6 +20,7 @@ func (s *UsersServiceV1) newClient(ctx context.Context) clientsv1connect.UsersSe
 	return clientsv1connect.NewUsersServiceClient(
 		oauth2.NewClient(ctx, s.client.tokenSource),
 		s.client.gRPCURL(),
+		connect.WithInterceptors(s.client.defaultInterceptors...),
 	)
 }
 

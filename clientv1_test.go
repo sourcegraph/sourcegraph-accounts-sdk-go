@@ -10,7 +10,18 @@ import (
 	"github.com/stretchr/testify/require"
 
 	clientsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
+	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
 )
+
+func TestNewClientV1(t *testing.T) {
+	c, err := NewClientV1(
+		"https://accounts.sourcegraph.com",
+		"fooclient",
+		"barsecret",
+		[]scopes.Scope{scopes.Profile})
+	require.NoError(t, err)
+	assert.NotEmpty(t, c.defaultInterceptors)
+}
 
 func TestParseResponseAndError(t *testing.T) {
 	tests := []struct {

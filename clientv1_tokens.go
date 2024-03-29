@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/sourcegraph/sourcegraph/lib/errors"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
 )
@@ -33,6 +34,24 @@ type IntrospectTokenResponse struct {
 	// ExpiresAt indicates when the token expires.
 	ExpiresAt time.Time
 }
+
+// tokenServiceTransport is a shared http.RoundTripper for use with introspection
+// requests that:
+//
+//   - Use a much shorter idle connection timeout than the default to avoid being
+//     idle for too long and force killed by Cloud Run.
+//   - Is wrapped on OpenTelemetry instrumentation
+//
+// It must be shared so that all requests still use the same pool of (short-lived)
+// connections.
+var tokenServiceTransport = func() http.RoundTripper {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.IdleConnTimeout = 3 * time.Second
+	return otelhttp.NewTransport(transport,
+		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
+			return fmt.Sprintf("sams.TokensServiceV1/%s: %s", operation, r.URL.Path)
+		}))
+}()
 
 // IntrospectToken takes a SAMS access token and returns relevant metadata.
 //
@@ -57,12 +76,8 @@ func (s *TokensServiceV1) IntrospectToken(ctx context.Context, token string) (*I
 	basicAuth := base64.StdEncoding.EncodeToString([]byte(credentialStr))
 	req.Header.Set("Authorization", "Basic "+basicAuth)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	// Use a much shorter idle connection timeout than the default to avoid being
-	// idle for too long and force killed by Cloud Run.
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.IdleConnTimeout = 3 * time.Second
 	httpClient := &http.Client{
-		Transport: transport,
+		Transport: tokenServiceTransport, // use custom shared transport
 	}
 	resp, err := httpClient.Do(req)
 	if err != nil {
