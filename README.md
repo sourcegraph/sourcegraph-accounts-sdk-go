@@ -60,6 +60,9 @@ func main() {
 			Issuer:         "https://accounts.sourcegraph.com",
 			ClientID:       os.Getenv("SAMS_CLIENT_ID"),
 			ClientSecret:   os.Getenv("SAMS_CLIENT_SECRET"),
+			// RequestScopes needs to include all the scopes that the service needs to
+			// access on behalf of the user. Scopes that are only used for Clients API are
+			// not needed here.
 			RequestScopes:  []scopes.Scope{scopes.OpenID, scopes.Email, scopes.Profile},
 			RedirectURI:    os.Getenv("SAMS_REDIRECT_URI"),
 			FailureHandler: samsauth.DefaultFailureHandler,
