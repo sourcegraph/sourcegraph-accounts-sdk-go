@@ -31,11 +31,13 @@ import (
 )
 
 type stateStore struct{
-	// For best security measures, authentication state should be stored in a
-	// backend component (e.g. Redis). The design of the samsauth.StateStore
-	// interface explicitly disallowed storing state in the cookie, as they can be
-	// tampered with when cookie values are stored Unencrypted.
-	// TODO: redisClient *redis.Client
+	// Authentication state is the unique identifier that is randomly-generated and
+	// assigned to a particular authentication flow, they are used to prevent
+	// authentication interception attacks and considered secrets, therefore it MUST
+	// be stored in a backend component (e.g. Redis, database). The design of the
+	// samsauth.StateStore interface explicitly disallowed storing state in the
+	// cookie, as they can be tampered with when cookie values are stored
+	// unencrypted.
 }
 
 func (s *stateStore) SetState(r *http.Request, state string) error {
