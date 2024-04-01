@@ -26,7 +26,8 @@ type Config struct {
 	// RequestScopes is the list of requested scopes for access tokens that are
 	// issued to this client.
 	RequestScopes []scopes.Scope
-	// RedirectURI is the URL to redirect to after the user has authenticated.
+	// RedirectURI is the URL to redirect to after the user has authenticated. It
+	// MUST exact-match one of the pre-registered redirect URIs on SAMS.
 	RedirectURI string
 
 	// FailureHandler is the HTTP handler to call when an error occurs. Use
