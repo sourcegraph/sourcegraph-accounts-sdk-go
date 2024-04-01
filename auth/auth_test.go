@@ -15,6 +15,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/hexops/autogold/v2"
 	"github.com/lestrrat-go/jwx/v2/jwk"
+	"github.com/sourcegraph/sourcegraph/lib/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -128,10 +129,14 @@ func newMockServer(t *testing.T, redirectURI, clientID, subject, code, accessTok
 }
 
 type mockStateStore struct {
-	state string
+	state         string
+	setStateError error
 }
 
 func (s *mockStateStore) SetState(_ *http.Request, state string) error {
+	if s.setStateError != nil {
+		return s.setStateError
+	}
 	s.state = state
 	return nil
 }
@@ -167,47 +172,85 @@ func TestHandler(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	// Set up the mock service server.
-	mux := http.NewServeMux()
-	mockServiceServer := httptest.NewServer(mux)
-	t.Cleanup(func() { mockServiceServer.Close() })
-	redirectURI := mockServiceServer.URL + "/callback"
+	t.Run("successfully auth flow", func(t *testing.T) {
+		// Set up the mock service server.
+		mux := http.NewServeMux()
+		mockServiceServer := httptest.NewServer(mux)
+		t.Cleanup(func() { mockServiceServer.Close() })
+		redirectURI := mockServiceServer.URL + "/callback"
 
-	// Set up the mock SAMS server.
-	mockSAMSServer := newMockServer(t, redirectURI, testClientID, testSubject, testCode, testAccessToken, userinfo)
+		// Set up the mock SAMS server.
+		mockSAMSServer := newMockServer(t, redirectURI, testClientID, testSubject, testCode, testAccessToken, userinfo)
 
-	// Set up auth handlers for the mock service server.
-	h, err := NewHandler(
-		Config{
-			Issuer:         mockSAMSServer.URL,
-			ClientID:       testClientID,
-			ClientSecret:   "test-client-secret",
-			RequestScopes:  []scopes.Scope{scopes.OpenID, scopes.Profile, scopes.Email},
-			RedirectURI:    redirectURI,
-			FailureHandler: DefaultFailureHandler,
-			StateStore:     &mockStateStore{},
-		},
-	)
-	require.NoError(t, err)
+		// Set up auth handlers for the mock service server.
+		h, err := NewHandler(
+			Config{
+				Issuer:         mockSAMSServer.URL,
+				ClientID:       testClientID,
+				ClientSecret:   "test-client-secret",
+				RequestScopes:  []scopes.Scope{scopes.OpenID, scopes.Profile, scopes.Email},
+				RedirectURI:    redirectURI,
+				FailureHandler: DefaultFailureHandler,
+				StateStore:     &mockStateStore{},
+			},
+		)
+		require.NoError(t, err)
 
-	mux.Handle("/login", h.LoginHandler())
-	mux.Handle("/callback", h.CallbackHandler(
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			userInfo := UserInfoFromContext(r.Context())
-			assert.NotNil(t, userInfo.Token)
-			assert.NotNil(t, userInfo.IDToken)
-			err := json.NewEncoder(w).Encode(userInfo)
-			require.NoError(t, err)
-		}),
-	))
+		mux.Handle("/login", h.LoginHandler())
+		mux.Handle("/callback", h.CallbackHandler(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				userInfo := UserInfoFromContext(r.Context())
+				assert.NotNil(t, userInfo.Token)
+				assert.NotNil(t, userInfo.IDToken)
+				err := json.NewEncoder(w).Encode(userInfo)
+				require.NoError(t, err)
+			}),
+		))
 
-	// Simulate authentication flow.
-	client := &http.Client{}
-	resp, err := client.Get(mockServiceServer.URL + "/login?prompt=login&prompt_auth=github")
-	require.NoError(t, err)
-	respBody, err := io.ReadAll(resp.Body)
-	require.NoError(t, err)
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	autogold.Expect(`{"sub":"018d21f2-0b8d-756a-84f0-13b942a2bae5","name":"John Doe","email":"john.doe@example.com","email_verified":true,"picture":"https://example.com/avatar.jpg","created_at":"2021-01-01T00:00:00Z"}
+		// Simulate authentication flow.
+		client := &http.Client{}
+		resp, err := client.Get(mockServiceServer.URL + "/login?prompt=login&prompt_auth=github")
+		require.NoError(t, err)
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		autogold.Expect(`{"sub":"018d21f2-0b8d-756a-84f0-13b942a2bae5","name":"John Doe","email":"john.doe@example.com","email_verified":true,"picture":"https://example.com/avatar.jpg","created_at":"2021-01-01T00:00:00Z"}
 `).Equal(t, string(respBody))
+	})
+
+	t.Run("failed to set state", func(t *testing.T) {
+		// Set up the mock service server.
+		mux := http.NewServeMux()
+		mockServiceServer := httptest.NewServer(mux)
+		t.Cleanup(func() { mockServiceServer.Close() })
+		redirectURI := mockServiceServer.URL + "/callback"
+
+		// Set up the mock SAMS server.
+		mockSAMSServer := newMockServer(t, redirectURI, testClientID, testSubject, testCode, testAccessToken, userinfo)
+
+		// Set up auth handlers for the mock service server.
+		h, err := NewHandler(
+			Config{
+				Issuer:         mockSAMSServer.URL,
+				ClientID:       testClientID,
+				ClientSecret:   "test-client-secret",
+				RequestScopes:  []scopes.Scope{scopes.OpenID, scopes.Profile, scopes.Email},
+				RedirectURI:    redirectURI,
+				FailureHandler: DefaultFailureHandler,
+				StateStore:     &mockStateStore{setStateError: errors.New("failed to set state")},
+			},
+		)
+		require.NoError(t, err)
+
+		mux.Handle("/login", h.LoginHandler())
+
+		// Simulate authentication flow.
+		client := &http.Client{}
+		resp, err := client.Get(mockServiceServer.URL + "/login?prompt=login&prompt_auth=github")
+		require.NoError(t, err)
+		respBody, err := io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+		autogold.Expect("set state: failed to set state\n").Equal(t, string(respBody))
+	})
 }
