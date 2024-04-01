@@ -3,7 +3,7 @@ module github.com/sourcegraph/sourcegraph-accounts-sdk-go
 go 1.22.0
 
 require (
-	connectrpc.com/connect v1.15.0
+	connectrpc.com/connect v1.16.0
 	github.com/sourcegraph/sourcegraph/lib v0.0.0-20240315183013-b2b134e08ada
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/oauth2 v0.18.0
