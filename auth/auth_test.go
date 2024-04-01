@@ -127,6 +127,23 @@ func newMockServer(t *testing.T, redirectURI, clientID, subject, code, accessTok
 	return s
 }
 
+type mockStateStore struct {
+	state string
+}
+
+func (s *mockStateStore) SetState(_ *http.Request, state string) error {
+	s.state = state
+	return nil
+}
+
+func (s *mockStateStore) GetState(*http.Request) (string, error) {
+	return s.state, nil
+}
+
+func (s *mockStateStore) DeleteState(*http.Request) {
+	s.state = ""
+}
+
 func TestHandler(t *testing.T) {
 	const (
 		testClientID    = "test-client-id"
@@ -151,7 +168,6 @@ func TestHandler(t *testing.T) {
 	require.NoError(t, err)
 
 	// Set up the mock service server.
-	mockState := ""
 	mux := http.NewServeMux()
 	mockServiceServer := httptest.NewServer(mux)
 	t.Cleanup(func() { mockServiceServer.Close() })
@@ -169,16 +185,7 @@ func TestHandler(t *testing.T) {
 			RequestScopes:  []scopes.Scope{scopes.OpenID, scopes.Profile, scopes.Email},
 			RedirectURI:    redirectURI,
 			FailureHandler: DefaultFailureHandler,
-			StateSetter: func(_ http.ResponseWriter, _ *http.Request, state string) error {
-				mockState = state
-				return nil
-			},
-			StateGetter: func(*http.Request) (string, error) {
-				return mockState, nil
-			},
-			StateDeleter: func(http.ResponseWriter, *http.Request) {
-				mockState = ""
-			},
+			StateStore:     &mockStateStore{},
 		},
 	)
 	require.NoError(t, err)

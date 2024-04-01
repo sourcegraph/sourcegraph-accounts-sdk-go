@@ -32,12 +32,19 @@ type Config struct {
 	// FailureHandler is the HTTP handler to call when an error occurs. Use
 	// ErrorFromContext to extract the error.
 	FailureHandler http.Handler
-	// StateSetter sets the randomly-generated state to the per-user session.
-	StateSetter func(w http.ResponseWriter, r *http.Request, state string) error
-	// StateGetter gets the state from the per-user session.
-	StateGetter func(r *http.Request) (string, error)
-	// StateDeleter deletes the state from the per-user session.
-	StateDeleter func(w http.ResponseWriter, r *http.Request)
+
+	StateStore
+}
+
+// StateStore is the interface for managing the authentication state in the
+// per-user session.
+type StateStore interface {
+	// SetState sets the randomly-generated state to the per-user session.
+	SetState(r *http.Request, state string) error
+	// GetState returns the state from the per-user session.
+	GetState(r *http.Request) (string, error)
+	// DeleteState deletes the state from the per-user session.
+	DeleteState(r *http.Request)
 }
 
 // Error is an error that occurred during the authentication process.
@@ -58,12 +65,8 @@ type Handler struct {
 func NewHandler(config Config) (*Handler, error) {
 	if config.FailureHandler == nil {
 		return nil, errors.New("missing FailureHandler")
-	} else if config.StateSetter == nil {
-		return nil, errors.New("missing StateSetter")
-	} else if config.StateGetter == nil {
-		return nil, errors.New("missing StateGetter")
-	} else if config.StateDeleter == nil {
-		return nil, errors.New("missing StateDeleter")
+	} else if config.StateStore == nil {
+		return nil, errors.New("missing StateStore")
 	}
 	return &Handler{config: config}, nil
 }
@@ -97,7 +100,7 @@ func (h *Handler) LoginHandler() http.Handler {
 			h.config.FailureHandler.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
-		err = h.config.StateSetter(w, r, nonce)
+		err = h.config.SetState(r, nonce)
 		if err != nil {
 			ctx = WithError(ctx, &Error{
 				StatusCode: http.StatusInternalServerError,
@@ -133,8 +136,8 @@ func (h *Handler) CallbackHandler(success http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		nonce, err := h.config.StateGetter(r)
-		h.config.StateDeleter(w, r) // Delete the state after getting it to make sure it's one-time use.
+		nonce, err := h.config.GetState(r)
+		h.config.DeleteState(r) // Delete the state after getting it to make sure it's one-time use.
 		if err != nil {
 			ctx = WithError(ctx, &Error{
 				StatusCode: http.StatusInternalServerError,
@@ -214,7 +217,7 @@ func (h *Handler) getUserInfo(r *http.Request) (*UserInfo, error) {
 		return nil, errors.Wrap(err, "create new provider")
 	}
 
-	nonce, err := h.config.StateGetter(r)
+	nonce, err := h.config.GetState(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "get state")
 	}
