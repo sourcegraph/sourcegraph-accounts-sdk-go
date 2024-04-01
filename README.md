@@ -11,33 +11,48 @@ go get github.com/sourcegraph/sourcegraph-accounts-sdk-go
 
 ## Authentication
 
+The following example demonstrates how to use the SDK to set up user authentication flow with SAMS for your service.
+
+In particular,
+
+- The route `/auth/login` is where the user should be redirected to start a new authentication flow.
+- The route `/auth/callback` is where the user will be redirected back to the service after completing the authentication on the SAMS side.
+
 ```go
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
 	samsauth "github.com/sourcegraph/sourcegraph-accounts-sdk-go/auth"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
 )
 
-func main() {
-	stateSetter := func(w http.ResponseWriter, r *http.Request, state string) error {
-		// TODO: Save to session data. For best security measures, store in a backend
-		// component (e.g. Redis) or encrypted cookie. Unencrypted cookies are strongly
-		// discouraged as they can be tampered with.
-		return nil
-	}
-	stateGetter := func(r *http.Request) (string, error) {
-		// TODO: Retrieve from session data.
-		return "", nil
-	}
-	stateDeleter := func(w http.ResponseWriter, r *http.Request) {
-		// TODO: Delete from session data.
-	}
+type stateStore struct{
+	// For best security measures, authentication state should be stored in a
+	// backend component (e.g. Redis). The design of the samsauth.StateStore
+	// interface explicitly disallowed storing state in the cookie, as they can be
+	// tampered with when cookie values are stored Unencrypted.
+	// TODO: redisClient *redis.Client
+}
 
+func (s *stateStore) SetState(r *http.Request, state string) error {
+	// TODO: Save to session data.
+	return nil
+}
+
+func (s *stateStore) GetState(r *http.Request) (string, error) {
+	// TODO: Retrieve from session data.
+	return "", nil
+}
+
+func (s *stateStore) DeleteState(r *http.Request) {
+	// TODO: Delete from session data.
+}
+
+func main() {
 	samsauthHandler, err := samsauth.NewHandler(
 		samsauth.Config{
 			Issuer:         "https://accounts.sourcegraph.com",
@@ -46,9 +61,7 @@ func main() {
 			RequestScopes:  []scopes.Scope{scopes.OpenID, scopes.Email, scopes.Profile},
 			RedirectURI:    os.Getenv("SAMS_REDIRECT_URI"),
 			FailureHandler: samsauth.DefaultFailureHandler,
-			StateSetter:    stateSetter,
-			StateGetter:    stateGetter,
-			StateDeleter:   stateDeleter,
+			StateStore:     &stateStore{},
 		},
 	)
 	if err != nil {
