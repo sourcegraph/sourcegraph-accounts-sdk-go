@@ -76,6 +76,13 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/auth/login", samsauthHandler.LoginHandler())
 	mux.Handle("/auth/callback", samsauthHandler.CallbackHandler(
+		// The SAMS auth handler will handle the callback and complete the
+		// authentication flow. And if successful, the `samsauth.UserInfo` will be
+		// accessible from the request context.
+		//
+		// You can safely assume the `samsauth.UserInfo` will be present when this
+		// user-supplied handler is being invoked. If any error is encountered, the
+		// provided FailureHandler will be invoked instead.
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			userInfo := samsauth.UserInfoFromContext(r.Context())
 			// TODO: Save user info to somewhere.
