@@ -89,6 +89,9 @@ func ToScope(service Service, permission Permission, action Action) Scope {
 type Permission string
 
 var (
+	codyGatewayPermissions = []Permission{
+		"flaggedprompts",
+	}
 	samsPermissions = []Permission{
 		"user",
 		"user.profile",
@@ -101,9 +104,6 @@ var (
 	}
 	telemetryGatewayPermissions = []Permission{
 		"events",
-	}
-	codyGatewayPermissions = []Permission{
-		"flaggedprompts",
 	}
 )
 
