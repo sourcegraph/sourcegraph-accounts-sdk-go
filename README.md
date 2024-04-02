@@ -30,7 +30,7 @@ import (
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
 )
 
-type stateStore struct{
+type secretStore struct{
 	// Authentication state is the unique identifier that is randomly-generated and
 	// assigned to a particular authentication flow, they are used to prevent
 	// authentication interception attacks and considered secrets, therefore it MUST
@@ -38,20 +38,39 @@ type stateStore struct{
 	// samsauth.StateStore interface explicitly disallowed storing state in the
 	// cookie, as they can be tampered with when cookie values are stored
 	// unencrypted.
+	//
+	// Authentication nonce is a unique identifier that is randomly-generated to
+	// make sure the ID Token we get back from SAMS is intended for the same
+	// authentication flow that we started. It is also a secret and MUST be stored
+	// in a backend component.
 }
 
-func (s *stateStore) SetState(r *http.Request, state string) error {
-	// TODO: Save to session data.
+func (s *secretStore) SetState(r *http.Request, state string) error {
+	// TODO: Save state to session data.
 	return nil
 }
 
-func (s *stateStore) GetState(r *http.Request) (string, error) {
-	// TODO: Retrieve from session data.
+func (s *secretStore) GetState(r *http.Request) (string, error) {
+	// TODO: Retrieve state from session data.
 	return "", nil
 }
 
-func (s *stateStore) DeleteState(r *http.Request) {
-	// TODO: Delete from session data.
+func (s *secretStore) DeleteState(r *http.Request) {
+	// TODO: Delete state from session data.
+}
+
+func (s *secretStore) SetNonce(r *http.Request, nonce string) error {
+	// TODO: Save nonce to session data.
+	return nil
+}
+
+func (s *secretStore) GetNonce(r *http.Request) (string, error) {
+	// TODO: Retrieve nonce from session data.
+	return "", nil
+}
+
+func (s *secretStore) DeleteNonce(r *http.Request) {
+	// TODO: Delete nonce from session data.
 }
 
 func main() {

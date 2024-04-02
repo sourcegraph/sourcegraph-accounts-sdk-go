@@ -26,15 +26,26 @@ import (
 // authentication flow.
 func newMockServer(t *testing.T, redirectURI, clientID, subject, code, accessToken string, userinfo []byte) *httptest.Server {
 	mux := http.NewServeMux()
+	s := httptest.NewServer(mux)
+	t.Cleanup(func() { s.Close() })
 
-	var openidConfig map[string]any
+	var openidConfig = map[string]any{
+		"issuer":                                s.URL,
+		"authorization_endpoint":                s.URL + "/oauth/authorize",
+		"token_endpoint":                        s.URL + "/oauth/token",
+		"userinfo_endpoint":                     s.URL + "/oauth/userinfo",
+		"jwks_uri":                              s.URL + "/oauth/discovery/keys",
+		"id_token_signing_alg_values_supported": []string{"RS256"},
+	}
 	mux.HandleFunc("/.well-known/openid-configuration", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(w).Encode(openidConfig)
 		require.NoError(t, err)
 	})
 
-	var state, nonce string
+	rs256, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+	var rawIDToken string
 	mux.HandleFunc("/oauth/authorize", func(w http.ResponseWriter, r *http.Request) {
 		// Assert all desired parameters are present.
 		assert.Equal(t, clientID, r.URL.Query().Get("client_id"))
@@ -44,14 +55,28 @@ func newMockServer(t *testing.T, redirectURI, clientID, subject, code, accessTok
 		assert.NotEmpty(t, r.URL.Query().Get("prompt"))
 		assert.NotEmpty(t, r.URL.Query().Get("prompt_auth"))
 
-		state = r.URL.Query().Get("state")
+		state := r.URL.Query().Get("state")
 		assert.NotEmpty(t, state)
-		nonce = r.URL.Query().Get("nonce")
+		nonce := r.URL.Query().Get("nonce")
 		assert.NotEmpty(t, nonce)
-		http.Redirect(w, r, fmt.Sprintf("%s?state=%s&nonce=%s&code=%s", redirectURI, state, nonce, code), http.StatusFound)
+
+		token := jwt.NewWithClaims(
+			jwt.SigningMethodRS256,
+			jwt.MapClaims{
+				"iss":   s.URL,
+				"sub":   subject,
+				"aud":   clientID,
+				"exp":   time.Now().Add(time.Hour).Unix(),
+				"iat":   time.Now().Unix(),
+				"nonce": nonce,
+			},
+		)
+		rawIDToken, err = token.SignedString(rs256)
+		require.NoError(t, err)
+
+		http.Redirect(w, r, fmt.Sprintf("%s?state=%s&code=%s", redirectURI, state, code), http.StatusFound)
 	})
 
-	var rawIDToken string
 	mux.HandleFunc("/oauth/token", func(w http.ResponseWriter, r *http.Request) {
 		require.Equal(t, http.MethodPost, r.Method)
 
@@ -80,8 +105,6 @@ func newMockServer(t *testing.T, redirectURI, clientID, subject, code, accessTok
 		require.NoError(t, err)
 	})
 
-	rs256, err := rsa.GenerateKey(rand.Reader, 2048)
-	require.NoError(t, err)
 	mux.HandleFunc("/oauth/discovery/keys", func(w http.ResponseWriter, _ *http.Request) {
 		key, err := jwk.FromRaw(rs256.PublicKey)
 		require.NoError(t, err)
@@ -99,41 +122,16 @@ func newMockServer(t *testing.T, redirectURI, clientID, subject, code, accessTok
 		})
 		require.NoError(t, err)
 	})
-
-	s := httptest.NewServer(mux)
-	t.Cleanup(func() { s.Close() })
-
-	openidConfig = map[string]any{
-		"issuer":                                s.URL,
-		"authorization_endpoint":                s.URL + "/oauth/authorize",
-		"token_endpoint":                        s.URL + "/oauth/token",
-		"userinfo_endpoint":                     s.URL + "/oauth/userinfo",
-		"jwks_uri":                              s.URL + "/oauth/discovery/keys",
-		"id_token_signing_alg_values_supported": []string{"RS256"},
-	}
-
-	token := jwt.NewWithClaims(
-		jwt.SigningMethodRS256,
-		jwt.MapClaims{
-			"iss":   s.URL,
-			"sub":   subject,
-			"aud":   clientID,
-			"exp":   time.Now().Add(time.Hour).Unix(),
-			"iat":   time.Now().Unix(),
-			"nonce": nonce,
-		},
-	)
-	rawIDToken, err = token.SignedString(rs256)
-	require.NoError(t, err)
 	return s
 }
 
-type mockStateStore struct {
+type mockSecretStore struct {
 	state         string
+	nonce         string
 	setStateError error
 }
 
-func (s *mockStateStore) SetState(_ *http.Request, state string) error {
+func (s *mockSecretStore) SetState(_ *http.Request, state string) error {
 	if s.setStateError != nil {
 		return s.setStateError
 	}
@@ -141,12 +139,25 @@ func (s *mockStateStore) SetState(_ *http.Request, state string) error {
 	return nil
 }
 
-func (s *mockStateStore) GetState(*http.Request) (string, error) {
+func (s *mockSecretStore) GetState(*http.Request) (string, error) {
 	return s.state, nil
 }
 
-func (s *mockStateStore) DeleteState(*http.Request) {
+func (s *mockSecretStore) DeleteState(*http.Request) {
 	s.state = ""
+}
+
+func (s *mockSecretStore) SetNonce(_ *http.Request, nonce string) error {
+	s.nonce = nonce
+	return nil
+}
+
+func (s *mockSecretStore) GetNonce(r *http.Request) (string, error) {
+	return s.nonce, nil
+}
+
+func (s *mockSecretStore) DeleteNonce(r *http.Request) {
+	s.nonce = ""
 }
 
 func TestHandler(t *testing.T) {
@@ -191,7 +202,7 @@ func TestHandler(t *testing.T) {
 				RequestScopes:  []scopes.Scope{scopes.OpenID, scopes.Profile, scopes.Email},
 				RedirectURI:    redirectURI,
 				FailureHandler: DefaultFailureHandler,
-				StateStore:     &mockStateStore{},
+				SecretStore:    &mockSecretStore{},
 			},
 		)
 		require.NoError(t, err)
@@ -237,7 +248,7 @@ func TestHandler(t *testing.T) {
 				RequestScopes:  []scopes.Scope{scopes.OpenID, scopes.Profile, scopes.Email},
 				RedirectURI:    redirectURI,
 				FailureHandler: DefaultFailureHandler,
-				StateStore:     &mockStateStore{setStateError: errors.New("failed to set state")},
+				SecretStore:    &mockSecretStore{setStateError: errors.New("failed to set state")},
 			},
 		)
 		require.NoError(t, err)

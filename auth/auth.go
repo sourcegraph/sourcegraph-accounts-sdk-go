@@ -34,18 +34,24 @@ type Config struct {
 	// ErrorFromContext to extract the error.
 	FailureHandler http.Handler
 
-	StateStore
+	SecretStore
 }
 
-// StateStore is the interface for managing the authentication state in the
-// per-user session.
-type StateStore interface {
+// SecretStore is the interface for managing the authentication state and nonce
+// in the per-user session.
+type SecretStore interface {
 	// SetState sets the randomly-generated state to the per-user session.
 	SetState(r *http.Request, state string) error
 	// GetState returns the state from the per-user session.
 	GetState(r *http.Request) (string, error)
 	// DeleteState deletes the state from the per-user session.
 	DeleteState(r *http.Request)
+	// SetNonce sets the randomly-generated nonce to the per-user session.
+	SetNonce(r *http.Request, nonce string) error
+	// GetNonce returns the nonce from the per-user session.
+	GetNonce(r *http.Request) (string, error)
+	// DeleteNonce deletes the nonce from the per-user session.
+	DeleteNonce(r *http.Request)
 }
 
 // Error is an error that occurred during the authentication process.
@@ -66,8 +72,8 @@ type Handler struct {
 func NewHandler(config Config) (*Handler, error) {
 	if config.FailureHandler == nil {
 		return nil, errors.New("missing FailureHandler")
-	} else if config.StateStore == nil {
-		return nil, errors.New("missing StateStore")
+	} else if config.SecretStore == nil {
+		return nil, errors.New("missing SecretStore")
 	}
 	return &Handler{config: config}, nil
 }
@@ -91,17 +97,18 @@ func (h *Handler) LoginHandler() http.Handler {
 			return
 		}
 
-		// Generate and store a random nonce to the session.
-		nonce, err := randomString()
+		// Generate and store a random state to the session. The state is used to make
+		// sure the subsequent callback is the result of the same login.
+		state, err := randomString()
 		if err != nil {
 			ctx = WithError(ctx, &Error{
 				StatusCode: http.StatusInternalServerError,
-				Cause:      errors.Wrap(err, "generate nonce"),
+				Cause:      errors.Wrap(err, "generate state"),
 			})
 			h.config.FailureHandler.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
-		err = h.config.SetState(r, nonce)
+		err = h.config.SetState(r, state)
 		if err != nil {
 			ctx = WithError(ctx, &Error{
 				StatusCode: http.StatusInternalServerError,
@@ -111,13 +118,32 @@ func (h *Handler) LoginHandler() http.Handler {
 			return
 		}
 
-		// NOTE: Using same value for both state and nonce is fine because "state" is
-		// for service self-validation (no CSRF) and "nonce" is for IdP validation (no
-		// repeated attempts).
+		// Generate and store a random nonce to the session. The nonce is used to make
+		// sure the ID Token is signed by the same SAMS instance we redirect to and for
+		// the same login.
+		nonce, err := randomString()
+		if err != nil {
+			ctx = WithError(ctx, &Error{
+				StatusCode: http.StatusInternalServerError,
+				Cause:      errors.Wrap(err, "generate nonce"),
+			})
+			h.config.FailureHandler.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+		err = h.config.SetNonce(r, nonce)
+		if err != nil {
+			ctx = WithError(ctx, &Error{
+				StatusCode: http.StatusInternalServerError,
+				Cause:      errors.Wrap(err, "set nonce"),
+			})
+			h.config.FailureHandler.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+
 		params := url.Values{}
 		params.Add("client_id", h.config.ClientID)
 		params.Add("redirect_uri", h.config.RedirectURI)
-		params.Add("state", nonce)
+		params.Add("state", state)
 		params.Add("nonce", nonce)
 		params.Add("response_type", "code")
 		params.Add("scope", strings.Join(scopes.ToStrings(h.config.RequestScopes), " "))
@@ -218,9 +244,10 @@ func (h *Handler) getUserInfo(r *http.Request) (*UserInfo, error) {
 		return nil, errors.Wrap(err, "create new provider")
 	}
 
-	nonce, err := h.config.GetState(r)
+	nonce, err := h.config.GetNonce(r)
+	h.config.DeleteNonce(r) // Delete the nonce after getting it to make sure it's one-time use.
 	if err != nil {
-		return nil, errors.Wrap(err, "get state")
+		return nil, errors.Wrap(err, "get nonce")
 	}
 
 	oauth2Config := oauth2.Config{
