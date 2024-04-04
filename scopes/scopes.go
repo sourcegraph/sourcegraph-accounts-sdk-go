@@ -33,6 +33,7 @@ type Service string
 
 // The list of registered services that publishes scopes.
 const (
+	ServiceCodyGateway      Service = "cody_gateway"
 	ServiceSAMS             Service = "sams"
 	ServiceTelemetryGateway Service = "telemetry_gateway"
 )
@@ -88,6 +89,9 @@ func ToScope(service Service, permission Permission, action Action) Scope {
 type Permission string
 
 var (
+	codyGatewayPermissions = []Permission{
+		"flaggedprompts",
+	}
 	samsPermissions = []Permission{
 		"user",
 		"user.profile",
@@ -129,9 +133,10 @@ func Allowed() AllowedScopes {
 		}
 	}
 
+	appendScopes(ServiceCodyGateway, codyGatewayPermissions)
 	appendScopes(ServiceSAMS, samsPermissions)
 	appendScopes(ServiceTelemetryGateway, telemetryGatewayPermissions)
-	// 👉ADD YOUR SCOPES HERE
+	// 👉 ADD YOUR SCOPES HERE
 	return allowed
 }
 
