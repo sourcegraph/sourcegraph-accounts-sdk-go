@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"connectrpc.com/connect"
+	"connectrpc.com/otelconnect"
 	"github.com/sourcegraph/sourcegraph/lib/errors"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
@@ -19,6 +20,10 @@ type ClientV1 struct {
 	rootURL                 string
 	clientCredentialsConfig clientcredentials.Config
 	tokenSource             oauth2.TokenSource
+
+	// defaultInterceptors is a list of default interceptors to use with all
+	// clients, generally providing enhanced diagnostics.
+	defaultInterceptors []connect.Interceptor
 }
 
 // NewClientV1 returns a new SAMS client for interacting with Clients API v1
@@ -31,6 +36,15 @@ func NewClientV1(url, clientID, clientSecret string, scopeList []scopes.Scope) (
 		return nil, errors.New("empty client ID or secret")
 	}
 
+	otelinterceptor, err := otelconnect.NewInterceptor(
+		// Start with simple, lower-cardinality metrics
+		otelconnect.WithoutServerPeerAttributes(),
+		// Start with lower-volume trace data
+		otelconnect.WithoutTraceEvents())
+	if err != nil {
+		return nil, errors.Wrap(err, "initiate OTEL interceptor")
+	}
+
 	clientCredentialsConfig := clientcredentials.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
@@ -41,6 +55,8 @@ func NewClientV1(url, clientID, clientSecret string, scopeList []scopes.Scope) (
 		rootURL:                 strings.TrimSuffix(url, "/"),
 		clientCredentialsConfig: clientCredentialsConfig,
 		tokenSource:             clientCredentialsConfig.TokenSource(context.Background()),
+
+		defaultInterceptors: []connect.Interceptor{otelinterceptor},
 	}, nil
 }
 
