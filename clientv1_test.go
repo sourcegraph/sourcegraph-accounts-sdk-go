@@ -45,7 +45,7 @@ func TestNewClientV1ConnectionConfigFromEnv(t *testing.T) {
 			name:            "no env",
 			env:             staticEnvGetter{},
 			want:            autogold.Expect(ClientV1ConnConfig{ExternalURL: "https://accounts.sourcegraph.com"}),
-			wantValidateErr: autogold.Expect("empty client ID or secret"),
+			wantValidateErr: autogold.Expect("empty client ID"),
 		},
 		{
 			name: "only client credentials",
