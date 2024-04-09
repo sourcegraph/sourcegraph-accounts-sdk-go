@@ -8,6 +8,7 @@ require (
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/hexops/autogold/v2 v2.0.3
+	github.com/hexops/valast v1.4.3
 	github.com/lestrrat-go/jwx/v2 v2.0.21
 	github.com/sourcegraph/sourcegraph/lib v0.0.0-20240315183013-b2b134e08ada
 	github.com/stretchr/testify v1.9.0
@@ -32,7 +33,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
-	github.com/hexops/valast v1.4.3 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
