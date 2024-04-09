@@ -72,9 +72,13 @@ func (c ClientV1ConnConfig) Validate() error {
 	if c.getAPIURL() == "" {
 		return errors.New("evaluated API URL is empty")
 	}
-	if c.ClientID == "" || c.ClientSecret == "" {
-		return errors.New("empty client ID or secret")
+	if c.ClientID == "" {
+		return errors.New("empty client ID")
 	}
+	if c.ClientSecret == "" {
+		return errors.New("empty client secret")
+	}
+	
 	return nil
 }
 
