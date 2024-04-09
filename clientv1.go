@@ -32,7 +32,7 @@ type ClientV1ConnConfig struct {
 	ExternalURL string
 	// APIURL is the URL to use for Sourcegraph Accounts API interactions. This
 	// can be set to some internal URLs for private networking. If this is nil,
-	// the client will fall back to URL instead.
+	// the client will fall back to ExternalURL instead.
 	APIURL *string
 	// Client credentials representing this Sourcegraph Accounts client
 	ClientID     string
