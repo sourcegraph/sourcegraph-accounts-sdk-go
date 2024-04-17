@@ -13,6 +13,7 @@ import (
 	"github.com/sourcegraph/sourcegraph/lib/errors"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
+	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/internal/httpretry"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
 )
 
@@ -47,10 +48,13 @@ type IntrospectTokenResponse struct {
 var tokenServiceTransport = func() http.RoundTripper {
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.IdleConnTimeout = 3 * time.Second
-	return otelhttp.NewTransport(transport,
-		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
-			return fmt.Sprintf("sams.TokensServiceV1/%s: %s", operation, r.URL.Path)
-		}))
+	return httpretry.NewRoundTripper(
+		otelhttp.NewTransport(transport,
+			otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
+				return fmt.Sprintf("sams.TokensServiceV1/%s: %s", operation, r.URL.Path)
+			}),
+		),
+	)
 }()
 
 // IntrospectToken takes a SAMS access token and returns relevant metadata.
