@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/sourcegraph/sourcegraph/lib/errors"
 )
 
 // Client is a wrapper around SAMS primitive REST API. Most likely, you want to use
