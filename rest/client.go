@@ -57,7 +57,7 @@ func (c *client) GetUserDetails(ctx context.Context, token string) (*User, error
 		return nil, errors.Wrap(err, "fetching user details")
 	}
 	if resp.Body == nil {
-		return nil, errors.Wrap(err, "no response body")
+		return nil, errors.New("no response body")
 	}
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
