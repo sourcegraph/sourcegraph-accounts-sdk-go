@@ -172,14 +172,24 @@ import (
 	"log"
 	"os"
 
-	samsREST "github.com/sourcegraph/sourcegraph-accounts-sdk-go/rest"
+	"golang.org/x/oauth2"
+	samsrest "github.com/sourcegraph/sourcegraph-accounts-sdk-go/rest/v1"
 )
 
 func main() {
-	token := os.Getenv("SAMS_USER_ACCESS_TOKEN")
+	// e.g. the SAMS token prefixed with "sams_at_".
+	rawToken := os.Getenv("SAMS_USER_ACCESS_TOKEN")
 
-	samsRESTClient := samsREST.NewClient("https://accounts.sourcegraph.com")
-	user, err := samsRESTClient.GetUserDetails(ctx, token)
+	// If you have the SAMS user's Refresh token, using the oauth2.TokenSource abstraction
+	// will take care of creating short-lived access tokens as needed. But if you only have
+	// the access token, you will need to use a StaticTokenSource instead.
+	token := oauth2.Token{
+		AccessToken: rawToken,
+	}
+	tokenSource := oauth2.StaticTokenSource(t)
+
+	client := samsrest.NewClient("https://accounts.sourcegraph.com", tokenSource)
+	user, err := client.GetUser(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
