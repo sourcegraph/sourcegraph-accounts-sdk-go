@@ -159,7 +159,7 @@ func main() {
 ## SAMS Accounts API
 
 The SAMS Accounts API is for user-oriented operations like inspecting your own account details. These APIs are
-much simpler in nature, as most integrations will make use of the Clients API. However, the REST API is
+much simpler in nature, as most integrations will make use of the Clients API. However, the Accounts API is
 required if the service is not governing access based on the SAMS token scope, but instead using its own
 authorization mechanism. e.g. governing access based on the SAMS external account ID.
 
