@@ -12,30 +12,26 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// NewClient constructs a new SAMS Accounts client, pointed to the supplied SAMS host.
+// e.g. "https://accounts.sourcegraph.com".
+func NewClient(samsHost string, tokenSource oauth2.TokenSource) *Client {
+	// Canonicalize the host so we only need to check if it ends in a slash or not once.
+	samsHost = strings.ToLower(samsHost)
+	samsHost = strings.TrimSuffix(samsHost, "/")
+
+	return &Client{
+		host:        samsHost,
+		tokenSource: tokenSource,
+	}
+}
+
 // Client is a wrapper around SAMS primitive REST-based ACcounts API. Most likely, you want
 // to use the more service-to-service "Clients" API instead.
 //
 // This API is needed when using SAMS to identify users, but not perform authorization
 // checks. e.g. the caller will handle its own authorization checks based on the identity
 // of the SAMS user. (The returned User.Subject, the SAMS account external ID.)
-type Client interface {
-	GetUser(ctx context.Context) (*User, error)
-}
-
-// NewClient constructs a new SAMS Accounts client, pointed to the supplied SAMS host.
-// e.g. "https://accounts.sourcegraph.com".
-func NewClient(samsHost string, tokenSource oauth2.TokenSource) Client {
-	// Canonicalize the host so we only need to check if it ends in a slash or not once.
-	samsHost = strings.ToLower(samsHost)
-	samsHost = strings.TrimSuffix(samsHost, "/")
-
-	return &client{
-		host:        samsHost,
-		tokenSource: tokenSource,
-	}
-}
-
-type client struct {
+type Client struct {
 	host        string
 	tokenSource oauth2.TokenSource
 }
@@ -45,7 +41,7 @@ type client struct {
 //
 // If the supplied token is invalid, malformed, or expired, the error will contain
 // "unexpected status 401".
-func (c *client) GetUser(ctx context.Context) (*User, error) {
+func (c *Client) GetUser(ctx context.Context) (*User, error) {
 	url := fmt.Sprintf("%s/api/v1/user", c.host)
 
 	token, err := c.tokenSource.Token()
