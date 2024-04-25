@@ -156,12 +156,12 @@ func main() {
 }
 ```
 
-## SAMS REST API
+## SAMS Accounts API
 
-The SAMS REST API is for user-oriented access tokens. These APIs are much simpler in nature, as most integrations
-will make use of the Client API. However, the REST API is required if the service is not governing access based
-on the SAMS token scope, but instead using its own authorization mechanism. e.g. governing access based on the
-SAMS external account ID.
+The SAMS Accounts API is for user-oriented operations like inspecting your own account details. These APIs are
+much simpler in nature, as most integrations will make use of the Clients API. However, the REST API is
+required if the service is not governing access based on the SAMS token scope, but instead using its own
+authorization mechanism. e.g. governing access based on the SAMS external account ID.
 
 ```go
 package main
@@ -173,7 +173,7 @@ import (
 	"os"
 
 	"golang.org/x/oauth2"
-	samsrest "github.com/sourcegraph/sourcegraph-accounts-sdk-go/rest/v1"
+	accountsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/accounts/v1"
 )
 
 func main() {
@@ -188,7 +188,7 @@ func main() {
 	}
 	tokenSource := oauth2.StaticTokenSource(t)
 
-	client := samsrest.NewClient("https://accounts.sourcegraph.com", tokenSource)
+	client := accountsv1.NewClient("https://accounts.sourcegraph.com", tokenSource)
 	user, err := client.GetUser(ctx)
 	if err != nil {
 		log.Fatal(err)

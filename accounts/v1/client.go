@@ -1,4 +1,4 @@
-package restv1
+package accountsv1
 
 import (
 	"context"
@@ -12,8 +12,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// Client is a wrapper around SAMS primitive REST API. Most likely, you want to use
-// the more robust service-to-service protobuf API.
+// Client is a wrapper around SAMS primitive REST-based ACcounts API. Most likely, you want
+// to use the more service-to-service "Clients" API instead.
 //
 // This API is needed when using SAMS to identify users, but not perform authorization
 // checks. e.g. the caller will handle its own authorization checks based on the identity
@@ -22,7 +22,7 @@ type Client interface {
 	GetUser(ctx context.Context) (*User, error)
 }
 
-// NewClient constructs a new SAMS REST client, pointed to the supplied SAMS host.
+// NewClient constructs a new SAMS Accounts client, pointed to the supplied SAMS host.
 // e.g. "https://accounts.sourcegraph.com".
 func NewClient(samsHost string, tokenSource oauth2.TokenSource) Client {
 	// Canonicalize the host so we only need to check if it ends in a slash or not once.

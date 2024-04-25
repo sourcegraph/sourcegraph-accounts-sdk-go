@@ -1,4 +1,4 @@
-package restv1
+package accountsv1
 
 import (
 	"time"
