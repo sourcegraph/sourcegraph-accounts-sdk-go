@@ -114,6 +114,10 @@ func main() {
 
 ## Clients API v1
 
+The SAMS Clients API is for SAMS clients to obtain information directly from SAMS. For example,
+authorizing a request based on the scopes attached to a token. Or looking up a user's profile
+information based on the SAMS external account ID.
+
 ```go
 package main
 
@@ -149,6 +153,47 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(user)
+}
+```
+
+## SAMS Accounts API
+
+The SAMS Accounts API is for user-oriented operations like inspecting your own account details. These APIs are
+much simpler in nature, as most integrations will make use of the Clients API. However, the Accounts API is
+required if the service is not governing access based on the SAMS token scope, but instead using its own
+authorization mechanism. e.g. governing access based on the SAMS external account ID.
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"golang.org/x/oauth2"
+	accountsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/accounts/v1"
+)
+
+func main() {
+	// e.g. the SAMS token prefixed with "sams_at_".
+	rawToken := os.Getenv("SAMS_USER_ACCESS_TOKEN")
+
+	// If you have the SAMS user's Refresh token, using the oauth2.TokenSource abstraction
+	// will take care of creating short-lived access tokens as needed. But if you only have
+	// the access token, you will need to use a StaticTokenSource instead.
+	token := oauth2.Token{
+		AccessToken: rawToken,
+	}
+	tokenSource := oauth2.StaticTokenSource(t)
+
+	client := accountsv1.NewClient("https://accounts.sourcegraph.com", tokenSource)
+	user, err := client.GetUser(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("User Details: %+v", user)
 }
 ```
 
