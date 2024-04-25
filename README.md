@@ -114,6 +114,10 @@ func main() {
 
 ## Clients API v1
 
+The SAMS Clients API is for SAMS clients to obtain information directly from SAMS. For example,
+authorizing a request based on the scopes attached to a token. Or looking up a user's profile
+information based on the SAMS external account ID.
+
 ```go
 package main
 
@@ -149,6 +153,37 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(user)
+}
+```
+
+## SAMS REST API
+
+The SAMS REST API is for user-oriented access tokens. These APIs are much simpler in nature, as most integrations
+will make use of the Client API. However, the REST API is required if the service is not governing access based
+on the SAMS token scope, but instead using its own authorization mechanism. e.g. governing access based on the
+SAMS external account ID.
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	samsREST "github.com/sourcegraph/sourcegraph-accounts-sdk-go/rest"
+)
+
+func main() {
+	token := os.Getenv("SAMS_USER_ACCESS_TOKEN")
+
+	samsRESTClient := samsREST.NewClient("https://accounts.sourcegraph.com")
+	user, err := samsRESTClient.GetUserDetails(ctx, token)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("User Details: %+v", user)
 }
 ```
 
