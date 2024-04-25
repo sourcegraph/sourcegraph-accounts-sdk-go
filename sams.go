@@ -1,6 +1,8 @@
 package sams
 
-import "github.com/sourcegraph/sourcegraph/lib/errors"
+import (
+	"github.com/sourcegraph/sourcegraph/lib/errors"
+)
 
 // envGetter is a helper interface for getting environment variables based on
 // the MSP runtime environment, matching the type

@@ -12,7 +12,6 @@ require (
 	github.com/lestrrat-go/jwx/v2 v2.0.21
 	github.com/sourcegraph/sourcegraph/lib v0.0.0-20240315183013-b2b134e08ada
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0
 	golang.org/x/oauth2 v0.18.0
 	google.golang.org/protobuf v1.33.0
 )
@@ -24,7 +23,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/fatih/color v1.15.0 // indirect
-	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/getsentry/sentry-go v0.25.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

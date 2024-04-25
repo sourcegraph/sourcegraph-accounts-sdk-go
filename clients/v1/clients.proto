@@ -117,3 +117,30 @@ message SignOutSessionResponse {}
 // ErrorRecordMismatch is returned in the error details when the record does not match the expected record,
 // e.g. the desired user ID does not match the actual user ID.
 message ErrorRecordMismatch {}
+
+service TokensService {
+  // IntrospectToken takes a SAMS access token and returns relevant metadata.
+  //
+  // 🚨SECURITY: SAMS will return a successful result if the token is valid, but
+  // is no longer active. It is critical that the caller not honor tokens where
+  // `.Active == false`.
+  rpc IntrospectToken(IntrospectTokenRequest) returns (IntrospectTokenResponse);
+}
+
+message IntrospectTokenRequest {
+  // The access token to introspect.
+  string token = 1;
+}
+
+message IntrospectTokenResponse {
+  // Active indicates whether the token is currently active. The value is "true"
+  // if the token has been issued by the SAMS instance, has not been revoked, and
+  // has not expired.
+  bool active = 1;
+  // Scopes is the list of scopes granted by the token.
+  repeated string scopes = 2;
+  // ClientID is the identifier of the SAMS client that the token was issued to.
+  string client_id = 3;
+  // ExpiresAt indicates when the token expires.
+  google.protobuf.Timestamp expires_at = 4;
+}

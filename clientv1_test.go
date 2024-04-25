@@ -14,14 +14,18 @@ import (
 )
 
 func TestNewClientV1(t *testing.T) {
+	config := ClientCredentialsTokenSource(
+		"https://accounts.sourcegraph.com",
+		"fooclient",
+		"barsecret",
+		[]scopes.Scope{scopes.Profile},
+	)
 	c, err := NewClientV1(
 		ClientV1Config{
 			ConnConfig: ConnConfig{
 				ExternalURL: "https://accounts.sourcegraph.com",
 			},
-			ClientID:     "fooclient",
-			ClientSecret: "barsecret",
-			Scopes:       []scopes.Scope{scopes.Profile},
+			TokenSource: config,
 		})
 	require.NoError(t, err)
 	assert.NotEmpty(t, c.defaultInterceptors)
