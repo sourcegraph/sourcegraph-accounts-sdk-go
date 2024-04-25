@@ -1,5 +1,7 @@
 # Sourcegraph Accounts SDK for Go
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/sourcegraph/sourcegraph-accounts-sdk-go.svg)](https://pkg.go.dev/github.com/sourcegraph/sourcegraph-accounts-sdk-go) [![Go](https://github.com/sourcegraph/sourcegraph-accounts-sdk-go/actions/workflows/go.yml/badge.svg)](https://github.com/sourcegraph/sourcegraph-accounts-sdk-go/actions/workflows/go.yml)
+
 This repository contains the Go SDK for integrating with [Sourcegraph Accounts Management System (SAMS)](https://handbook.sourcegraph.com/departments/engineering/teams/core-services/sams/).
 
 ```zsh
@@ -132,18 +134,18 @@ import (
 )
 
 func main() {
-	samsClient, err := sams.NewClientV1(
-		"https://accounts.sourcegraph.com",
-		os.Getenv("SAMS_CLIENT_ID"),
-		os.Getenv("SAMS_CLIENT_SECRET"),
-		[]scopes.Scope{
+	samsClient, err := sams.NewClientV1(sams.ClientV1Config{
+		ConnConfig:   sams.NewConnConfigFromEnv(/* ... */),
+		ClientID:     os.Getenv("SAMS_CLIENT_ID"),
+		ClientSecret: os.Getenv("SAMS_CLIENT_SECRET"),
+		Scopes:       []scopes.Scope{
 			scopes.OpenID,
 			scopes.Profile,
 			scopes.Email,
 			"sams::user.roles::read",
 			"sams::session::read",
 		},
-	)
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -173,7 +175,7 @@ import (
 	"os"
 
 	"golang.org/x/oauth2"
-	accountsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/accounts/v1"
+	sams "github.com/sourcegraph/sourcegraph-accounts-sdk-go"
 )
 
 func main() {
@@ -188,7 +190,10 @@ func main() {
 	}
 	tokenSource := oauth2.StaticTokenSource(t)
 
-	client := accountsv1.NewClient("https://accounts.sourcegraph.com", tokenSource)
+	client := sams.NewAccountsV1(sams.AccountsV1Config{
+		ConnConfig:  sams.NewConnConfigFromEnv(/* ... */),
+		TokenSource: tokenSource,
+	})
 	user, err := client.GetUser(ctx)
 	if err != nil {
 		log.Fatal(err)

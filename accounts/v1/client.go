@@ -14,6 +14,8 @@ import (
 
 // NewClient constructs a new SAMS Accounts client, pointed to the supplied SAMS host.
 // e.g. "https://accounts.sourcegraph.com".
+//
+// Users should prefer to use the top-level 'sams.NewAccountsV1' constructor instead.
 func NewClient(samsHost string, tokenSource oauth2.TokenSource) *Client {
 	// Canonicalize the host so we only need to check if it ends in a slash or not once.
 	samsHost = strings.ToLower(samsHost)
