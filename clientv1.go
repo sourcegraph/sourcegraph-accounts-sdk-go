@@ -133,11 +133,11 @@ var (
 // source. Scopes should be defined using the available scopes package. All
 // requested scopes must be allowed by the registered client - see:
 // https://sourcegraph.notion.site/6cc4a1bd9cb247eea9674dbf9d5ce8c3
-func ClientCredentialsTokenSource(apiURL, clientID, clientSecret string, requestScopes []scopes.Scope) oauth2.TokenSource {
+func ClientCredentialsTokenSource(conn ConnConfig, clientID, clientSecret string, requestScopes []scopes.Scope) oauth2.TokenSource {
 	config := clientcredentials.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		TokenURL:     fmt.Sprintf("%s/oauth/token", apiURL),
+		TokenURL:     fmt.Sprintf("%s/oauth/token", conn.getAPIURL()),
 		Scopes:       scopes.ToStrings(requestScopes),
 	}
 	return config.TokenSource(context.Background())

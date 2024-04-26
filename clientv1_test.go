@@ -14,17 +14,16 @@ import (
 )
 
 func TestNewClientV1(t *testing.T) {
+	conn := ConnConfig{ExternalURL: "https://accounts.sourcegraph.com"}
 	config := ClientCredentialsTokenSource(
-		"https://accounts.sourcegraph.com",
+		conn,
 		"fooclient",
 		"barsecret",
 		[]scopes.Scope{scopes.Profile},
 	)
 	c, err := NewClientV1(
 		ClientV1Config{
-			ConnConfig: ConnConfig{
-				ExternalURL: "https://accounts.sourcegraph.com",
-			},
+			ConnConfig:  conn,
 			TokenSource: config,
 		})
 	require.NoError(t, err)
