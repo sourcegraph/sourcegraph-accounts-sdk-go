@@ -25,6 +25,8 @@ const (
 	UsersServiceName = "clients.v1.UsersService"
 	// SessionsServiceName is the fully-qualified name of the SessionsService service.
 	SessionsServiceName = "clients.v1.SessionsService"
+	// TokensServiceName is the fully-qualified name of the TokensService service.
+	TokensServiceName = "clients.v1.TokensService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -48,6 +50,9 @@ const (
 	// SessionsServiceSignOutSessionProcedure is the fully-qualified name of the SessionsService's
 	// SignOutSession RPC.
 	SessionsServiceSignOutSessionProcedure = "/clients.v1.SessionsService/SignOutSession"
+	// TokensServiceIntrospectTokenProcedure is the fully-qualified name of the TokensService's
+	// IntrospectToken RPC.
+	TokensServiceIntrospectTokenProcedure = "/clients.v1.TokensService/IntrospectToken"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -59,6 +64,8 @@ var (
 	sessionsServiceServiceDescriptor              = v1.File_clients_v1_clients_proto.Services().ByName("SessionsService")
 	sessionsServiceGetSessionMethodDescriptor     = sessionsServiceServiceDescriptor.Methods().ByName("GetSession")
 	sessionsServiceSignOutSessionMethodDescriptor = sessionsServiceServiceDescriptor.Methods().ByName("SignOutSession")
+	tokensServiceServiceDescriptor                = v1.File_clients_v1_clients_proto.Services().ByName("TokensService")
+	tokensServiceIntrospectTokenMethodDescriptor  = tokensServiceServiceDescriptor.Methods().ByName("IntrospectToken")
 )
 
 // UsersServiceClient is a client for the clients.v1.UsersService service.
@@ -325,4 +332,82 @@ func (UnimplementedSessionsServiceHandler) GetSession(context.Context, *connect.
 
 func (UnimplementedSessionsServiceHandler) SignOutSession(context.Context, *connect.Request[v1.SignOutSessionRequest]) (*connect.Response[v1.SignOutSessionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.SessionsService.SignOutSession is not implemented"))
+}
+
+// TokensServiceClient is a client for the clients.v1.TokensService service.
+type TokensServiceClient interface {
+	// IntrospectToken takes a SAMS access token and returns relevant metadata.
+	//
+	// 🚨SECURITY: SAMS will return a successful result if the token is valid, but
+	// is no longer active. It is critical that the caller not honor tokens where
+	// `.Active == false`.
+	IntrospectToken(context.Context, *connect.Request[v1.IntrospectTokenRequest]) (*connect.Response[v1.IntrospectTokenResponse], error)
+}
+
+// NewTokensServiceClient constructs a client for the clients.v1.TokensService service. By default,
+// it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and
+// sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC()
+// or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewTokensServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) TokensServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	return &tokensServiceClient{
+		introspectToken: connect.NewClient[v1.IntrospectTokenRequest, v1.IntrospectTokenResponse](
+			httpClient,
+			baseURL+TokensServiceIntrospectTokenProcedure,
+			connect.WithSchema(tokensServiceIntrospectTokenMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// tokensServiceClient implements TokensServiceClient.
+type tokensServiceClient struct {
+	introspectToken *connect.Client[v1.IntrospectTokenRequest, v1.IntrospectTokenResponse]
+}
+
+// IntrospectToken calls clients.v1.TokensService.IntrospectToken.
+func (c *tokensServiceClient) IntrospectToken(ctx context.Context, req *connect.Request[v1.IntrospectTokenRequest]) (*connect.Response[v1.IntrospectTokenResponse], error) {
+	return c.introspectToken.CallUnary(ctx, req)
+}
+
+// TokensServiceHandler is an implementation of the clients.v1.TokensService service.
+type TokensServiceHandler interface {
+	// IntrospectToken takes a SAMS access token and returns relevant metadata.
+	//
+	// 🚨SECURITY: SAMS will return a successful result if the token is valid, but
+	// is no longer active. It is critical that the caller not honor tokens where
+	// `.Active == false`.
+	IntrospectToken(context.Context, *connect.Request[v1.IntrospectTokenRequest]) (*connect.Response[v1.IntrospectTokenResponse], error)
+}
+
+// NewTokensServiceHandler builds an HTTP handler from the service implementation. It returns the
+// path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewTokensServiceHandler(svc TokensServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	tokensServiceIntrospectTokenHandler := connect.NewUnaryHandler(
+		TokensServiceIntrospectTokenProcedure,
+		svc.IntrospectToken,
+		connect.WithSchema(tokensServiceIntrospectTokenMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/clients.v1.TokensService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case TokensServiceIntrospectTokenProcedure:
+			tokensServiceIntrospectTokenHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedTokensServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedTokensServiceHandler struct{}
+
+func (UnimplementedTokensServiceHandler) IntrospectToken(context.Context, *connect.Request[v1.IntrospectTokenRequest]) (*connect.Response[v1.IntrospectTokenResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.TokensService.IntrospectToken is not implemented"))
 }

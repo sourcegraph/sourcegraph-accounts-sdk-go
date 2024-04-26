@@ -2,17 +2,13 @@ package sams
 
 import (
 	"context"
-	"encoding/base64"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"strings"
 	"time"
 
-	"github.com/sourcegraph/sourcegraph/lib/errors"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"connectrpc.com/connect"
+	"golang.org/x/oauth2"
 
+	clientsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
+	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1/clientsv1connect"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
 )
 
@@ -20,6 +16,14 @@ import (
 // API v1.
 type TokensServiceV1 struct {
 	client *ClientV1
+}
+
+func (s *TokensServiceV1) newClient(ctx context.Context) clientsv1connect.TokensServiceClient {
+	return clientsv1connect.NewTokensServiceClient(
+		oauth2.NewClient(ctx, s.client.tokenSource),
+		s.client.gRPCURL(),
+		connect.WithInterceptors(s.client.defaultInterceptors...),
+	)
 }
 
 type IntrospectTokenResponse struct {
@@ -35,80 +39,22 @@ type IntrospectTokenResponse struct {
 	ExpiresAt time.Time
 }
 
-// tokenServiceTransport is a shared http.RoundTripper for use with introspection
-// requests that:
-//
-//   - Use a much shorter idle connection timeout than the default to avoid being
-//     idle for too long and force killed by Cloud Run.
-//   - Is wrapped on OpenTelemetry instrumentation
-//
-// It must be shared so that all requests still use the same pool of (short-lived)
-// connections.
-var tokenServiceTransport = func() http.RoundTripper {
-	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.IdleConnTimeout = 3 * time.Second
-	return otelhttp.NewTransport(transport,
-		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
-			return fmt.Sprintf("sams.TokensServiceV1/%s: %s", operation, r.URL.Path)
-		}))
-}()
-
 // IntrospectToken takes a SAMS access token and returns relevant metadata.
 //
 // 🚨SECURITY: SAMS will return a successful result if the token is valid, but
 // is no longer active. It is critical that the caller not honor tokens where
 // `.Active == false`.
 func (s *TokensServiceV1) IntrospectToken(ctx context.Context, token string) (*IntrospectTokenResponse, error) {
-	req, err := http.NewRequestWithContext(
-		ctx,
-		http.MethodPost,
-		fmt.Sprintf("%s/oauth/introspect", s.client.rootURL),
-		strings.NewReader("token="+token),
-	)
+	req := &clientsv1.IntrospectTokenRequest{Token: token}
+	client := s.newClient(ctx)
+	resp, err := parseResponseAndError(client.IntrospectToken(ctx, connect.NewRequest(req)))
 	if err != nil {
-		return nil, errors.Wrap(err, "create introspection request")
-	}
-
-	credentialStr := fmt.Sprintf(
-		"%s:%s",
-		s.client.clientCredentialsConfig.ClientID, s.client.clientCredentialsConfig.ClientSecret,
-	)
-	basicAuth := base64.StdEncoding.EncodeToString([]byte(credentialStr))
-	req.Header.Set("Authorization", "Basic "+basicAuth)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	httpClient := &http.Client{
-		Transport: tokenServiceTransport, // use custom shared transport
-	}
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "request introspection endpoint")
-	}
-	defer func() { _ = resp.Body.Close() }()
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, errors.Wrap(err, "read introspection response body")
-	}
-
-	// For full token introspection response format, see
-	// https://www.oauth.com/oauth2-servers/token-introspection-endpoint/
-	var result struct {
-		Active     bool   `json:"active"`
-		Scope      string `json:"scope"` // Space-separated list
-		ClientID   string `json:"client_id"`
-		Expiration int64  `json:"exp"` // Unix timestamp
-	}
-	err = json.Unmarshal(respBody, &result)
-	if err != nil {
-		return nil, errors.Wrap(err, "parse introspection response body")
+		return nil, err
 	}
 	return &IntrospectTokenResponse{
-		Active:    result.Active,
-		Scopes:    scopes.ToScopes(strings.Split(result.Scope, " ")),
-		ClientID:  result.ClientID,
-		ExpiresAt: time.Unix(result.Expiration, 0),
+		Active:    resp.Msg.Active,
+		Scopes:    scopes.ToScopes(resp.Msg.Scopes),
+		ClientID:  resp.Msg.ClientId,
+		ExpiresAt: resp.Msg.ExpiresAt.AsTime(),
 	}, nil
 }

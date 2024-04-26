@@ -17,9 +17,8 @@ import (
 
 // ClientV1 provides helpers to talk to a SAMS instance via Clients API v1.
 type ClientV1 struct {
-	rootURL                 string
-	clientCredentialsConfig clientcredentials.Config
-	tokenSource             oauth2.TokenSource
+	rootURL     string
+	tokenSource oauth2.TokenSource
 
 	// defaultInterceptors is a list of default interceptors to use with all
 	// clients, generally providing enhanced diagnostics.
@@ -28,28 +27,21 @@ type ClientV1 struct {
 
 type ClientV1Config struct {
 	ConnConfig
-	// Client credentials representing this Sourcegraph Accounts client
-	ClientID     string
-	ClientSecret string
-	// Scopes to request for this client. Scopes should be defined using the
-	// available scopes package. All requested scopes must be allowed by
-	// the registered client - see:
-	// https://sourcegraph.notion.site/6cc4a1bd9cb247eea9674dbf9d5ce8c3
-	Scopes []scopes.Scope
+	// TokenSource is the OAuth2 token source to use for authentication. It MUST be
+	// based on a per-client token that is on behalf of a SAMS client (i.e. Clients
+	// Credentials).
+	//
+	// The oauth2.TokenSource abstraction will take care of creating short-lived
+	// access tokens as needed.
+	TokenSource oauth2.TokenSource
 }
 
 func (c ClientV1Config) Validate() error {
 	if err := c.ConnConfig.Validate(); err != nil {
-		return errors.Wrap(err, "ConnConfig")
+		return errors.Wrap(err, "invalid ConnConfig")
 	}
-	if c.ClientID == "" {
-		return errors.New("empty client ID")
-	}
-	if c.ClientSecret == "" {
-		return errors.New("empty client secret")
-	}
-	if len(c.Scopes) == 0 {
-		return errors.New("no scopes requested")
+	if c.TokenSource == nil {
+		return errors.New("token source is required")
 	}
 	return nil
 }
@@ -72,17 +64,9 @@ func NewClientV1(config ClientV1Config) (*ClientV1, error) {
 	}
 
 	apiURL := config.getAPIURL()
-	clientCredentialsConfig := clientcredentials.Config{
-		ClientID:     config.ClientID,
-		ClientSecret: config.ClientSecret,
-		TokenURL:     fmt.Sprintf("%s/oauth/token", apiURL),
-		Scopes:       scopes.ToStrings(config.Scopes),
-	}
 	return &ClientV1{
-		rootURL:                 strings.TrimSuffix(apiURL, "/"),
-		clientCredentialsConfig: clientCredentialsConfig,
-		tokenSource:             clientCredentialsConfig.TokenSource(context.Background()),
-
+		rootURL:             strings.TrimSuffix(apiURL, "/"),
+		tokenSource:         config.TokenSource,
 		defaultInterceptors: []connect.Interceptor{otelinterceptor},
 	}, nil
 }
@@ -135,20 +119,26 @@ func (c *ClientV1) Tokens() *TokensServiceV1 {
 	return &TokensServiceV1{client: c}
 }
 
-// TokenSource returns a valid access token to send requests authenticated with
-// a SAMS access token. Internally, the token returned is reused. So that new
-// tokens are only created when needed. (Provided this `Client` is long-lived.)
-//
-// To send outbound requests to other SAMS clients, you would use:
-//
-//	```go
-//	httpClient := oauth2.NewClient(ctx, samsClient.TokenSource())
-//	```
-func (c *ClientV1) TokenSource() oauth2.TokenSource {
-	return c.clientCredentialsConfig.TokenSource(context.Background())
-}
-
 var (
 	ErrNotFound       = errors.New("not found")
 	ErrRecordMismatch = errors.New("record mismatch")
 )
+
+// ClientCredentialsTokenSource returns a TokenSource that generates an access
+// token using the client credentials flow. Internally, the token returned is
+// reused. So that new tokens are only created when needed. (Provided this
+// `Client` is long-lived.)
+//
+// The `requestScopes` is a list of scopes to be requested for this token
+// source. Scopes should be defined using the available scopes package. All
+// requested scopes must be allowed by the registered client - see:
+// https://sourcegraph.notion.site/6cc4a1bd9cb247eea9674dbf9d5ce8c3
+func ClientCredentialsTokenSource(apiURL, clientID, clientSecret string, requestScopes []scopes.Scope) oauth2.TokenSource {
+	config := clientcredentials.Config{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		TokenURL:     fmt.Sprintf("%s/oauth/token", apiURL),
+		Scopes:       scopes.ToStrings(requestScopes),
+	}
+	return config.TokenSource(context.Background())
+}

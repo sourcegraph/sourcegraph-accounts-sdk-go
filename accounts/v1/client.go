@@ -27,12 +27,13 @@ func NewClient(samsHost string, tokenSource oauth2.TokenSource) *Client {
 	}
 }
 
-// Client is a wrapper around SAMS primitive REST-based ACcounts API. Most likely, you want
-// to use the more service-to-service "Clients" API instead.
+// Client is a wrapper around SAMS primitive REST-based Accounts API. Most
+// likely, you want to use the more service-to-service "Clients" API instead.
 //
-// This API is needed when using SAMS to identify users, but not perform authorization
-// checks. e.g. the caller will handle its own authorization checks based on the identity
-// of the SAMS user. (The returned User.Subject, the SAMS account external ID.)
+// This API is needed when using SAMS to identify users, but not perform
+// authorization checks. e.g. the caller will handle its own authorization
+// checks based on the identity of the SAMS user. (The returned User.Sub, the
+// SAMS account external ID.)
 type Client struct {
 	host        string
 	tokenSource oauth2.TokenSource
