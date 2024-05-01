@@ -58,8 +58,9 @@ github.com/hexops/autogold/v2 v2.0.3 h1:zyrfTlNfyxLpX/zuk8wjTeTYP5AXaFeeRYFEZfHP
 github.com/hexops/autogold/v2 v2.0.3/go.mod h1:cYVc0tJn6v9Uf9xMOHvmH6scuTxsVJSxGcKR/yOVPzY=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
-github.com/hexops/valast v1.4.3 h1:oBoGERMJh6UZdRc6cduE1CTPK+VAdXA59Y1HFgu3sm0=
 github.com/hexops/valast v1.4.3/go.mod h1:Iqx2kLj3Jn47wuXpj3wX40xn6F93QNFBHuiKBerkTGA=
+github.com/hexops/valast v1.4.4 h1:rETyycw+/L2ZVJHHNxEBgh8KUn+87WugH9MxcEv9PGs=
+github.com/hexops/valast v1.4.4/go.mod h1:Jcy1pNH7LNraVaAZDLyv21hHg2WBv9Nf9FL6fGxU7o4=
 github.com/jackc/chunkreader v1.0.0/go.mod h1:RT6O25fNZIuasFJRyZ4R/Y2BbhasbmZXF9QQ7T3kePo=
 github.com/jackc/chunkreader/v2 v2.0.0/go.mod h1:odVSm741yZoC3dpHEUXIqA9tQRhFrgOHwnPIn9lDKlk=
 github.com/jackc/chunkreader/v2 v2.0.1 h1:i+RDz65UE+mmpjTfyz0MoVTnzeYxroil2G82ki7MGG8=
