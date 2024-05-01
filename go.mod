@@ -3,7 +3,7 @@ module github.com/sourcegraph/sourcegraph-accounts-sdk-go
 go 1.22.0
 
 require (
-	connectrpc.com/connect v1.16.0
+	connectrpc.com/connect v1.16.1
 	connectrpc.com/otelconnect v0.7.0
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/golang-jwt/jwt/v5 v5.2.1
