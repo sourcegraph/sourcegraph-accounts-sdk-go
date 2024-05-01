@@ -13,7 +13,7 @@ require (
 	github.com/sourcegraph/sourcegraph/lib v0.0.0-20240315183013-b2b134e08ada
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/oauth2 v0.18.0
-	google.golang.org/protobuf v1.33.0
+	google.golang.org/protobuf v1.34.0
 )
 
 require (
