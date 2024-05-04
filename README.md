@@ -158,7 +158,7 @@ func main() {
 }
 ```
 
-## SAMS Accounts API
+## Accounts API v1
 
 The SAMS Accounts API is for user-oriented operations like inspecting your own account details. These APIs are
 much simpler in nature, as most integrations will make use of the Clients API. However, the Accounts API is
