@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/sourcegraph/sourcegraph-accounts-sdk-go.svg)](https://pkg.go.dev/github.com/sourcegraph/sourcegraph-accounts-sdk-go) [![Go](https://github.com/sourcegraph/sourcegraph-accounts-sdk-go/actions/workflows/go.yml/badge.svg)](https://github.com/sourcegraph/sourcegraph-accounts-sdk-go/actions/workflows/go.yml)
 
-This repository contains the Go SDK for integrating with [Sourcegraph Accounts Management System (SAMS)](https://handbook.sourcegraph.com/departments/engineering/teams/core-services/sams/).
+This repository contains the Go SDK for integrating with [Sourcegraph Accounts Management System (SAMS)](https://sourcegraph.notion.site/Sourcegraph-Accounts-Management-System-SAMS-e86f1bc3dc3b4d979818e468bba189fd).
 
 ```zsh
 go get github.com/sourcegraph/sourcegraph-accounts-sdk-go
