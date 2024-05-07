@@ -12,8 +12,9 @@ import (
 // Client is a client for receiving SAMS notifications from a GCP Pub/Sub
 // subscription.
 type Client struct {
-	logger       log.Logger
-	subscription *pubsub.Subscription
+	logger        log.Logger
+	subscription  *pubsub.Subscription
+	cancelContext context.CancelFunc
 }
 
 // NewClient creates a new Client for receiving SAMS notifications with given
@@ -46,7 +47,9 @@ type ReceiveHandlers struct {
 //
 // ⚠️ WARNING: Each subscription can only have one active receiver at a time,
 // i.e. there should only be one call to Receive for a given subscription.
-func (c *Client) Receive(ctx context.Context, handler *ReceiveHandlers) error {
+func (c *Client) Receive(handler *ReceiveHandlers) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	c.cancelContext = cancel
 	return c.subscription.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		var msgData struct {
 			Name     string          `json:"name"`
@@ -84,4 +87,9 @@ func (c *Client) handleReceive(handler *ReceiveHandlers, name string, metadata j
 		c.logger.Warn("acknowledging unknown notification name", log.String("name", name))
 	}
 	return nil
+}
+
+// Close stops the client from receiving notifications.
+func (c *Client) Close() {
+	c.cancelContext()
 }

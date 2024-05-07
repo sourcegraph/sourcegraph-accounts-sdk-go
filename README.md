@@ -228,7 +228,6 @@ func main() {
 		return
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
 	handler := &notificationv1.ReceiveHandlers{
 		OnUserDeleted: func(data *notificationv1.UserDeletedData) error {
 			fmt.Printf("User %q (%s) has been deleted.\n", data.UserID, data.Email)
@@ -237,7 +236,7 @@ func main() {
 	}
 
 	go func() {
-		err := client.Receive(ctx, handler)
+		err := client.Receive(handler)
 		if err != nil {
 			logger.Error("failed to receive notification", log.Error(err))
 		}
@@ -245,7 +244,7 @@ func main() {
 
 	// For demonstration purposes, we will run the client for 1 minute.
 	time.Sleep(time.Minute)
-	cancel() // Cancel the context to stop receiving notifications.
+	client.Close() // Close the client to stop receiving notifications.
 }
 ```
 
