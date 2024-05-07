@@ -9,7 +9,7 @@ go get github.com/sourcegraph/sourcegraph-accounts-sdk-go
 ```
 
 > [!note]
-> Please submit all issues to the [Core Services project](https://linear.app/sourcegraph/team/CORE/all) on Linear.
+> Please reach out to [#discuss-core-services](https://sourcegraph.slack.com/archives/C05GJPTSZCZ) for questions and help, and when guided, submit all issues to the [Core Services project](https://linear.app/sourcegraph/team/CORE/all) on Linear.
 
 ## Authentication
 
