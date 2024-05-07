@@ -2,14 +2,14 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/sourcegraph/sourcegraph-accounts-sdk-go.svg)](https://pkg.go.dev/github.com/sourcegraph/sourcegraph-accounts-sdk-go) [![Go](https://github.com/sourcegraph/sourcegraph-accounts-sdk-go/actions/workflows/go.yml/badge.svg)](https://github.com/sourcegraph/sourcegraph-accounts-sdk-go/actions/workflows/go.yml)
 
-This repository contains the Go SDK for integrating with [Sourcegraph Accounts Management System (SAMS)](https://handbook.sourcegraph.com/departments/engineering/teams/core-services/sams/).
+This repository contains the Go SDK for integrating with [Sourcegraph Accounts Management System (SAMS)](https://sourcegraph.notion.site/Sourcegraph-Accounts-Management-System-SAMS-e86f1bc3dc3b4d979818e468bba189fd).
 
 ```zsh
 go get github.com/sourcegraph/sourcegraph-accounts-sdk-go
 ```
 
 > [!note]
-> Please submit all issues to the [`sourcegraph/sourcegraph-accounts` repository](https://github.com/sourcegraph/sourcegraph-accounts/issues) 
+> Please reach out to [#discuss-core-services](https://sourcegraph.slack.com/archives/C05GJPTSZCZ) for questions and help, and when guided, submit all issues to the [Core Services project](https://linear.app/sourcegraph/team/CORE/all) on Linear.
 
 ## Authentication
 
@@ -158,7 +158,7 @@ func main() {
 }
 ```
 
-## SAMS Accounts API
+## Accounts API v1
 
 The SAMS Accounts API is for user-oriented operations like inspecting your own account details. These APIs are
 much simpler in nature, as most integrations will make use of the Clients API. However, the Accounts API is
