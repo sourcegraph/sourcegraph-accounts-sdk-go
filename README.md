@@ -210,19 +210,26 @@ The SAMS Notifications API is for distributing notifications to downstream syste
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/sourcegraph/log"
+	sams "github.com/sourcegraph/sourcegraph-accounts-sdk-go"
 	notificationv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/notifications/v1"
 )
 
 func main() {
 	var logger log.Logger // TODO: Initialize your logger.
 
-	client, err := notificationv1.NewClient(logger, os.Getenv("GCP_PROJECT"), os.Getenv("SAMS_NOTIFICATION_SUBSCRIPTION"))
+	client, err := sams.NewNotificationsV1(
+		logger,
+		// In MSP, you can use `sams.NewNotificationsV1ConfigFromEnv` to get a `sams.NotificationsV1Config`.
+		sams.NotificationsV1Config{
+			ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT"),
+			SubscriptionID: os.Getenv("SAMS_NOTIFICATION_SUBSCRIPTION"),
+		},
+	)
 	if err != nil {
 		logger.Fatal("failed to create notification client", log.Error(err))
 		return
@@ -236,7 +243,7 @@ func main() {
 	}
 
 	go func() {
-		err := client.Receive(handler)
+		err := client.Receive(notificationv1.DefaultReceiveSettings, handler)
 		if err != nil {
 			logger.Error("failed to receive notification", log.Error(err))
 		}

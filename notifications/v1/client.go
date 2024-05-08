@@ -19,6 +19,9 @@ type Client struct {
 
 // NewClient creates a new Client for receiving SAMS notifications with given
 // GCP project ID and Pub/Sub subscription ID.
+//
+// Users should prefer to use the top-level 'sams.NewNotificationsV1'
+// constructor instead.
 func NewClient(logger log.Logger, projectID, subscriptionID string) (*Client, error) {
 	client, err := pubsub.NewClient(context.Background(), projectID)
 	if err != nil {
