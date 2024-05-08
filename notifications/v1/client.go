@@ -72,12 +72,12 @@ func (c *Client) Receive(settings ReceiveSettings, handler *ReceiveHandlers) err
 		}
 
 		err = c.handleReceive(handler, msgData.Name, msgData.Metadata)
-		if err != nil {
+		if err == nil {
+			msg.Ack()
+		} else {
 			c.logger.Error("failed to process notification message", log.Error(err))
 			msg.Nack()
-			return
 		}
-		msg.Ack()
 	})
 }
 
