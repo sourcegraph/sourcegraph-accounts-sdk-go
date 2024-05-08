@@ -85,8 +85,7 @@ func (c *Client) handleReceive(handler *ReceiveHandlers, name string, metadata j
 	switch name {
 	case nameUserDeleted:
 		var data UserDeletedData
-		err := json.Unmarshal(metadata, &data)
-		if err != nil {
+		if err := json.Unmarshal(metadata, &data); err != nil {
 			return errors.Wrap(err, "unmarshal metadata")
 		}
 		if handler.OnUserDeleted != nil {
