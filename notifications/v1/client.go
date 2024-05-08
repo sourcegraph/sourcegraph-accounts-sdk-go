@@ -84,13 +84,15 @@ func (c *Client) Receive(settings ReceiveSettings, handler *ReceiveHandlers) err
 func (c *Client) handleReceive(handler *ReceiveHandlers, name string, metadata json.RawMessage) error {
 	switch name {
 	case nameUserDeleted:
+		if handler.OnUserDeleted == nil {
+			return nil
+		}
+		
 		var data UserDeletedData
 		if err := json.Unmarshal(metadata, &data); err != nil {
 			return errors.Wrap(err, "unmarshal metadata")
 		}
-		if handler.OnUserDeleted != nil {
-			return handler.OnUserDeleted(&data)
-		}
+		return handler.OnUserDeleted(&data)
 	default:
 		c.logger.Warn("acknowledging unknown notification name", log.String("name", name))
 	}
