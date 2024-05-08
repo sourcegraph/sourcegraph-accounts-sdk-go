@@ -41,15 +41,21 @@ type ReceiveHandlers struct {
 	OnUserDeleted func(data *UserDeletedData) error
 }
 
+type ReceiveSettings = pubsub.ReceiveSettings
+
+var DefaultReceiveSettings = pubsub.DefaultReceiveSettings
+
 // Receive starts receiving SAMS notifications and calls the corresponding
 // handler for each notification. It blocks until the context is done (e.g.
 // deadline exceed or canceled).
 //
-// ⚠️ WARNING: Each subscription can only have one active receiver at a time,
-// i.e. there should only be one call to Receive for a given subscription.
-func (c *Client) Receive(handler *ReceiveHandlers) error {
+// ⚠️ WARNING: Each client can only have one active receiver at a time, i.e.
+// there should only be one call to Receive for a given client at any given
+// time. This constraint is imposed by the underlying Pub/Sub client.
+func (c *Client) Receive(settings ReceiveSettings, handler *ReceiveHandlers) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancelContext = cancel
+	c.subscription.ReceiveSettings = settings
 	return c.subscription.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 		var msgData struct {
 			Name     string          `json:"name"`
