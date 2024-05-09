@@ -1,5 +1,7 @@
 package v1
 
+import "go.opentelemetry.io/otel"
+
 // ⚠️ WARNING: These types MUST match the SAMS implementation, at
 // backend/internal/notification/types.go
 
@@ -14,3 +16,5 @@ type UserDeletedData struct {
 	// Email is the email address of the deleted user.
 	Email string `json:"email"`
 }
+
+var tracer = otel.Tracer("sams.notifications.v1")

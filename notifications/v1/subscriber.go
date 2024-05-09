@@ -9,6 +9,8 @@ import (
 	"github.com/sourcegraph/log"
 	"github.com/sourcegraph/sourcegraph/lib/background"
 	"github.com/sourcegraph/sourcegraph/lib/errors"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/atomic"
 )
 
@@ -86,22 +88,55 @@ func (s *subscriber) Start() {
 	ctx, cancel := context.WithCancel(context.Background())
 	s.cancelContext = cancel
 	err := s.subscription.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
+		var span trace.Span
+		ctx, span = tracer.Start(ctx, "subscriber.Receive",
+			trace.WithAttributes(attribute.String("msg.id", msg.ID)))
+		if msg.DeliveryAttempt != nil {
+			span.SetAttributes(attribute.Int("msg.deliveryAttempt", *msg.DeliveryAttempt))
+		}
+
+		// Create a logger with important context. Only log messages related to
+		// this message handling with this logger.
+		logger := s.logger.
+			With(
+				log.String("msg.id", msg.ID),
+				log.Intp("msg.deliveryAttempt", msg.DeliveryAttempt),
+			).
+			WithTrace(log.TraceContext{
+				TraceID: span.SpanContext().TraceID().String(),
+				SpanID:  span.SpanContext().SpanID().String(),
+			})
+
 		var msgData struct {
 			Name     string          `json:"name"`
 			Metadata json.RawMessage `json:"metadata"`
 		}
 		err := json.Unmarshal(msg.Data, &msgData)
 		if err != nil {
-			s.logger.Error("failed to unmarshal notification message", log.Error(err))
+			logger.Error("failed to unmarshal notification message", log.Error(err))
 			msg.Nack()
 			return
 		}
 
-		err = s.handleReceive(msgData.Name, msgData.Metadata)
+		status, err := s.handleReceive(ctx, msgData.Name, msgData.Metadata)
+
+		logger = logger.With(
+			log.String("msg.name", msgData.Name),
+			log.String("handleReceive.status", status))
+		span.SetAttributes(
+			attribute.String("msg.name", msgData.Name),
+			attribute.String("handleReceive.status", status),
+		)
+
 		if err == nil {
+			if status == "unknown" {
+				logger.Warn("acknowledging unknown notification name")
+			} else {
+				logger.Debug("message processed")
+			}
 			msg.Ack()
 		} else {
-			s.logger.Error("failed to process notification message", log.Error(err))
+			logger.Error("failed to process notification message", log.Error(err))
 			msg.Nack()
 		}
 	})
@@ -134,29 +169,30 @@ type SubscriberHandlers struct {
 	// vendor systems to stay in compliance. In the event of an error, the handler
 	// MUST make sure the error is surfaced (by either returning or logging the
 	// error) to be retried or to a human operator.
-	OnUserDeleted func(data *UserDeletedData) error
+	OnUserDeleted func(ctx context.Context, data *UserDeletedData) error
 }
 
 type ReceiveSettings = pubsub.ReceiveSettings
 
 var DefaultReceiveSettings = pubsub.DefaultReceiveSettings
 
-func (r *subscriber) handleReceive(name string, metadata json.RawMessage) error {
+func (r *subscriber) handleReceive(ctx context.Context, name string, metadata json.RawMessage) (status string, _ error) {
 	switch name {
 	case nameUserDeleted:
 		if r.handlers.OnUserDeleted == nil {
-			return nil
+			return "skipped", nil
 		}
 
 		var data UserDeletedData
 		if err := json.Unmarshal(metadata, &data); err != nil {
-			return errors.Wrap(err, "unmarshal metadata")
+			return "invalid_metadata", errors.Wrap(err, "unmarshal metadata")
 		}
-		return r.handlers.OnUserDeleted(&data)
-	default:
-		r.logger.Warn("acknowledging unknown notification name", log.String("name", name))
+
+		return "handled", r.handlers.OnUserDeleted(ctx, &data)
 	}
-	return nil
+
+	// Unknown message type
+	return "unknown", nil
 }
 
 // state is a concurrent-safe state machine that transitions between "idle",
