@@ -231,7 +231,7 @@ func main() {
 
 	subscriber, err := sams.NewNotificationsV1Subscriber(
 		logger,
-		// In MSP, you can use `sams.NewNotificationsV1SubscriberOptions` to derive some configurations from the environment variables.
+		// In MSP, you can use `sams.NewNotificationsV1SubscriberConfigFromEnv` to derive some configurations from the environment variables.
 		notificationsv1.SubscriberOptions{
 			ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT"),
 			SubscriptionID: os.Getenv("SAMS_NOTIFICATION_SUBSCRIPTION"),
