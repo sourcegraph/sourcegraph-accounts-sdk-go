@@ -129,7 +129,7 @@ func (s *subscriber) Start() {
 		)
 
 		if err == nil {
-			if status == "unknown" {
+			if status == handleReceiveStatusUnknownMessage {
 				logger.Warn("acknowledging unknown notification name")
 			} else {
 				logger.Debug("message processed")
@@ -176,6 +176,8 @@ type ReceiveSettings = pubsub.ReceiveSettings
 
 var DefaultReceiveSettings = pubsub.DefaultReceiveSettings
 
+const handleReceiveStatusUnknownMessage = "unknown_message"
+
 func (r *subscriber) handleReceive(ctx context.Context, name string, metadata json.RawMessage) (status string, _ error) {
 	switch name {
 	case nameUserDeleted:
@@ -185,14 +187,14 @@ func (r *subscriber) handleReceive(ctx context.Context, name string, metadata js
 
 		var data UserDeletedData
 		if err := json.Unmarshal(metadata, &data); err != nil {
-			return "invalid_metadata", errors.Wrap(err, "unmarshal metadata")
+			return "malformed_message", errors.Wrap(err, "unmarshal metadata")
 		}
 
 		return "handled", r.handlers.OnUserDeleted(ctx, &data)
 	}
 
 	// Unknown message type
-	return "unknown", nil
+	return handleReceiveStatusUnknownMessage, nil
 }
 
 // state is a concurrent-safe state machine that transitions between "idle",
