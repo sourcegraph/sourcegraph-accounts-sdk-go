@@ -222,36 +222,32 @@ import (
 func main() {
 	var logger log.Logger // TODO: Initialize your logger.
 
-	client, err := sams.NewNotificationsV1(
-		logger,
-		// In MSP, you can use `sams.NewNotificationsV1ConfigFromEnv` to get a `sams.NotificationsV1Config`.
-		sams.NotificationsV1Config{
-			ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT"),
-			SubscriptionID: os.Getenv("SAMS_NOTIFICATION_SUBSCRIPTION"),
-		},
-	)
-	if err != nil {
-		logger.Fatal("failed to create notification client", log.Error(err))
-		return
-	}
-
-	handler := &notificationv1.ReceiveHandlers{
+	handlers := notificationv1.SubscriberHandlers{
 		OnUserDeleted: func(data *notificationv1.UserDeletedData) error {
-			fmt.Printf("User %q (%s) has been deleted.\n", data.UserID, data.Email)
+			fmt.Printf("User %q (%s) has been deleted.\n", data.AccountID, data.Email)
 			return nil
 		},
 	}
 
-	go func() {
-		err := client.Receive(notificationv1.DefaultReceiveSettings, handler)
-		if err != nil {
-			logger.Error("failed to receive notification", log.Error(err))
-		}
-	}()
+	subscriber, err := sams.NewNotificationsV1Subscriber(
+		logger,
+		// In MSP, you can use `sams.NewNotificationsV1SubscriberOptions` to derive some configurations from the environment variables.
+		notificationsv1.SubscriberOptions{
+			ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT"),
+			SubscriptionID: os.Getenv("SAMS_NOTIFICATION_SUBSCRIPTION"),
+			ReceiveSettings: notificationsv1.DefaultReceiveSettings,
+			Handlers: handlers,
+		},
+	)
+	if err != nil {
+		logger.Fatal("failed to create notification subscriber", log.Error(err))
+		return
+	}
+	go subscriber.Start()
 
-	// For demonstration purposes, we will run the client for 1 minute.
+	// For demonstration purposes, we will run the subscriber for 1 minute.
 	time.Sleep(time.Minute)
-	client.Close() // Close the client to stop receiving notifications.
+	subscriber.Stop() // Stop receiving notifications.
 }
 ```
 
