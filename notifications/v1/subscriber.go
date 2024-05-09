@@ -59,6 +59,7 @@ func NewSubscriber(logger log.Logger, opts SubscriberOptions) (background.Routin
 		return nil, err
 	}
 
+	logger = logger.Scoped("notification.subscriber")
 	client, err := pubsub.NewClient(context.Background(), opts.ProjectID)
 	if err != nil {
 		return nil, errors.Wrap(err, "create GCP Pub/Sub client")
@@ -66,10 +67,13 @@ func NewSubscriber(logger log.Logger, opts SubscriberOptions) (background.Routin
 	subscription := client.Subscription(opts.SubscriptionID)
 	subscription.ReceiveSettings = opts.ReceiveSettings
 	return &subscriber{
-		logger:       logger.Scoped("notification.subscriber"),
+		logger:       logger,
 		handlers:     opts.Handlers,
 		subscription: subscription,
 		state:        newState(),
+		cancelContext: func() {
+			logger.Error("cancelContext is not set")
+		},
 	}, nil
 }
 
