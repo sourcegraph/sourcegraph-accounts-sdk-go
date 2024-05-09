@@ -16,9 +16,8 @@ type subscriber struct {
 	handlers     SubscriberHandlers
 	subscription *pubsub.Subscription
 
-	// state indicates the state of workers, must be one of "idle", "started" or
-	// "stopped".
-	state *atomic.String
+	// state indicates the state of workers.
+	state state
 	// cancelContext is the function to cancel the context of the receiver that
 	// effectively stops the receiver.
 	cancelContext context.CancelFunc
@@ -70,13 +69,13 @@ func NewSubscriber(logger log.Logger, opts SubscriberOptions) (background.Routin
 		logger:       logger.Scoped("notification.subscriber"),
 		handlers:     opts.Handlers,
 		subscription: subscription,
-		state:        atomic.NewString(stateIdle),
+		state:        newState(),
 	}, nil
 }
 
 func (s *subscriber) Start() {
-	if !s.state.CompareAndSwap(stateIdle, stateStarted) {
-		s.logger.Error("failed to start subscriber", log.Error(errors.New(`not in "idle" state`)))
+	if err := s.state.toStarted(); err != nil {
+		s.logger.Error("failed to start subscriber", log.Error(err))
 		return
 	}
 
@@ -109,8 +108,8 @@ func (s *subscriber) Start() {
 }
 
 func (r *subscriber) Stop() {
-	if !r.state.CompareAndSwap(stateStarted, stateStopped) {
-		r.logger.Error("failed to stop subscriber", log.Error(errors.New(`not in "started" state`)))
+	if err := r.state.toStopped(); err != nil {
+		r.logger.Error("failed to stop subscriber", log.Error(err))
 		return
 	}
 
@@ -147,6 +146,30 @@ func (r *subscriber) handleReceive(name string, metadata json.RawMessage) error 
 		return r.handlers.OnUserDeleted(&data)
 	default:
 		r.logger.Warn("acknowledging unknown notification name", log.String("name", name))
+	}
+	return nil
+}
+
+// state is a concurrent-safe state machine that transitions between "idle",
+// "started", and "stopped" states.
+type state struct {
+	value *atomic.String
+}
+
+func newState() state {
+	return state{value: atomic.NewString(stateIdle)}
+}
+
+func (s state) toStarted() error {
+	if !s.value.CompareAndSwap(stateIdle, stateStarted) {
+		return errors.Newf("not in %q state", stateIdle)
+	}
+	return nil
+}
+
+func (s state) toStopped() error {
+	if !s.value.CompareAndSwap(stateStarted, stateStopped) {
+		return errors.Newf("not in %q state", stateStarted)
 	}
 	return nil
 }
