@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/sourcegraph/log"
@@ -79,8 +80,7 @@ func NewSubscriber(logger log.Logger, opts SubscriberOptions) (background.Routin
 
 func (s *subscriber) Start() {
 	if err := s.state.toStarted(); err != nil {
-		s.logger.Error("failed to start subscriber", log.Error(err))
-		return
+		panic(fmt.Sprintf("failed to start subscriber: %v", err))
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -113,8 +113,7 @@ func (s *subscriber) Start() {
 
 func (r *subscriber) Stop() {
 	if err := r.state.toStopped(); err != nil {
-		r.logger.Error("failed to stop subscriber", log.Error(err))
-		return
+		panic(fmt.Sprintf("failed to stop subscriber: %v", err))
 	}
 
 	r.cancelContext()
