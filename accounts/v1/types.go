@@ -4,8 +4,8 @@ import (
 	"time"
 )
 
-// These types MUST match the SAMS implementation, at
-// backend/internal/model.go
+// ⚠️ WARNING: These types MUST match the SAMS implementation, at
+// backend/internal/api/model.go
 
 type Metadata map[string]any
 type MetadataSet map[string]Metadata

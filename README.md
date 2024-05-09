@@ -202,6 +202,55 @@ func main() {
 }
 ```
 
+## Notifications API
+
+The SAMS Notifications API is for distributing notifications to downstream systems for them to take appropriate actions. For example, notifying systems that a user has been deleted.
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+	"time"
+
+	"github.com/sourcegraph/log"
+	sams "github.com/sourcegraph/sourcegraph-accounts-sdk-go"
+	notificationv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/notifications/v1"
+)
+
+func main() {
+	var logger log.Logger // TODO: Initialize your logger.
+
+	handlers := notificationv1.SubscriberHandlers{
+		OnUserDeleted: func(data *notificationv1.UserDeletedData) error {
+			fmt.Printf("User %q (%s) has been deleted.\n", data.AccountID, data.Email)
+			return nil
+		},
+	}
+
+	subscriber, err := sams.NewNotificationsV1Subscriber(
+		logger,
+		// In MSP, you can use `sams.NewNotificationsV1SubscriberConfigFromEnv` to derive some configurations from the environment variables.
+		notificationsv1.SubscriberOptions{
+			ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT"),
+			SubscriptionID: os.Getenv("SAMS_NOTIFICATION_SUBSCRIPTION"),
+			ReceiveSettings: notificationsv1.DefaultReceiveSettings,
+			Handlers: handlers,
+		},
+	)
+	if err != nil {
+		logger.Fatal("failed to create notification subscriber", log.Error(err))
+		return
+	}
+	go subscriber.Start()
+
+	// For demonstration purposes, we will run the subscriber for 1 minute.
+	time.Sleep(time.Minute)
+	subscriber.Stop() // Stop receiving notifications.
+}
+```
+
 ## Development
 
 [Buf](https://buf.build) and [Connect](https://connectrpc.com/) are used for gRPC and Protocol Buffers code generation.
