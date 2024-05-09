@@ -129,6 +129,12 @@ func (r *subscriber) Stop() {
 // retried later.
 type SubscriberHandlers struct {
 	// OnUserDeleted is called when a "UserDeleted" notification is received.
+	//
+	// It indicates that a user has been permanently deleted from SAMS and the
+	// handler MUST delete any user-related PII from the system and/or integrated
+	// vendor systems to stay in compliance. In the event of an error, the handler
+	// MUST make sure the error is surfaced (by either returning or logging the
+	// error) to be retried or to a human operator.
 	OnUserDeleted func(data *UserDeletedData) error
 }
 
