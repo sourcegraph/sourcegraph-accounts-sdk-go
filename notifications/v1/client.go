@@ -87,7 +87,7 @@ func (c *Client) handleReceive(handler *ReceiveHandlers, name string, metadata j
 		if handler.OnUserDeleted == nil {
 			return nil
 		}
-		
+
 		var data UserDeletedData
 		if err := json.Unmarshal(metadata, &data); err != nil {
 			return errors.Wrap(err, "unmarshal metadata")

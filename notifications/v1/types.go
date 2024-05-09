@@ -9,8 +9,8 @@ const (
 
 // UserDeletedData contains information of a "UserDeleted" notification.
 type UserDeletedData struct {
-	// UserID is the SAMS external user ID of the deleted user.
-	UserID string `json:"user_id"`
+	// AccountID is the SAMS external ID of the deleted user.
+	AccountID string `json:"account_id"`
 	// Email is the email address of the deleted user.
 	Email string `json:"email"`
 }
