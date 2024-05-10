@@ -26,7 +26,7 @@ func NewNotificationsV1SubscriberConfigFromEnv(env envGetter) NotificationsV1Sub
 	defaultProject := env.Get("GOOGLE_CLOUD_PROJECT", "", "The GCP project that the service is running in")
 	return NotificationsV1SubscriberConfig{
 		ProjectID:      env.Get("SAMS_NOTIFICATION_PROJECT", defaultProject, "GCP project ID that the Pub/Sub subscription belongs to"),
-		SubscriptionID: env.Get("SAMS_NOTIFICATION_SUBSCRIPTION", "sams_notifications", "GCP Pub/Sub subscription ID to receive SAMS notifications from"),
+		SubscriptionID: env.Get("SAMS_NOTIFICATION_SUBSCRIPTION", "sams-notifications", "GCP Pub/Sub subscription ID to receive SAMS notifications from"),
 	}
 }
 
