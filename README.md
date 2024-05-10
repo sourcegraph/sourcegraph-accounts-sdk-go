@@ -202,7 +202,7 @@ func main() {
 }
 ```
 
-## Notifications API
+## Notifications API v1
 
 The SAMS Notifications API is for distributing notifications to downstream systems for them to take appropriate actions. For example, notifying systems that a user has been deleted.
 
