@@ -210,6 +210,7 @@ The SAMS Notifications API is for distributing notifications to downstream syste
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -223,7 +224,7 @@ func main() {
 	var logger log.Logger // TODO: Initialize your logger.
 
 	handlers := notificationv1.SubscriberHandlers{
-		OnUserDeleted: func(data *notificationv1.UserDeletedData) error {
+		OnUserDeleted: func(ctx context.Context, data *notificationv1.UserDeletedData) error {
 			fmt.Printf("User %q (%s) has been deleted.\n", data.AccountID, data.Email)
 			return nil
 		},
