@@ -3,8 +3,52 @@ package scopes
 import (
 	"testing"
 
+	"github.com/hexops/autogold/v2"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestAllowedGoldenList(t *testing.T) {
+	// Generated golden list of all allowed scopes for ease of visual review.
+	autogold.Expect(AllowedScopes{
+		Scope("openid"), Scope("profile"), Scope("email"),
+		Scope("offline_access"),
+		Scope("client.ssc"),
+		Scope("client.dotcom"),
+		Scope("cody_gateway::flaggedprompts::read"),
+		Scope("cody_gateway::flaggedprompts::write"),
+		Scope("cody_gateway::flaggedprompts::delete"),
+		Scope("sams::user::read"),
+		Scope("sams::user::write"),
+		Scope("sams::user::delete"),
+		Scope("sams::user.profile::read"),
+		Scope("sams::user.profile::write"),
+		Scope("sams::user.profile::delete"),
+		Scope("sams::user.roles::read"),
+		Scope("sams::user.roles::write"),
+		Scope("sams::user.roles::delete"),
+		Scope("sams::user.metadata::read"),
+		Scope("sams::user.metadata::write"),
+		Scope("sams::user.metadata::delete"),
+		Scope("sams::user.metadata.cody::read"),
+		Scope("sams::user.metadata.cody::write"),
+		Scope("sams::user.metadata.cody::delete"),
+		Scope("sams::user.metadata.dotcom::read"),
+		Scope("sams::user.metadata.dotcom::write"),
+		Scope("sams::user.metadata.dotcom::delete"),
+		Scope("sams::session::read"),
+		Scope("sams::session::write"),
+		Scope("sams::session::delete"),
+		Scope("telemetry_gateway::events::read"),
+		Scope("telemetry_gateway::events::write"),
+		Scope("telemetry_gateway::events::delete"),
+		Scope("enterprise_portal::subscription::read"),
+		Scope("enterprise_portal::subscription::write"),
+		Scope("enterprise_portal::subscription::delete"),
+		Scope("enterprise_portal::codyaccess::read"),
+		Scope("enterprise_portal::codyaccess::write"),
+		Scope("enterprise_portal::codyaccess::delete"),
+	}).Equal(t, Allowed())
+}
 
 func TestAllowed(t *testing.T) {
 	allowedScopes := Allowed()
