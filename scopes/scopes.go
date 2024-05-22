@@ -107,9 +107,9 @@ var (
 		"events",
 	}
 	enterprisePortalPermissions = []Permission{
-		// enterpriseportal.subscriptions.v1.SubscriptionsService
+		// gRPC service: enterpriseportal.subscriptions.v1.SubscriptionsService
 		"subscription",
-		// enterpriseportal.codyaccess.v1.CodyAccessService
+		// gRPC service: enterpriseportal.codyaccess.v1.CodyAccessService
 		"codyaccess",
 	}
 )
