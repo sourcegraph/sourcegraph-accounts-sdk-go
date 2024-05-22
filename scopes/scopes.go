@@ -36,6 +36,7 @@ const (
 	ServiceCodyGateway      Service = "cody_gateway"
 	ServiceSAMS             Service = "sams"
 	ServiceTelemetryGateway Service = "telemetry_gateway"
+	ServiceEnterprisePortal Service = "enterprise_portal"
 )
 
 // Action is a type for the action part of a scope.
@@ -105,6 +106,12 @@ var (
 	telemetryGatewayPermissions = []Permission{
 		"events",
 	}
+	enterprisePortalPermissions = []Permission{
+		// gRPC service: enterpriseportal.subscriptions.v1.SubscriptionsService
+		"subscription",
+		// gRPC service: enterpriseportal.codyaccess.v1.CodyAccessService
+		"codyaccess",
+	}
 )
 
 // Allowed returns all allowed scopes for a client. The caller should use
@@ -136,6 +143,7 @@ func Allowed() AllowedScopes {
 	appendScopes(ServiceCodyGateway, codyGatewayPermissions)
 	appendScopes(ServiceSAMS, samsPermissions)
 	appendScopes(ServiceTelemetryGateway, telemetryGatewayPermissions)
+	appendScopes(ServiceEnterprisePortal, enterprisePortalPermissions)
 	// 👉 ADD YOUR SCOPES HERE
 	return allowed
 }
