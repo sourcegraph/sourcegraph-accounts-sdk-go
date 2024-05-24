@@ -80,6 +80,10 @@ func NewSubscriber(logger log.Logger, opts SubscriberOptions) (background.Routin
 	}, nil
 }
 
+func (s *subscriber) Name() string {
+	return "SAMS Notifications Subscriber"
+}
+
 func (s *subscriber) Start() {
 	if err := s.state.toStarted(); err != nil {
 		panic(fmt.Sprintf("failed to start subscriber: %v", err))
@@ -146,13 +150,14 @@ func (s *subscriber) Start() {
 	}
 }
 
-func (r *subscriber) Stop() {
-	if err := r.state.toStopped(); err != nil {
+func (s *subscriber) Stop(context.Context) error {
+	if err := s.state.toStopped(); err != nil {
 		panic(fmt.Sprintf("failed to stop subscriber: %v", err))
 	}
 
-	r.cancelContext()
-	r.logger.Info("subscriber stopped")
+	s.cancelContext()
+	s.logger.Info("subscriber stopped")
+	return nil
 }
 
 // SubscriberHandlers is a collection of subscription handlers for each type of
@@ -178,10 +183,10 @@ var DefaultReceiveSettings = pubsub.DefaultReceiveSettings
 
 const handleReceiveStatusUnknownMessage = "unknown_message"
 
-func (r *subscriber) handleReceive(ctx context.Context, name string, metadata json.RawMessage) (status string, _ error) {
+func (s *subscriber) handleReceive(ctx context.Context, name string, metadata json.RawMessage) (status string, _ error) {
 	switch name {
 	case nameUserDeleted:
-		if r.handlers.OnUserDeleted == nil {
+		if s.handlers.OnUserDeleted == nil {
 			return "skipped", nil
 		}
 
@@ -190,7 +195,7 @@ func (r *subscriber) handleReceive(ctx context.Context, name string, metadata js
 			return "malformed_message", errors.Wrap(err, "unmarshal metadata")
 		}
 
-		return "handled", r.handlers.OnUserDeleted(ctx, &data)
+		return "handled", s.handlers.OnUserDeleted(ctx, &data)
 	}
 
 	// Unknown message type
