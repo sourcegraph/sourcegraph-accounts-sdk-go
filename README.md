@@ -204,6 +204,9 @@ func main() {
 
 ## Notifications API v1
 
+>[!note]
+> For integrating MSP services, please refer to the handbook page [SAMS notifications distribution system](https://sourcegraph.notion.site/SAMS-notifications-distribution-system-0d174480e0044b05b545d37d24263d5a#:~:text=Integrate%20to%20MSP%20service) for a step-by-step integration guidance.
+
 The SAMS Notifications API is for distributing notifications to downstream systems for them to take appropriate actions. For example, notifying systems that a user has been deleted.
 
 ```go
