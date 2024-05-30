@@ -12,6 +12,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/atomic"
+	"google.golang.org/api/option"
 )
 
 type subscriber struct {
@@ -40,6 +41,9 @@ type SubscriberOptions struct {
 	// Handlers is the collection of subscription handlers for each type of SAMS
 	// notifications.
 	Handlers SubscriberHandlers
+	// CredentialsFile is the path to the credentials file for the GCP Pub/Sub
+	// client. Empty value means to use the default credentials.
+	CredentialsFile string
 }
 
 func (opts SubscriberOptions) Validate() error {
@@ -63,7 +67,7 @@ func NewSubscriber(logger log.Logger, opts SubscriberOptions) (background.Routin
 	}
 
 	logger = logger.Scoped("notification.subscriber")
-	client, err := pubsub.NewClient(context.Background(), opts.ProjectID)
+	client, err := pubsub.NewClient(context.Background(), opts.ProjectID, option.WithCredentialsFile(opts.CredentialsFile))
 	if err != nil {
 		return nil, errors.Wrap(err, "create GCP Pub/Sub client")
 	}
