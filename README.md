@@ -220,14 +220,14 @@ import (
 
 	"github.com/sourcegraph/log"
 	sams "github.com/sourcegraph/sourcegraph-accounts-sdk-go"
-	notificationv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/notifications/v1"
+	notificationsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/notifications/v1"
 )
 
 func main() {
 	var logger log.Logger // TODO: Initialize your logger.
 
-	handlers := notificationv1.SubscriberHandlers{
-		OnUserDeleted: func(ctx context.Context, data *notificationv1.UserDeletedData) error {
+	handlers := notificationsv1.SubscriberHandlers{
+		OnUserDeleted: func(ctx context.Context, data *notificationsv1.UserDeletedData) error {
 			fmt.Printf("User %q (%s) has been deleted.\n", data.AccountID, data.Email)
 			return nil
 		},
