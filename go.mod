@@ -19,7 +19,7 @@ require (
 	go.uber.org/atomic v1.11.0
 	golang.org/x/oauth2 v0.19.0
 	google.golang.org/api v0.167.0
-	google.golang.org/protobuf v1.34.0
+	google.golang.org/protobuf v1.34.1
 )
 
 require (
