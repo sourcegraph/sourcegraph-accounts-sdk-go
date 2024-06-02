@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	cloud.google.com/go/pubsub v1.37.0
-	connectrpc.com/connect v1.16.1
+	connectrpc.com/connect v1.16.2
 	connectrpc.com/otelconnect v0.7.0
 	github.com/coreos/go-oidc v2.2.1+incompatible
 	github.com/golang-jwt/jwt/v5 v5.2.1
@@ -76,7 +76,7 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/mod v0.15.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
