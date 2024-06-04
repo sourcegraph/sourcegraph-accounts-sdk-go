@@ -134,17 +134,21 @@ import (
 )
 
 func main() {
+	connConfig := sams.NewConnConfigFromEnv(/* ... */)
 	samsClient, err := sams.NewClientV1(sams.ClientV1Config{
-		ConnConfig:   sams.NewConnConfigFromEnv(/* ... */),
-		ClientID:     os.Getenv("SAMS_CLIENT_ID"),
-		ClientSecret: os.Getenv("SAMS_CLIENT_SECRET"),
-		Scopes:       []scopes.Scope{
-			scopes.OpenID,
-			scopes.Profile,
-			scopes.Email,
-			"sams::user.roles::read",
-			"sams::session::read",
-		},
+		ConnConfig:  connConfig,
+		TokenSource: sams.ClientCredentialsTokenSource(
+			connConfig,
+			os.Getenv("SAMS_CLIENT_ID"),
+			os.Getenv("SAMS_CLIENT_SECRET"),
+			[]scopes.Scope{
+				scopes.OpenID,
+				scopes.Profile,
+				scopes.Email,
+				"sams::user.roles::read",
+				"sams::session::read",
+			},
+		),
 	})
 	if err != nil {
 		log.Fatal(err)
