@@ -38,6 +38,20 @@ func (s *UsersServiceV1) GetUserByID(ctx context.Context, id string) (*clientsv1
 	return resp.Msg.User, nil
 }
 
+// GetUserByID returns the SAMS user with the given verified email. It returns
+// ErrNotFound if no such user exists.
+//
+// Required scope: profile
+func (s *UsersServiceV1) GetUserByEmail(ctx context.Context, email string) (*clientsv1.User, error) {
+	req := &clientsv1.GetUserRequest{Email: email}
+	client := s.newClient(ctx)
+	resp, err := parseResponseAndError(client.GetUser(ctx, connect.NewRequest(req)))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Msg.User, nil
+}
+
 // GetUsersByIDs returns the list of SAMS users matching the provided IDs.
 //
 // NOTE: It silently ignores any invalid user IDs, i.e. the length of the return
