@@ -30,8 +30,8 @@ service UsersService {
 message GetUserRequest {
   // The user's external ID.
   string id = 1;
-  // The user's primary email address.
-  string primary_email = 2;
+  // The user's verified email address.
+  string email = 2;
 }
 
 message User {
