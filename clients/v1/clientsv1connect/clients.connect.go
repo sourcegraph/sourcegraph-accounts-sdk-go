@@ -70,7 +70,7 @@ var (
 
 // UsersServiceClient is a client for the clients.v1.UsersService service.
 type UsersServiceClient interface {
-	// GetUser returns the SAMS user with the given ID. It returns connect.CodeNotFound
+	// GetUser returns the SAMS user with the given query. It returns connect.CodeNotFound
 	// if no such user exists.
 	//
 	// Required scope: profile
@@ -144,7 +144,7 @@ func (c *usersServiceClient) GetUserRoles(ctx context.Context, req *connect.Requ
 
 // UsersServiceHandler is an implementation of the clients.v1.UsersService service.
 type UsersServiceHandler interface {
-	// GetUser returns the SAMS user with the given ID. It returns connect.CodeNotFound
+	// GetUser returns the SAMS user with the given query. It returns connect.CodeNotFound
 	// if no such user exists.
 	//
 	// Required scope: profile
