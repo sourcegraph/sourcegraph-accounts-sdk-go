@@ -7,7 +7,7 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1;clientsv1";
 
 service UsersService {
-  // GetUser returns the SAMS user with the given ID. It returns connect.CodeNotFound
+  // GetUser returns the SAMS user with the given query. It returns connect.CodeNotFound
   // if no such user exists.
   //
   // Required scope: profile
@@ -26,9 +26,12 @@ service UsersService {
   rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse);
 }
 
+// Exactly one attribute can be set.
 message GetUserRequest {
   // The user's external ID.
   string id = 1;
+  // The user's verified email address.
+  string email = 2;
 }
 
 message User {
