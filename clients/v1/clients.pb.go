@@ -21,8 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// If multiple attributes are provided, they are treated as AND-concatenated.
-// At least one attribute is required.
+// Exactly one attribute can be set.
 type GetUserRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

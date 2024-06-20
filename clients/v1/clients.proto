@@ -26,8 +26,7 @@ service UsersService {
   rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse);
 }
 
-// If multiple attributes are provided, they are treated as AND-concatenated.
-// At least one attribute is required.
+// Exactly one attribute can be set.
 message GetUserRequest {
   // The user's external ID.
   string id = 1;
