@@ -38,7 +38,7 @@ func (s *UsersServiceV1) GetUserByID(ctx context.Context, id string) (*clientsv1
 	return resp.Msg.User, nil
 }
 
-// GetUserByID returns the SAMS user with the given verified email. It returns
+// GetUserByEmail returns the SAMS user with the given verified email. It returns
 // ErrNotFound if no such user exists.
 //
 // Required scope: profile
