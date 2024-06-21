@@ -109,6 +109,7 @@ var (
 	enterprisePortalPermissions = []Permission{
 		// gRPC service: enterpriseportal.subscriptions.v1.SubscriptionsService
 		"subscription",
+		"permission.subscription",
 		// gRPC service: enterpriseportal.codyaccess.v1.CodyAccessService
 		"codyaccess",
 	}
