@@ -107,12 +107,29 @@ var (
 		"events",
 	}
 	enterprisePortalPermissions = []Permission{
-		// gRPC service: enterpriseportal.subscriptions.v1.SubscriptionsService
-		"subscription",
-		"permission.subscription",
-		// gRPC service: enterpriseportal.codyaccess.v1.CodyAccessService
-		"codyaccess",
+		PermissionEnterprisePortalSubscription,
+		PermissionEnterprisePortalSubscriptionPermission,
+		PermissionEnterprisePortalCodyAccess,
 	}
+)
+
+const (
+	// Permissions for Enterprise Portal gRPC service:
+	// enterpriseportal.subscriptions.v1.SubscriptionsService
+
+	// PermissionEnterprisePortalSubscription designates permissions for
+	// Enteprrise subscriptions.
+	PermissionEnterprisePortalSubscription Permission = "subscription"
+	// PermissionEnterprisePortalSubscriptionPermission designates permissions
+	// for managing permissions on Enterprise subscriptions.
+	PermissionEnterprisePortalSubscriptionPermission Permission = "permission.subscription"
+
+	// Permissions for Enterprise Portal gRPC service:
+	// enterpriseportal.codyaccess.v1.CodyAccessService
+
+	// PermissionEnterprisePortalCodyAccess designates permissions for Enterprise
+	// Cody Access for managed Cody features.
+	PermissionEnterprisePortalCodyAccess Permission = "codyaccess"
 )
 
 // Allowed returns all allowed scopes for a client. The caller should use
