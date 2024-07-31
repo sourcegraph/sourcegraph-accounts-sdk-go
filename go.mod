@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/pubsub v1.40.0
 	connectrpc.com/connect v1.16.2
 	connectrpc.com/otelconnect v0.7.0
-	github.com/coreos/go-oidc v2.2.1+incompatible
+	github.com/coreos/go-oidc/v3 v3.11.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/hexops/autogold/v2 v2.2.1
 	github.com/hexops/valast v1.4.4
@@ -36,6 +36,7 @@ require (
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/getsentry/sentry-go v0.25.0 // indirect
+	github.com/go-jose/go-jose/v4 v4.0.2 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
@@ -66,7 +67,6 @@ require (
 	github.com/nightlyone/lockfile v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/pquerna/cachecontrol v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
@@ -75,11 +75,11 @@ require (
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/crypto v0.24.0 // indirect
+	golang.org/x/crypto v0.25.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
-	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
@@ -87,7 +87,6 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20240617180043-68d350f18fd4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240617180043-68d350f18fd4 // indirect
 	google.golang.org/grpc v1.64.0 // indirect
-	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	mvdan.cc/gofumpt v0.5.0 // indirect
 )
