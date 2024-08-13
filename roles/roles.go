@@ -25,6 +25,7 @@ func ToStrings(roles []Role) []string {
 }
 
 // ToRoles converts a list of strings to a list of roles.
+// It does not validate each input value.
 func ToRoles(strings []string) []Role {
 	roles := make([]Role, len(strings))
 	for i, s := range strings {
