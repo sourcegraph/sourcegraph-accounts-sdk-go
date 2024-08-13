@@ -10,7 +10,7 @@ import (
 type Role string
 
 // ToRole returns a role string in the format of
-// "service::role".
+// "service::role", which comprises a fully qualified role name.
 func ToRole(service services.Service, name string) Role {
 	return Role(string(service) + "::" + name)
 }
