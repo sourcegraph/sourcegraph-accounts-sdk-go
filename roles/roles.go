@@ -6,53 +6,89 @@ import (
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/services"
 )
 
-// Role is the string literal of a role.
+// Role is always the full qualified role name.
 type Role string
 
-// RoleRegistration is a struct that contains the display name and roles for a service.
-type RoleRegistration struct {
-	DisplayName string
-	Roles       []Role
+// ToRole returns a role string in the format of
+// "service::role".
+func ToRole(service services.Service, name string) Role {
+	return Role(string(service) + "::" + name)
+}
+
+// ToStrings converts a list of roles to a list of strings.
+func ToStrings(roles []Role) []string {
+	ss := make([]string, len(roles))
+	for i, role := range roles {
+		ss[i] = string(role)
+	}
+	return ss
+}
+
+// ToRoles converts a list of strings to a list of roles.
+func ToRoles(strings []string) []Role {
+	roles := make([]Role, len(strings))
+	for i, s := range strings {
+		roles[i] = Role(s)
+	}
+	return roles
 }
 
 var (
 	// services.Dotcom
-	dotcomDisplayName string = "Sourcegraph Dotcom"
-	dotcomRoles              = []Role{
-		RoleDotcomSiteadmin,
+	dotcomRoles = []string{
+		RoleNameDotcomSiteAdmin,
 	}
 )
 
 const (
-	// Roles for services.Dotcom
+	// Role names for services.Dotcom
 
-	// RoleDotcomSiteadmin is the role for site admins on dotcom
-	RoleDotcomSiteadmin Role = "site_admin"
+	// Dotcom site admin
+	RoleNameDotcomSiteAdmin = "site_admin"
 )
 
-// Registered returns a map of all registered roles for all services.
-type RegisteredRoles map[services.Service]RoleRegistration
+// AllowedRoles is a concrete list of allowed roles that can be granted to a user.
+type AllowedRoles []Role
 
-func Registered() RegisteredRoles {
-	registered := map[services.Service]RoleRegistration{}
+type registeredRoles map[services.Service]AllowedRoles
 
-	appendRoles := func(service services.Service, registration RoleRegistration) {
-		registered[service] = registration
+func registered() registeredRoles {
+	registered := make(registeredRoles)
+
+	appendRoles := func(service services.Service, roleNames []string) {
+		var roles AllowedRoles
+		for _, role := range roleNames {
+			roles = append(roles, ToRole(service, role))
+		}
+		registered[service] = roles
+
 	}
 
-	appendRoles(services.Dotcom, RoleRegistration{
-		DisplayName: dotcomDisplayName,
-		Roles:       dotcomRoles,
-	})
+	appendRoles(services.Dotcom, dotcomRoles)
 	// 👉 ADD YOUR ROLES HERE
 
 	return registered
 }
 
-func (r RegisteredRoles) Contains(service services.Service, role Role) bool {
-	registration, ok := r[service]
-	if !ok {
-		return false
+// Allowed returns all allowed roles that can be granted to a user. The caller
+// should use AllowedRoles.Contains for matching requested roles.
+func Allowed() AllowedRoles {
+	var allowed AllowedRoles
+	for _, roles := range registered() {
+		allowed = append(allowed, roles...)
 	}
-	return slices.Contains(registration.Roles, role)
+	return allowed
+}
+
+// Contains returns true if the role is in the list of allowed roles
+func (r AllowedRoles) Contains(role Role) bool {
+	return slices.Contains(r, role)
+}
+
+// EntitleRoles is a map of services to a list of roles that can be granted to a user
+type EntitleRoles registeredRoles
+
+// AllowedEntitle returns a map of services to a list of roles that can be granted to a user.
+func AllowedEntitle() EntitleRoles {
+	return EntitleRoles(registered())
 }

@@ -11,3 +11,18 @@ const (
 	TelemetryGateway Service = "telemetry_gateway"
 	EnterprisePortal Service = "enterprise_portal"
 )
+
+var serviceNames = map[Service]string{
+	CodyGateway:      "Cody Gateway",
+	Dotcom:           "Sourcegraph Dotcom",
+	SAMS:             "Sourcegraph Accounts Management System",
+	TelemetryGateway: "Telemetry Gateway",
+	EnterprisePortal: "Enterprise Portal",
+}
+
+func (s Service) DisplayName() string {
+	if v, ok := serviceNames[s]; ok {
+		return v
+	}
+	return string(s)
+}
