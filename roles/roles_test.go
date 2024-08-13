@@ -25,7 +25,7 @@ func TestAllowedContains(t *testing.T) {
 		},
 		{
 			name:     "dotcom site admin",
-			role:     ToRole(services.Dotcom, RoleNameDotcomSiteAdmin),
+			role:     RoleDotcomSiteAdmin,
 			expected: true,
 		},
 		{

@@ -36,16 +36,13 @@ func ToRoles(strings []string) []Role {
 
 var (
 	// services.Dotcom
-	dotcomRoles = []string{
-		RoleNameDotcomSiteAdmin,
-	}
-)
-
-const (
-	// Role names for services.Dotcom
 
 	// Dotcom site admin
-	RoleNameDotcomSiteAdmin = "site_admin"
+	RoleDotcomSiteAdmin = ToRole(services.Dotcom, "site_admin")
+
+	dotcomRoles = []Role{
+		RoleDotcomSiteAdmin,
+	}
 )
 
 // AllowedRoles is a concrete list of allowed roles that can be granted to a user.
@@ -56,13 +53,8 @@ type registeredRoles map[services.Service]AllowedRoles
 func registered() registeredRoles {
 	registered := make(registeredRoles)
 
-	appendRoles := func(service services.Service, roleNames []string) {
-		var roles AllowedRoles
-		for _, role := range roleNames {
-			roles = append(roles, ToRole(service, role))
-		}
+	appendRoles := func(service services.Service, roles []Role) {
 		registered[service] = roles
-
 	}
 
 	appendRoles(services.Dotcom, dotcomRoles)
