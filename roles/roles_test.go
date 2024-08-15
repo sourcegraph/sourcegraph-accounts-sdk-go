@@ -44,10 +44,25 @@ func TestAllowedContains(t *testing.T) {
 	}
 }
 
-func TestAllowedEntitleGoldenList(t *testing.T) {
-	autogold.Expect(EntitleRoles{
-		services.Service("dotcom"): AllowedRoles{
-			Role("dotcom::site_admin"),
+func TestAllowedRolesByService(t *testing.T) {
+	tests := []struct {
+		name     string
+		service  services.Service
+		expected autogold.Value
+	}{
+		{
+			name:    "dotcom",
+			service: services.Dotcom,
+			expected: autogold.Expect([]Role{
+				Role("dotcom::site_admin"),
+			}),
 		},
-	}).Equal(t, AllowedEntitle())
+	}
+	allowed := Allowed()
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := allowed.ByService()
+			test.expected.Equal(t, got[test.service])
+		})
+	}
 }

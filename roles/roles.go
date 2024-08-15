@@ -2,11 +2,12 @@ package roles
 
 import (
 	"slices"
+	"strings"
 
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/services"
 )
 
-// Role is always the full qualified role name.
+// Role is always the full qualified role name, e.g. "dotcom::site_admin".
 type Role string
 
 // ToRole returns a role string in the format of
@@ -34,6 +35,31 @@ func ToRoles(strings []string) []Role {
 	return roles
 }
 
+type ParsedRole struct {
+	Service services.Service
+	Name    string
+}
+
+// Parse parses a role into its parts. It returns the service, and the role name.
+func (r Role) Parse() (_ ParsedRole, valid bool) {
+	i := strings.Index(string(r), "::")
+	if i == -1 {
+		return ParsedRole{}, false
+	}
+
+	service := r[:i]
+	name := r[i+2:] // skip the "::"
+
+	if service == "" || name == "" {
+		return ParsedRole{}, false
+	}
+
+	return ParsedRole{
+		Service: services.Service(service),
+		Name:    string(name),
+	}, true
+}
+
 var (
 	// services.Dotcom
 
@@ -42,34 +68,25 @@ var (
 
 	dotcomRoles = []Role{
 		RoleDotcomSiteAdmin,
+		Role("dotcom::"),
 	}
 )
 
 // AllowedRoles is a concrete list of allowed roles that can be granted to a user.
 type AllowedRoles []Role
 
-type registeredRoles map[services.Service]AllowedRoles
-
-func registered() registeredRoles {
-	registered := make(registeredRoles)
-
-	appendRoles := func(service services.Service, roles []Role) {
-		registered[service] = roles
-	}
-
-	appendRoles(services.Dotcom, dotcomRoles)
-	// 👉 ADD YOUR ROLES HERE
-
-	return registered
-}
-
 // Allowed returns all allowed roles that can be granted to a user. The caller
 // should use AllowedRoles.Contains for matching requested roles.
 func Allowed() AllowedRoles {
 	var allowed AllowedRoles
-	for _, roles := range registered() {
+
+	appendRoles := func(roles []Role) {
 		allowed = append(allowed, roles...)
 	}
+
+	appendRoles(dotcomRoles)
+	// 👉 ADD YOUR ROLES HERE
+
 	return allowed
 }
 
@@ -78,10 +95,16 @@ func (r AllowedRoles) Contains(role Role) bool {
 	return slices.Contains(r, role)
 }
 
-// EntitleRoles is a map of services to a list of roles that can be granted to a user
-type EntitleRoles registeredRoles
+// ByService returns all allowed roles grouped by service.
+func (r AllowedRoles) ByService() map[services.Service][]Role {
+	byService := make(map[services.Service][]Role)
+	for _, role := range Allowed() {
+		parsed, valid := role.Parse()
+		if !valid {
+			continue
+		}
 
-// AllowedEntitle returns a map of services to a list of roles that can be granted to a user.
-func AllowedEntitle() EntitleRoles {
-	return EntitleRoles(registered())
+		byService[parsed.Service] = append(byService[parsed.Service], role)
+	}
+	return byService
 }
