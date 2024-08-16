@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/services"
 )
 
 // The list of concrete scopes that can be requested by a client.
@@ -26,17 +28,6 @@ var (
 	ServiceRegex    = regexp.MustCompile(`^[a-z_]{1,30}$`)
 	PermissionRegex = regexp.MustCompile(`^[a-z_.]{1,215}$`)
 	ActionRegex     = regexp.MustCompile(`^(read|write|delete)$`)
-)
-
-// Service is a type for the service part of a scope.
-type Service string
-
-// The list of registered services that publishes scopes.
-const (
-	ServiceCodyGateway      Service = "cody_gateway"
-	ServiceSAMS             Service = "sams"
-	ServiceTelemetryGateway Service = "telemetry_gateway"
-	ServiceEnterprisePortal Service = "enterprise_portal"
 )
 
 // Action is a type for the action part of a scope.
@@ -82,7 +73,7 @@ func (s AllowedScopes) Contains(scope Scope) bool {
 
 // ToScope returns a scope string in the format of
 // "service::permission::action".
-func ToScope(service Service, permission Permission, action Action) Scope {
+func ToScope(service services.Service, permission Permission, action Action) Scope {
 	return Scope(string(service) + "::" + string(permission) + "::" + string(action))
 }
 
@@ -145,7 +136,7 @@ func Allowed() AllowedScopes {
 	}
 
 	// Add full { read, write, delete } actions for all permissions for the given service.
-	appendScopes := func(service Service, permissions []Permission) {
+	appendScopes := func(service services.Service, permissions []Permission) {
 		for _, permission := range permissions {
 			allowed = append(
 				allowed,
@@ -158,16 +149,16 @@ func Allowed() AllowedScopes {
 		}
 	}
 
-	appendScopes(ServiceCodyGateway, codyGatewayPermissions)
-	appendScopes(ServiceSAMS, samsPermissions)
-	appendScopes(ServiceTelemetryGateway, telemetryGatewayPermissions)
-	appendScopes(ServiceEnterprisePortal, enterprisePortalPermissions)
+	appendScopes(services.CodyGateway, codyGatewayPermissions)
+	appendScopes(services.SAMS, samsPermissions)
+	appendScopes(services.TelemetryGateway, telemetryGatewayPermissions)
+	appendScopes(services.EnterprisePortal, enterprisePortalPermissions)
 	// 👉 ADD YOUR SCOPES HERE
 	return allowed
 }
 
 type ParsedScope struct {
-	Service    Service
+	Service    services.Service
 	Permission Permission
 	Action     Action
 }
@@ -217,14 +208,14 @@ func ParseScope(scope Scope) (_ ParsedScope, valid bool) {
 		return ParsedScope{}, false // Any of the parts of the scope can't be empty.
 	}
 	return ParsedScope{
-		Service:    Service(service),
+		Service:    services.Service(service),
 		Permission: Permission(permission),
 		Action:     Action(action),
 	}, true
 }
 
 var aliases = map[Scope]Scope{
-	Profile: ToScope(ServiceSAMS, "user.profile", ActionRead),
+	Profile: ToScope(services.SAMS, "user.profile", ActionRead),
 }
 
 // Strategy is a custom scope strategy that matches scopes based on the following rules:
