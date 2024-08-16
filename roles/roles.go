@@ -35,9 +35,16 @@ func ToRoles(strings []string) []Role {
 	return roles
 }
 
+// ParsedRole is a role parsed into its service and name.
 type ParsedRole struct {
 	Service services.Service
 	Name    string
+}
+
+// ToRole creates a fully qualified role from a parsed role
+// in the format of service::name.
+func (p ParsedRole) ToRole() Role {
+	return ToRole(p.Service, p.Name)
 }
 
 // Parse parses a role into its parts. It returns the service, and the role name.
