@@ -75,7 +75,6 @@ var (
 
 	dotcomRoles = []Role{
 		RoleDotcomSiteAdmin,
-		Role("dotcom::"),
 	}
 )
 
