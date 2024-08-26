@@ -16,6 +16,8 @@ on:
   #   - '.github/workflows/go.yml'
 env:
   GOPROXY: "https://proxy.golang.org"
+  GOPRIVATE: "github.com/sourcegraph/*"
+  PRIVATE_TOKEN: "${{ secrets.PRIVATE_SG_ACCESS_TOKEN }}"
 
 jobs:
   lint:
@@ -28,6 +30,8 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: 1.22.x
+      - name: Enable pulling Go modules from private sourcegrahp/sourcegraph 
+        run: git config --global url."https://TODO:${PRIVATE_TOKEN}@github.com/sourcegraph/".insteadOf "https://github.com/sourcegraph/"
       - name: Check Go module tidiness
         shell: bash
         run: |
