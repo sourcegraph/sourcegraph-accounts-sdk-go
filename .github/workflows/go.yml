@@ -63,3 +63,12 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go-version }}
+      - name: Enable pulling Go modules from private sourcegrahp/sourcegraph 
+        run: git config --global url."https://${PRIVATE_TOKEN}@github.com/sourcegraph/".insteadOf "https://github.com/sourcegraph/"
+      - name: Run tests with coverage
+        continue-on-error: true
+        run: go test -shuffle=on -v -race -coverprofile=coverage -covermode=atomic -json ./... > test-report.json
+      - name: Analyze test report
+        run: |
+          go install github.com/mfridman/tparse@latest
+          tparse -all -file=test-report.json
