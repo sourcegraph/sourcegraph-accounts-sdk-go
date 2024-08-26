@@ -180,6 +180,13 @@ type SubscriberHandlers struct {
 	// MUST make sure the error is surfaced (by either returning or logging the
 	// error) to be retried or to a human operator.
 	OnUserDeleted func(ctx context.Context, data *UserDeletedData) error
+	// OnUserRolesUpdated is called when a "UserRolesUpdated" notification is received.
+	//
+	// It indicates that a user's roles have been updated for a particular service.
+	// The notification data does not specify whether roles have been granted or revoked.
+	// If the service's roles are relevant to the subscriber the user's current roles can
+	// be retrieved from the SAMS API.
+	OnUserRolesUpdated func(ctx context.Context, data *UserRolesUpdatedData) error
 }
 
 type ReceiveSettings = pubsub.ReceiveSettings
@@ -201,6 +208,16 @@ func (s *subscriber) handleReceive(ctx context.Context, name string, metadata js
 		}
 
 		return "handled", s.handlers.OnUserDeleted(ctx, &data)
+	case nameUserRolesUpdated:
+		if s.handlers.OnUserRolesUpdated == nil {
+			return "skipped", nil
+		}
+		var data UserRolesUpdatedData
+		if err := json.Unmarshal(metadata, &data); err != nil {
+			return "malformed_message", errors.Wrap(err, "unmarshal metadata")
+		}
+
+		return "handled", s.handlers.OnUserRolesUpdated(ctx, &data)
 	}
 
 	// Unknown message type

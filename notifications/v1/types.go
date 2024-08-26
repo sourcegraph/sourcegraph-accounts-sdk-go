@@ -6,7 +6,8 @@ import "go.opentelemetry.io/otel"
 // backend/internal/notification/types.go
 
 const (
-	nameUserDeleted = "UserDeleted"
+	nameUserDeleted      = "UserDeleted"
+	nameUserRolesUpdated = "UserRolesUpdated"
 )
 
 // UserDeletedData contains information of a "UserDeleted" notification.
@@ -15,6 +16,12 @@ type UserDeletedData struct {
 	AccountID string `json:"account_id"`
 	// Email is the email address of the deleted user.
 	Email string `json:"email"`
+}
+
+// UserRolesUpdatedData contains information of a "UserRolesUpdated" notification.
+type UserRolesUpdatedData struct {
+	AccountID string `json:"account_id"`
+	Service   string `json:"service"`
 }
 
 var tracer = otel.Tracer("sams.notifications.v1")
