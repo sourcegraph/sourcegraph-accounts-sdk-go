@@ -67,9 +67,8 @@ func (r Role) Parse() (_ ParsedRole, valid bool) {
 	}, true
 }
 
+// services.Dotcom
 var (
-	// services.Dotcom
-
 	// Dotcom site admin
 	RoleDotcomSiteAdmin = ToRole(services.Dotcom, "site_admin")
 
@@ -78,9 +77,8 @@ var (
 	}
 )
 
+// services.SSC
 var (
-	// services.SSC
-
 	// SSC admin
 	RoleSSCAdmin = ToRole(services.SSC, "admin")
 
