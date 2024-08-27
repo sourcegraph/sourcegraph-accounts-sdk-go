@@ -9,7 +9,7 @@ import (
 )
 
 func TestAllowedGoldenList(t *testing.T) {
-	autogold.Expect(AllowedRoles{Role("dotcom::site_admin")}).Equal(t, Allowed())
+	autogold.Expect(AllowedRoles{Role("dotcom::site_admin"), Role("ssc::admin")}).Equal(t, Allowed())
 }
 
 func TestAllowedContains(t *testing.T) {

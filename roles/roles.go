@@ -67,14 +67,23 @@ func (r Role) Parse() (_ ParsedRole, valid bool) {
 	}, true
 }
 
+// services.Dotcom
 var (
-	// services.Dotcom
-
 	// Dotcom site admin
 	RoleDotcomSiteAdmin = ToRole(services.Dotcom, "site_admin")
 
 	dotcomRoles = []Role{
 		RoleDotcomSiteAdmin,
+	}
+)
+
+// services.SSC
+var (
+	// SSC admin
+	RoleSSCAdmin = ToRole(services.SSC, "admin")
+
+	sscRoles = []Role{
+		RoleSSCAdmin,
 	}
 )
 
@@ -91,6 +100,7 @@ func Allowed() AllowedRoles {
 	}
 
 	appendRoles(dotcomRoles)
+	appendRoles(sscRoles)
 	// 👉 ADD YOUR ROLES HERE
 
 	return allowed
