@@ -10,6 +10,7 @@ const (
 	SAMS             Service = "sams"
 	TelemetryGateway Service = "telemetry_gateway"
 	EnterprisePortal Service = "enterprise_portal"
+	SSC              Service = "ssc"
 )
 
 var serviceNames = map[Service]string{
@@ -18,6 +19,7 @@ var serviceNames = map[Service]string{
 	SAMS:             "Sourcegraph Accounts Management System",
 	TelemetryGateway: "Telemetry Gateway",
 	EnterprisePortal: "Enterprise Portal",
+	SSC:              "Self Serve Cody",
 }
 
 func (s Service) DisplayName() string {

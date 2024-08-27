@@ -78,6 +78,17 @@ var (
 	}
 )
 
+var (
+	// services.SSC
+
+	// SSC admin
+	RoleSSCAdmin = ToRole(services.SSC, "admin")
+
+	sscRoles = []Role{
+		RoleSSCAdmin,
+	}
+)
+
 // AllowedRoles is a concrete list of allowed roles that can be granted to a user.
 type AllowedRoles []Role
 
@@ -91,6 +102,7 @@ func Allowed() AllowedRoles {
 	}
 
 	appendRoles(dotcomRoles)
+	appendRoles(sscRoles)
 	// 👉 ADD YOUR ROLES HERE
 
 	return allowed
