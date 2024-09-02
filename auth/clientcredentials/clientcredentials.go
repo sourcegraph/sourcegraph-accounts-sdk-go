@@ -22,7 +22,7 @@ import (
 var tracer = otel.Tracer("sams/interceptors/clientcredentials")
 
 type TokenIntrospector interface {
-	// IntrospectSAMSToken takes a SAMS access token and returns relevant metadata.
+	// IntrospectToken takes a SAMS access token and returns relevant metadata.
 	// This is generally implemented by *sams.TokensServiceV1.
 	//
 	// 🚨 SECURITY: SAMS will return a successful result if the token is valid, but
