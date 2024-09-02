@@ -145,9 +145,15 @@ func (i *Interceptor) requireScope(ctx context.Context, headers http.Header, req
 	if err != nil {
 		return nil, internalError(ctx, i.logger, err, "unable to validate token")
 	}
-	span.SetAttributes(attribute.String("client_id", result.ClientID))
-	info := &ClientInfo{ClientID: result.ClientID, TokenExpiresAt: result.ExpiresAt, TokenScopes: result.Scopes}
-	logger := i.logger.With(info.LogFields()...)
+	span.SetAttributes(
+		attribute.String("client_id", result.ClientID),
+		attribute.String("token_expires_at", result.ExpiresAt.String()),
+		attribute.StringSlice("token_scopes", scopes.ToStrings(result.Scopes)))
+	info := &ClientInfo{
+		ClientID:       result.ClientID,
+		TokenExpiresAt: result.ExpiresAt,
+		TokenScopes:    result.Scopes,
+	}
 
 	// Active encapsulates whether the token is active, including expiration.
 	if !result.Active {
@@ -159,13 +165,10 @@ func (i *Interceptor) requireScope(ctx context.Context, headers http.Header, req
 	// Check for our required scope.
 	for _, required := range requiredScopes {
 		if !result.Scopes.Match(required) {
-			// Record detailed error in span and logs
 			err = errors.Newf("got scopes %+v, required: %+v", result.Scopes, requiredScopes)
 			span.SetAttributes(attribute.String("full_error", err.Error()))
-			logger.Error("attempt to authenticate using SAMS token without required scope",
-				log.Error(err))
-			// Return an opaque error
-			return info, connect.NewError(connect.CodePermissionDenied, errors.New("insufficient scope"))
+			return info, connect.NewError(connect.CodePermissionDenied,
+				errors.Wrap(err, "insufficient scopes"))
 		}
 	}
 
