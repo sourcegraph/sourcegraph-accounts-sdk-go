@@ -40,7 +40,9 @@ type Interceptor struct {
 
 // NewInterceptor creates a serverside handler interceptor that ensures every
 // incoming request has a valid client credential token with the required scopes
-// indicated in the RPC method options.
+// indicated in the RPC method options. When used, required scopes CANNOT be
+// empty - if no scopes are required, declare a separate service that does not
+// use this interceptor.
 //
 // To declare required SAMS scopes in your RPC, add the following to your proto
 // schema:
@@ -181,6 +183,9 @@ func extractSchemaRequiredScopes(spec connect.Spec, extension *protoimpl.Extensi
 		return nil, errors.Newf("extension field %s not valid", extension.TypeDescriptor().FullName())
 	}
 	list := value.List()
+	if list.Len() == 0 {
+		return nil, errors.Newf("extension field %s cannot be empty", extension.TypeDescriptor().FullName())
+	}
 
 	requiredScopes := make(scopes.Scopes, list.Len())
 	for i := 0; i < list.Len(); i++ {
