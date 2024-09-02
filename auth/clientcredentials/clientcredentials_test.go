@@ -39,14 +39,14 @@ func TestInterceptor(t *testing.T) {
 		token: &sams.IntrospectTokenResponse{
 			Active: false,
 		},
-		wantError: autogold.Expect("unauthenticated: invalid authorization header: invalid token type Bearer in Authorization header"),
+		wantError: autogold.Expect("permission_denied: permission denied"),
 		wantLogs:  autogold.Expect([]string{}),
 	}, {
 		name: "insufficient scopes",
 		token: &sams.IntrospectTokenResponse{
 			Active: true,
 		},
-		wantError: autogold.Expect("unauthenticated: invalid authorization header: invalid token type Bearer in Authorization header"),
+		wantError: autogold.Expect("permission_denied: insufficient scopes: got scopes [], required: [profile]"),
 		wantLogs:  autogold.Expect([]string{}),
 	}, {
 		name: "matches required scope",
@@ -54,7 +54,7 @@ func TestInterceptor(t *testing.T) {
 			Active: true,
 			Scopes: scopes.Scopes{"profile"},
 		},
-		wantError: autogold.Expect("unauthenticated: invalid authorization header: invalid token type Bearer in Authorization header"), // should not error!
+		wantError: autogold.Expect(nil), // should not error!
 		wantLogs:  autogold.Expect([]string{}),
 	}, {
 		name: "wrong scope",
@@ -62,7 +62,7 @@ func TestInterceptor(t *testing.T) {
 			Active: true,
 			Scopes: scopes.Scopes{"not-a-scope"},
 		},
-		wantError: autogold.Expect("unauthenticated: invalid authorization header: invalid token type Bearer in Authorization header"),
+		wantError: autogold.Expect("permission_denied: insufficient scopes: got scopes [not-a-scope], required: [profile]"),
 		wantLogs:  autogold.Expect([]string{}),
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
