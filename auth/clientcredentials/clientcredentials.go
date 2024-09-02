@@ -203,7 +203,7 @@ func extractBearerContents(h http.Header) (string, error) {
 	if len(typ) != 2 {
 		return "", errors.New("token type missing in Authorization header")
 	}
-	if strings.ToLower(typ[0]) != "bearer" {
+	if strings.EqualFold(typ[0], "bearer") {
 		return "", errors.Newf("invalid token type %s in Authorization header", typ[0])
 	}
 	return typ[1], nil
