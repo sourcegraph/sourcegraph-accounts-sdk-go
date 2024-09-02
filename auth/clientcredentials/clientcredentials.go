@@ -19,7 +19,7 @@ import (
 	"github.com/sourcegraph/sourcegraph/lib/errors"
 )
 
-var tracer = otel.Tracer("sams/interceptors/clientcredentials")
+var tracer = otel.Tracer("sams/auth/clientcredentials")
 
 type TokenIntrospector interface {
 	// IntrospectToken takes a SAMS access token and returns relevant metadata.
@@ -126,7 +126,7 @@ func (i *Interceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) co
 // returned directly from a ConnectRPC implementation.
 func (i *Interceptor) requireScope(ctx context.Context, headers http.Header, requiredScopes scopes.Scopes) (_ *ClientInfo, err error) {
 	var span trace.Span
-	ctx, span = tracer.Start(ctx, "RequireScope")
+	ctx, span = tracer.Start(ctx, "clientcredentials.requireScope")
 	defer func() {
 		if err != nil {
 			span.RecordError(err)
