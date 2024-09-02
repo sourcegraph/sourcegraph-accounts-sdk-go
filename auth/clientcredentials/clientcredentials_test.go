@@ -6,17 +6,17 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hexops/autogold/v2"
-	"github.com/sourcegraph/sourcegraph/lib/errors"
-	"github.com/stretchr/testify/require"
-
 	"connectrpc.com/connect"
+	"github.com/hexops/autogold/v2"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/oauth2"
+
 	"github.com/sourcegraph/log/logtest"
 	sams "github.com/sourcegraph/sourcegraph-accounts-sdk-go"
 	clientsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1/clientsv1connect"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
-	"golang.org/x/oauth2"
+	"github.com/sourcegraph/sourcegraph/lib/errors"
 )
 
 type mockTokenIntrospector struct {

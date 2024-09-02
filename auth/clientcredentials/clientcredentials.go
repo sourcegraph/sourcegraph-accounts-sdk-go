@@ -6,17 +6,17 @@ import (
 	"strings"
 
 	"connectrpc.com/connect"
-	"github.com/sourcegraph/log"
-	sams "github.com/sourcegraph/sourcegraph-accounts-sdk-go"
-	otelcodes "go.opentelemetry.io/otel/codes"
-	"google.golang.org/protobuf/runtime/protoimpl"
-
-	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
-	"github.com/sourcegraph/sourcegraph/lib/errors"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	otelcodes "go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/runtime/protoimpl"
+
+	"github.com/sourcegraph/log"
+	sams "github.com/sourcegraph/sourcegraph-accounts-sdk-go"
+	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
+	"github.com/sourcegraph/sourcegraph/lib/errors"
 )
 
 var tracer = otel.Tracer("sams/interceptors/clientcredentials")
