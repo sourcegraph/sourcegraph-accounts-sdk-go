@@ -3,27 +3,42 @@ syntax = "proto3";
 package clients.v1;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/descriptor.proto";
 
 option go_package = "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1;clientsv1";
+
+extend google.protobuf.MethodOptions {
+  // The SAMS scopes required to use this RPC.
+  //
+  // The range 50000-99999 is reserved for internal use within individual organizations
+  // so you can use numbers in this range freely for in-house applications.
+  repeated string sams_required_scopes = 50001;
+}
 
 service UsersService {
   // GetUser returns the SAMS user with the given query. It returns connect.CodeNotFound
   // if no such user exists.
   //
   // Required scope: profile
-  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
+    option (sams_required_scopes) = "profile";
+  };
   // GetUsers returns the list of SAMS users matching the provided IDs.
   //
   // NOTE: It silently ignores any invalid user IDs, i.e. the length of the return
   // slice may be less than the length of the input slice.
   //
   // Required scopes: profile
-  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse);
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {
+    option (sams_required_scopes) = "profile";
+  };
   // GetUserRoles returns all roles that have been assigned to the SAMS user
   // with the given ID and scoped by the service.
   //
   // Required scopes: sams::user.roles::read
-  rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse);
+  rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse) {
+    option (sams_required_scopes) = "sams::user.roles::read";
+  };
 }
 
 // Exactly one attribute can be set.
@@ -81,7 +96,9 @@ service SessionsService {
   // populated if the session is authenticated by a user.
   //
   // Required scope: sams::session::read
-  rpc GetSession(GetSessionRequest) returns (GetSessionResponse);
+  rpc GetSession(GetSessionRequest) returns (GetSessionResponse) {
+    option (sams_required_scopes) = "sams::session::read";
+  };
   // SignOutSession revokes the authenticated state of the session with the given
   // ID for the given user. It does not return error if the session does not exist
   // or is not authenticated. It returns clientsv1.ErrorRecordMismatch in the
@@ -89,7 +106,9 @@ service SessionsService {
   // given user.
   //
   // Required scope: sams::session::write
-  rpc SignOutSession(SignOutSessionRequest) returns (SignOutSessionResponse);
+  rpc SignOutSession(SignOutSessionRequest) returns (SignOutSessionResponse) {
+    option (sams_required_scopes) = "sams::session::write";
+  };
 }
 
 message GetSessionRequest {
