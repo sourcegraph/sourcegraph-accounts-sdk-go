@@ -10,6 +10,7 @@ const (
 	SAMS             Service = "sams"
 	TelemetryGateway Service = "telemetry_gateway"
 	EnterprisePortal Service = "enterprise_portal"
+	Workspaces       Service = "workspaces"
 	SSC              Service = "ssc"
 )
 
@@ -19,6 +20,7 @@ var serviceNames = map[Service]string{
 	SAMS:             "Sourcegraph Accounts Management System",
 	TelemetryGateway: "Telemetry Gateway",
 	EnterprisePortal: "Enterprise Portal",
+	Workspaces:       "Workspaces",
 	SSC:              "Self Serve Cody",
 }
 

@@ -50,6 +50,9 @@ func TestAllowedGoldenList(t *testing.T) {
 		Scope("enterprise_portal::codyaccess::read"),
 		Scope("enterprise_portal::codyaccess::write"),
 		Scope("enterprise_portal::codyaccess::delete"),
+		Scope("workspaces::workspace::read"),
+		Scope("workspaces::workspace::write"),
+		Scope("workspaces::workspace::delete"),
 	}).Equal(t, Allowed())
 }
 

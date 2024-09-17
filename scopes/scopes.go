@@ -102,6 +102,9 @@ var (
 		PermissionEnterprisePortalSubscriptionPermission,
 		PermissionEnterprisePortalCodyAccess,
 	}
+	workspacesPermissions = []Permission{
+		"workspace",
+	}
 )
 
 const (
@@ -153,6 +156,7 @@ func Allowed() AllowedScopes {
 	appendScopes(services.SAMS, samsPermissions)
 	appendScopes(services.TelemetryGateway, telemetryGatewayPermissions)
 	appendScopes(services.EnterprisePortal, enterprisePortalPermissions)
+	appendScopes(services.Workspaces, workspacesPermissions)
 	// 👉 ADD YOUR SCOPES HERE
 	return allowed
 }
