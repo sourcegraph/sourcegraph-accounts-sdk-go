@@ -105,6 +105,7 @@ var (
 	workspacesPermissions = []Permission{
 		"workspace",
 		"instance",
+		"permission.workspace",
 	}
 )
 
