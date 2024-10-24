@@ -3,6 +3,7 @@ package sams
 import (
 	"github.com/sourcegraph/log"
 	"github.com/sourcegraph/sourcegraph/lib/background"
+	"github.com/sourcegraph/sourcegraph/lib/pointers"
 
 	notificationsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/notifications/v1"
 )
@@ -23,9 +24,12 @@ type NotificationsV1SubscriberConfig struct {
 // NewNotificationsV1SubscriberConfigFromEnv initializes configuration based on
 // environment variables.
 func NewNotificationsV1SubscriberConfigFromEnv(env envGetter) NotificationsV1SubscriberConfig {
-	defaultProject := env.Get("GOOGLE_CLOUD_PROJECT", "", "The GCP project that the service is running in")
+	projectID := env.GetOptional("SAMS_NOTIFICATION_PROJECT", "GCP project ID that the Pub/Sub subscription belongs to")
+	if pointers.DerefZero(projectID) == "" {
+		projectID = env.GetOptional("GOOGLE_CLOUD_PROJECT", "The GCP project that the service is running in")
+	}
 	return NotificationsV1SubscriberConfig{
-		ProjectID:      env.Get("SAMS_NOTIFICATION_PROJECT", defaultProject, "GCP project ID that the Pub/Sub subscription belongs to"),
+		ProjectID:      pointers.DerefZero(projectID),
 		SubscriptionID: env.Get("SAMS_NOTIFICATION_SUBSCRIPTION", "sams-notifications", "GCP Pub/Sub subscription ID to receive SAMS notifications from"),
 	}
 }
