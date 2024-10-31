@@ -89,8 +89,8 @@ func TestRolesByResourceType(t *testing.T) {
 			}),
 		},
 		{
-			name:     "subscription",
-			resource: Subscription,
+			name:     "enterprise_subscription",
+			resource: EnterpriseSubscription,
 			expected: autogold.Expect([]Role{
 				Role("enterprise_portal::customer_admin"),
 			}),
@@ -120,6 +120,31 @@ func TestToService(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			got := test.role.Service()
+			assert.Equal(t, test.want, got)
+		})
+	}
+}
+
+func TestDisplay(t *testing.T) {
+	tests := []struct {
+		name     string
+		resource ResourceType
+		want     string
+	}{
+		{
+			name:     "service",
+			resource: Service,
+			want:     "Service",
+		},
+		{
+			name:     "enterprise_subscription",
+			resource: EnterpriseSubscription,
+			want:     "Enterprise Subscription",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := test.resource.Display()
 			assert.Equal(t, test.want, got)
 		})
 	}

@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/services"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // Role is always the full qualified role name, e.g. "dotcom::site_admin".
@@ -47,13 +49,19 @@ const (
 	// Service type is a special type used for service level roles.
 	Service ResourceType = "service"
 	// Subscription resources for Enterprise Portal.
-	Subscription ResourceType = "subscription"
+	EnterpriseSubscription ResourceType = "enterprise_subscription"
 )
 
 // IsService returns true if the resource type is a service.
 // This is a special helper function as service level roles have special handling.
 func (r ResourceType) IsService() bool {
 	return r == Service
+}
+
+// Display returns the display name of the resource type.
+func (r ResourceType) Display() string {
+	s := strings.ReplaceAll(string(r), "_", " ")
+	return cases.Title(language.English).String(s)
 }
 
 // roleInfo is the sdk internal representation of a role.
@@ -103,7 +111,7 @@ var (
 		{
 			id:           RoleEnterprisePortalCustomerAdmin,
 			service:      services.EnterprisePortal,
-			resourceType: Subscription,
+			resourceType: EnterpriseSubscription,
 		},
 	}
 )
