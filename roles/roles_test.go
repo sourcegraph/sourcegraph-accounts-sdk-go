@@ -1,6 +1,7 @@
 package roles
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/hexops/autogold/v2"
@@ -8,11 +9,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAllowedGoldenList(t *testing.T) {
-	autogold.Expect(AllowedRoles{Role("dotcom::site_admin"), Role("ssc::admin")}).Equal(t, Allowed())
+func TestGoldenList(t *testing.T) {
+	got := List()
+	slices.Sort(got)
+	autogold.Expect([]Role{
+		Role("dotcom::site_admin"),
+		Role("enterprise_portal::customer_admin"),
+		Role("ssc::admin"),
+	}).Equal(t, got)
 }
 
-func TestAllowedContains(t *testing.T) {
+func TestContains(t *testing.T) {
 	tests := []struct {
 		name     string
 		role     Role
@@ -35,16 +42,15 @@ func TestAllowedContains(t *testing.T) {
 		},
 	}
 
-	allowed := Allowed()
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := allowed.Contains(test.role)
+			got := Contains(test.role)
 			assert.Equal(t, test.expected, got)
 		})
 	}
 }
 
-func TestAllowedRolesByService(t *testing.T) {
+func TestRolesByService(t *testing.T) {
 	tests := []struct {
 		name     string
 		service  services.Service
@@ -58,11 +64,88 @@ func TestAllowedRolesByService(t *testing.T) {
 			}),
 		},
 	}
-	allowed := Allowed()
+
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := allowed.ByService()
-			test.expected.Equal(t, got[test.service])
+			got := ByService()[test.service]
+			slices.Sort(got)
+			test.expected.Equal(t, got)
+		})
+	}
+}
+
+func TestRolesByResourceType(t *testing.T) {
+	tests := []struct {
+		name     string
+		resource ResourceType
+		expected autogold.Value
+	}{
+		{
+			name:     "service",
+			resource: Service,
+			expected: autogold.Expect([]Role{
+				Role("dotcom::site_admin"),
+				Role("ssc::admin"),
+			}),
+		},
+		{
+			name:     "enterprise_subscription",
+			resource: EnterpriseSubscription,
+			expected: autogold.Expect([]Role{
+				Role("enterprise_portal::customer_admin"),
+			}),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := ByResourceType()[test.resource]
+			slices.Sort(got)
+			test.expected.Equal(t, got)
+		})
+	}
+}
+
+func TestToService(t *testing.T) {
+	tests := []struct {
+		name string
+		role Role
+		want services.Service
+	}{
+		{
+			name: "dotcom site admin",
+			role: RoleDotcomSiteAdmin,
+			want: services.Dotcom,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := test.role.Service()
+			assert.Equal(t, test.want, got)
+		})
+	}
+}
+
+func TestDisplay(t *testing.T) {
+	tests := []struct {
+		name     string
+		resource ResourceType
+		want     string
+	}{
+		{
+			name:     "service",
+			resource: Service,
+			want:     "Service",
+		},
+		{
+			name:     "enterprise_subscription",
+			resource: EnterpriseSubscription,
+			want:     "Enterprise Subscription",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := test.resource.Display()
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
