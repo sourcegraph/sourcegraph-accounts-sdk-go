@@ -105,6 +105,36 @@ func TestRolesByResourceType(t *testing.T) {
 	}
 }
 
+func TestServiceRolesByService(t *testing.T) {
+	tests := []struct {
+		name     string
+		service  services.Service
+		expected autogold.Value
+	}{
+		{
+			name:    "dotcom",
+			service: services.Dotcom,
+			expected: autogold.Expect([]Role{
+				Role("dotcom::site_admin"),
+			}),
+		},
+		{
+			name:    "ssc",
+			service: services.SSC,
+			expected: autogold.Expect([]Role{
+				Role("ssc::admin"),
+			}),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := ServiceRolesByService()[test.service]
+			slices.Sort(got)
+			test.expected.Equal(t, got)
+		})
+	}
+}
+
 func TestToService(t *testing.T) {
 	tests := []struct {
 		name string
