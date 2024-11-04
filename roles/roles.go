@@ -162,3 +162,14 @@ func ByResourceType() map[ResourceType][]Role {
 	}
 	return byResourceType
 }
+
+// ServiceRolesByService returns all allowed service roles grouped by service.
+func ServiceRolesByService() map[services.Service][]Role {
+	byService := make(map[services.Service][]Role)
+	for _, role := range registeredRoles {
+		if role.resourceType.IsService() {
+			byService[role.service] = append(byService[role.service], role.id)
+		}
+	}
+	return byService
+}
