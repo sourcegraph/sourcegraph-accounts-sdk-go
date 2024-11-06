@@ -166,3 +166,40 @@ message IntrospectTokenResponse {
   // ExpiresAt indicates when the token expires.
   google.protobuf.Timestamp expires_at = 4;
 }
+
+service RolesService {
+  rpc RegisterRoleResources (stream RegisterRoleResourcesRequest) returns (RegisterRoleResourcesResponse) {
+    option (sams_required_scopes) = "sams::roles.resources::write";
+  };
+}
+message RegisterRoleResourcesRequestMetadata {
+  // Client-provided revision identifier.
+  // Older `resource_type` resources with a different revision will be removed.
+  string revision = 1;
+  // The type of resources being registered.
+  string resource_type = 2;
+}
+message RegisterRoleResourcesRequest {
+  message Resources {
+    repeated Resource resources = 1;
+  }
+  oneof payload {
+    // Metadata about the resources being registered.
+    RegisterRoleResourcesRequestMetadata metadata = 1;
+    // Batch of resources to register in a single request. Clients should aim to
+    // batch a large number of resources into a series of smaller requests in the
+    // RegisterRoleResources stream.
+    Resources resources = 2;
+  }
+}
+
+message RegisterRoleResourcesResponse {
+  uint64 resource_count = 1;
+}
+
+message Resource {
+  // A unique identifier for the resource
+  string resource_id = 1;
+  // A human readable name for the resource
+  string display_name = 2;
+}
