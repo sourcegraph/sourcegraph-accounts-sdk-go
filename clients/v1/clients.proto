@@ -174,7 +174,7 @@ service RolesService {
 }
 message RegisterRoleResourcesRequestMetadata {
   // Client-provided revision identifier.
-  // Older `resource_type` resources with a different revision will be removed.
+  // Upon completing the streaming request, any `resource_type` resources with a different revision will be removed.
   string revision = 1;
   // The type of resources being registered.
   string resource_type = 2;
