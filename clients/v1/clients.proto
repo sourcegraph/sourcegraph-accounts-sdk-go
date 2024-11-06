@@ -181,10 +181,11 @@ message RegisterRoleResourcesRequestMetadata {
 }
 message RegisterRoleResourcesRequest {
   message Resources {
-    repeated Resource resources = 1;
+    repeated RoleResource resources = 1;
   }
   oneof payload {
     // Metadata about the resources being registered.
+    // It is expected that a metadata payload is sent only once per request and before any resources are sent.
     RegisterRoleResourcesRequestMetadata metadata = 1;
     // Batch of resources to register in a single request. Clients should aim to
     // batch a large number of resources into a series of smaller requests in the
@@ -197,7 +198,7 @@ message RegisterRoleResourcesResponse {
   uint64 resource_count = 1;
 }
 
-message Resource {
+message RoleResource {
   // A unique identifier for the resource
   string resource_id = 1;
   // A human readable name for the resource
