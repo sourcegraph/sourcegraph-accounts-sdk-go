@@ -119,6 +119,10 @@ func (c *ClientV1) Tokens() *TokensServiceV1 {
 	return &TokensServiceV1{client: c}
 }
 
+func (c *ClientV1) Roles() *RolesServiceV1 {
+	return &RolesServiceV1{client: c}
+}
+
 var (
 	ErrNotFound       = errors.New("not found")
 	ErrRecordMismatch = errors.New("record mismatch")

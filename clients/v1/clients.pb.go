@@ -849,6 +849,8 @@ type RegisterRoleResourcesRequestMetadata struct {
 	// Upon completing the streaming request, any `resource_type` resources with a different revision will be removed.
 	Revision string `protobuf:"bytes,1,opt,name=revision,proto3" json:"revision,omitempty"`
 	// The type of resources being registered.
+	// Should be a valid resource type as defined in the `roles` package:
+	// https://github.com/sourcegraph/sourcegraph-accounts-sdk-go/blob/main/roles/
 	ResourceType string `protobuf:"bytes,2,opt,name=resource_type,json=resourceType,proto3" json:"resource_type,omitempty"`
 }
 
