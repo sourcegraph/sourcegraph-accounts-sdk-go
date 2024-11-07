@@ -58,8 +58,8 @@ func (r ResourceType) IsService() bool {
 	return r == Service
 }
 
-// Display returns the display name of the resource type.
-func (r ResourceType) Display() string {
+// DisplayName returns the display name of the resource type.
+func (r ResourceType) DisplayName() string {
 	s := strings.ReplaceAll(string(r), "_", " ")
 	return cases.Title(language.English).String(s)
 }
@@ -172,4 +172,13 @@ func ServiceRolesByService() map[services.Service][]Role {
 		}
 	}
 	return byService
+}
+
+// ResourceTypes returns all allowed resource types.
+func ResourceTypes() []ResourceType {
+	var resourceTypes []ResourceType
+	for _, role := range registeredRoles {
+		resourceTypes = append(resourceTypes, role.resourceType)
+	}
+	return resourceTypes
 }

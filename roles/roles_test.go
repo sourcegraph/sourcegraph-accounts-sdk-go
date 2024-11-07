@@ -174,7 +174,7 @@ func TestDisplay(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := test.resource.Display()
+			got := test.resource.DisplayName()
 			assert.Equal(t, test.want, got)
 		})
 	}

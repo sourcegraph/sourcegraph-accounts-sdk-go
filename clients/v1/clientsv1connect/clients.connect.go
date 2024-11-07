@@ -27,6 +27,8 @@ const (
 	SessionsServiceName = "clients.v1.SessionsService"
 	// TokensServiceName is the fully-qualified name of the TokensService service.
 	TokensServiceName = "clients.v1.TokensService"
+	// RolesServiceName is the fully-qualified name of the RolesService service.
+	RolesServiceName = "clients.v1.RolesService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -53,19 +55,24 @@ const (
 	// TokensServiceIntrospectTokenProcedure is the fully-qualified name of the TokensService's
 	// IntrospectToken RPC.
 	TokensServiceIntrospectTokenProcedure = "/clients.v1.TokensService/IntrospectToken"
+	// RolesServiceRegisterRoleResourcesProcedure is the fully-qualified name of the RolesService's
+	// RegisterRoleResources RPC.
+	RolesServiceRegisterRoleResourcesProcedure = "/clients.v1.RolesService/RegisterRoleResources"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	usersServiceServiceDescriptor                 = v1.File_clients_v1_clients_proto.Services().ByName("UsersService")
-	usersServiceGetUserMethodDescriptor           = usersServiceServiceDescriptor.Methods().ByName("GetUser")
-	usersServiceGetUsersMethodDescriptor          = usersServiceServiceDescriptor.Methods().ByName("GetUsers")
-	usersServiceGetUserRolesMethodDescriptor      = usersServiceServiceDescriptor.Methods().ByName("GetUserRoles")
-	sessionsServiceServiceDescriptor              = v1.File_clients_v1_clients_proto.Services().ByName("SessionsService")
-	sessionsServiceGetSessionMethodDescriptor     = sessionsServiceServiceDescriptor.Methods().ByName("GetSession")
-	sessionsServiceSignOutSessionMethodDescriptor = sessionsServiceServiceDescriptor.Methods().ByName("SignOutSession")
-	tokensServiceServiceDescriptor                = v1.File_clients_v1_clients_proto.Services().ByName("TokensService")
-	tokensServiceIntrospectTokenMethodDescriptor  = tokensServiceServiceDescriptor.Methods().ByName("IntrospectToken")
+	usersServiceServiceDescriptor                     = v1.File_clients_v1_clients_proto.Services().ByName("UsersService")
+	usersServiceGetUserMethodDescriptor               = usersServiceServiceDescriptor.Methods().ByName("GetUser")
+	usersServiceGetUsersMethodDescriptor              = usersServiceServiceDescriptor.Methods().ByName("GetUsers")
+	usersServiceGetUserRolesMethodDescriptor          = usersServiceServiceDescriptor.Methods().ByName("GetUserRoles")
+	sessionsServiceServiceDescriptor                  = v1.File_clients_v1_clients_proto.Services().ByName("SessionsService")
+	sessionsServiceGetSessionMethodDescriptor         = sessionsServiceServiceDescriptor.Methods().ByName("GetSession")
+	sessionsServiceSignOutSessionMethodDescriptor     = sessionsServiceServiceDescriptor.Methods().ByName("SignOutSession")
+	tokensServiceServiceDescriptor                    = v1.File_clients_v1_clients_proto.Services().ByName("TokensService")
+	tokensServiceIntrospectTokenMethodDescriptor      = tokensServiceServiceDescriptor.Methods().ByName("IntrospectToken")
+	rolesServiceServiceDescriptor                     = v1.File_clients_v1_clients_proto.Services().ByName("RolesService")
+	rolesServiceRegisterRoleResourcesMethodDescriptor = rolesServiceServiceDescriptor.Methods().ByName("RegisterRoleResources")
 )
 
 // UsersServiceClient is a client for the clients.v1.UsersService service.
@@ -410,4 +417,72 @@ type UnimplementedTokensServiceHandler struct{}
 
 func (UnimplementedTokensServiceHandler) IntrospectToken(context.Context, *connect.Request[v1.IntrospectTokenRequest]) (*connect.Response[v1.IntrospectTokenResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.TokensService.IntrospectToken is not implemented"))
+}
+
+// RolesServiceClient is a client for the clients.v1.RolesService service.
+type RolesServiceClient interface {
+	RegisterRoleResources(context.Context) *connect.ClientStreamForClient[v1.RegisterRoleResourcesRequest, v1.RegisterRoleResourcesResponse]
+}
+
+// NewRolesServiceClient constructs a client for the clients.v1.RolesService service. By default, it
+// uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and sends
+// uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or
+// connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewRolesServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) RolesServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	return &rolesServiceClient{
+		registerRoleResources: connect.NewClient[v1.RegisterRoleResourcesRequest, v1.RegisterRoleResourcesResponse](
+			httpClient,
+			baseURL+RolesServiceRegisterRoleResourcesProcedure,
+			connect.WithSchema(rolesServiceRegisterRoleResourcesMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// rolesServiceClient implements RolesServiceClient.
+type rolesServiceClient struct {
+	registerRoleResources *connect.Client[v1.RegisterRoleResourcesRequest, v1.RegisterRoleResourcesResponse]
+}
+
+// RegisterRoleResources calls clients.v1.RolesService.RegisterRoleResources.
+func (c *rolesServiceClient) RegisterRoleResources(ctx context.Context) *connect.ClientStreamForClient[v1.RegisterRoleResourcesRequest, v1.RegisterRoleResourcesResponse] {
+	return c.registerRoleResources.CallClientStream(ctx)
+}
+
+// RolesServiceHandler is an implementation of the clients.v1.RolesService service.
+type RolesServiceHandler interface {
+	RegisterRoleResources(context.Context, *connect.ClientStream[v1.RegisterRoleResourcesRequest]) (*connect.Response[v1.RegisterRoleResourcesResponse], error)
+}
+
+// NewRolesServiceHandler builds an HTTP handler from the service implementation. It returns the
+// path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewRolesServiceHandler(svc RolesServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	rolesServiceRegisterRoleResourcesHandler := connect.NewClientStreamHandler(
+		RolesServiceRegisterRoleResourcesProcedure,
+		svc.RegisterRoleResources,
+		connect.WithSchema(rolesServiceRegisterRoleResourcesMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/clients.v1.RolesService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case RolesServiceRegisterRoleResourcesProcedure:
+			rolesServiceRegisterRoleResourcesHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedRolesServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedRolesServiceHandler struct{}
+
+func (UnimplementedRolesServiceHandler) RegisterRoleResources(context.Context, *connect.ClientStream[v1.RegisterRoleResourcesRequest]) (*connect.Response[v1.RegisterRoleResourcesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.RolesService.RegisterRoleResources is not implemented"))
 }

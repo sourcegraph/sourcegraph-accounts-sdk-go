@@ -93,6 +93,9 @@ var (
 		"user.metadata.dotcom",
 
 		"session",
+
+		"roles",
+		"roles.resources",
 	}
 	telemetryGatewayPermissions = []Permission{
 		"events",
