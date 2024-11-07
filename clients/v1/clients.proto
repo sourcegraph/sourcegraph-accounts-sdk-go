@@ -177,6 +177,8 @@ message RegisterRoleResourcesRequestMetadata {
   // Upon completing the streaming request, any `resource_type` resources with a different revision will be removed.
   string revision = 1;
   // The type of resources being registered.
+  // Should be a valid resource type as defined in the `roles` package:
+  // https://github.com/sourcegraph/sourcegraph-accounts-sdk-go/blob/main/roles/
   string resource_type = 2;
 }
 message RegisterRoleResourcesRequest {
