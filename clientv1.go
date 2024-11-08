@@ -82,6 +82,10 @@ func parseResponseAndError[T any](resp *connect.Response[T], err error) (*connec
 		return nil, ErrNotFound
 	}
 
+	if connectErr.Code() == connect.CodeAborted {
+		return nil, ErrAborted
+	}
+
 	// Cannot determine action solely based on status code, let's look at the error
 	// details.
 	for _, detail := range connectErr.Details() {
@@ -126,6 +130,7 @@ func (c *ClientV1) Roles() *RolesServiceV1 {
 var (
 	ErrNotFound       = errors.New("not found")
 	ErrRecordMismatch = errors.New("record mismatch")
+	ErrAborted        = errors.New("aborted")
 )
 
 // ClientCredentialsTokenSource returns a TokenSource that generates an access

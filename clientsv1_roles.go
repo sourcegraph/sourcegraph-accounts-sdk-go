@@ -2,6 +2,7 @@ package sams
 
 import (
 	"context"
+	"io"
 	"slices"
 
 	"connectrpc.com/connect"
@@ -28,7 +29,7 @@ func (s *RolesServiceV1) newClient(ctx context.Context) clientsv1connect.RolesSe
 	)
 }
 
-// RegisterResourcesMetadata is the metadata for registering resources.
+// RegisterResourcesMetadata is the metadata for a set of resources to be registered.
 type RegisterResourcesMetadata struct {
 	ResourceType roles.ResourceType
 	Revision     uuid.UUID
@@ -42,8 +43,9 @@ func (r RegisterResourcesMetadata) validate() error {
 }
 
 // RegisterRoleResources registers the resources for a given resource type.
-// `resourcesIterator` is a function that returns a list of resources to register.
+// `resourcesIterator` is a function that returns a page of resources to register.
 // The function is invoked repeatedly until it produces an empty slice or an error.
+// If another replica is already registering the same resources, the function will return 0 without an error.
 //
 // Required scope: sams::roles.resources::write
 func (s *RolesServiceV1) RegisterRoleResources(ctx context.Context, metadata RegisterResourcesMetadata, resourcesIterator func() ([]*clientsv1.RoleResource, error)) (uint64, error) {
@@ -54,6 +56,7 @@ func (s *RolesServiceV1) RegisterRoleResources(ctx context.Context, metadata Reg
 
 	client := s.newClient(ctx)
 	stream := client.RegisterRoleResources(ctx)
+	// Metadata must be submitted first in the stream.
 	err = stream.Send(&clientsv1.RegisterRoleResourcesRequest{
 		Payload: &clientsv1.RegisterRoleResourcesRequest_Metadata{
 			Metadata: &clientsv1.RegisterRoleResourcesRequestMetadata{
@@ -62,10 +65,16 @@ func (s *RolesServiceV1) RegisterRoleResources(ctx context.Context, metadata Reg
 			},
 		},
 	})
+
+	sendResources := true
 	if err != nil {
+		// The stream has been closed; skip sending resources.
+		if errors.Is(err, io.EOF) {
+			sendResources = false
+		}
 		return 0, errors.Wrap(err, "failed to send metadata")
 	}
-	for {
+	for sendResources {
 		resources, err := resourcesIterator()
 		if err != nil {
 			return 0, errors.Wrap(err, "failed to get resources")
@@ -81,12 +90,18 @@ func (s *RolesServiceV1) RegisterRoleResources(ctx context.Context, metadata Reg
 			},
 		})
 		if err != nil {
+			// The stream has been closed, so we stop sending resources.
+			if errors.Is(err, io.EOF) {
+				break
+			}
 			return 0, errors.Wrap(err, "failed to send resources")
 		}
 	}
-	resp, err := stream.CloseAndReceive()
-	if err != nil {
-		return 0, errors.Wrap(err, "failed to close stream")
+
+	resp, err := parseResponseAndError(stream.CloseAndReceive())
+	// Stream closed due to another replica registering the same resources.
+	if errors.Is(err, ErrAborted) {
+		return 0, nil
 	}
 	return resp.Msg.GetResourceCount(), nil
 }
