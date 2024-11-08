@@ -71,8 +71,9 @@ func (s *RolesServiceV1) RegisterRoleResources(ctx context.Context, metadata Reg
 		// The stream has been closed; skip sending resources.
 		if errors.Is(err, io.EOF) {
 			sendResources = false
+		} else {
+			return 0, errors.Wrap(err, "failed to send metadata")
 		}
-		return 0, errors.Wrap(err, "failed to send metadata")
 	}
 	for sendResources {
 		resources, err := resourcesIterator()
