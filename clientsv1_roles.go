@@ -100,9 +100,12 @@ func (s *RolesServiceV1) RegisterRoleResources(ctx context.Context, metadata Reg
 	}
 
 	resp, err := parseResponseAndError(stream.CloseAndReceive())
-	// Stream closed due to another replica registering the same resources.
-	if errors.Is(err, ErrAborted) {
-		return 0, nil
+	if err != nil {
+		// Stream closed due to another replica registering the same resources.
+		if errors.Is(err, ErrAborted) {
+			return 0, nil
+		}
+		return 0, err
 	}
 	return resp.Msg.GetResourceCount(), nil
 }
