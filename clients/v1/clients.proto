@@ -87,7 +87,19 @@ message GetUserRolesRequest {
 }
 
 message GetUserRolesResponse {
-  repeated string roles = 1;
+  repeated string roles = 1 [deprecated = true];
+  repeated Role user_roles = 2;
+}
+
+message Role {
+  // The fully qualified role name e.g. `dotcom::site_admin`
+  string role_id = 1;
+  // The service the role is scoped to.
+  string service = 2;
+  // If the role applies to a resource this is the ID of the resource.
+  optional string resource_id = 3;
+  // If the role applies to a resource the is the ResourceType of the resource.
+  optional string resource_type = 4;
 }
 
 service SessionsService {
