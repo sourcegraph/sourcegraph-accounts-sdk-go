@@ -423,8 +423,9 @@ func (UnimplementedTokensServiceHandler) IntrospectToken(context.Context, *conne
 type RolesServiceClient interface {
 	// RegisterRoleResources registers resources with SAMS.
 	//
-	// Only one client can register resources at a time.
-	// If another client is currently registering resources, this request will return an Aborted error.
+	// Only one client can register resources at a time for a particular resource type.
+	// If another client is currently registering resources for the same resource type
+	// this request will return an Aborted error.
 	RegisterRoleResources(context.Context) *connect.ClientStreamForClient[v1.RegisterRoleResourcesRequest, v1.RegisterRoleResourcesResponse]
 }
 
@@ -461,8 +462,9 @@ func (c *rolesServiceClient) RegisterRoleResources(ctx context.Context) *connect
 type RolesServiceHandler interface {
 	// RegisterRoleResources registers resources with SAMS.
 	//
-	// Only one client can register resources at a time.
-	// If another client is currently registering resources, this request will return an Aborted error.
+	// Only one client can register resources at a time for a particular resource type.
+	// If another client is currently registering resources for the same resource type
+	// this request will return an Aborted error.
 	RegisterRoleResources(context.Context, *connect.ClientStream[v1.RegisterRoleResourcesRequest]) (*connect.Response[v1.RegisterRoleResourcesResponse], error)
 }
 

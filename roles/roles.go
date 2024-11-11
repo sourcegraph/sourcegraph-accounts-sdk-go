@@ -23,6 +23,18 @@ func (r Role) Service() services.Service {
 	return services.Service(r[:strings.Index(string(r), "::")])
 }
 
+// ResourceType returns the resource type that the role is associated with.
+// If the role is not registered, it returns "unknown".
+func (r Role) ResourceType() ResourceType {
+	for _, role := range registeredRoles {
+		if role.id == r {
+			return role.resourceType
+		}
+	}
+
+	return ResourceType("unknown")
+}
+
 // ToStrings converts a list of roles to a list of strings.
 func ToStrings(roles []Role) []string {
 	ss := make([]string, len(roles))
