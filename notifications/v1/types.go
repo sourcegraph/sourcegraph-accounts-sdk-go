@@ -32,10 +32,12 @@ type UserRolesUpdatedData struct {
 	AccountID string `json:"account_id"`
 	// Service is the service that the user's roles have been updated in.
 	Service services.Service `json:"service"`
-	// RoleID is the  role that has been updated
+	// RoleID is the  role that has been updated.
 	RoleID roles.Role `json:"role"`
 	// ResourceID is the ID of the resource the role has been updated on.
 	ResourceID string `json:"resource_id,omitempty"`
+	// ResourceType is the type of the resource the role has been updated on.
+	ResourceType roles.ResourceType `json:"resource_type"`
 }
 
 // SessionInvalidatedData contains information of a "SessionInvalidated"
