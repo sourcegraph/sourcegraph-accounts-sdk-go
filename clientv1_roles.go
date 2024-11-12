@@ -88,7 +88,8 @@ func (s *RolesServiceV1) RegisterRoleResources(ctx context.Context, metadata Reg
 			return 0, errors.Wrap(err, "failed to get resources")
 		}
 		if len(resources) == 0 {
-			break
+			sendResources = false
+			continue
 		}
 		err = stream.Send(&clientsv1.RegisterRoleResourcesRequest{
 			Payload: &clientsv1.RegisterRoleResourcesRequest_Resources_{
@@ -100,7 +101,8 @@ func (s *RolesServiceV1) RegisterRoleResources(ctx context.Context, metadata Reg
 		if err != nil {
 			// The stream has been closed, so we stop sending resources.
 			if errors.Is(err, io.EOF) {
-				break
+				sendResources = false
+				continue
 			}
 			return 0, errors.Wrap(err, "failed to send resources")
 		}
