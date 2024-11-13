@@ -82,6 +82,13 @@ func parseResponseAndError[T any](resp *connect.Response[T], err error) (*connec
 		return nil, ErrNotFound
 	}
 
+	// connect.CodeAborted is returned due to a concurrency conflict.
+	// e.g. Two clients trying to register role resources at the same time for the same resource type.
+	// It is safe to retry the request at a later time.
+	if connectErr.Code() == connect.CodeAborted {
+		return nil, ErrAborted
+	}
+
 	// Cannot determine action solely based on status code, let's look at the error
 	// details.
 	for _, detail := range connectErr.Details() {
@@ -119,9 +126,17 @@ func (c *ClientV1) Tokens() *TokensServiceV1 {
 	return &TokensServiceV1{client: c}
 }
 
+func (c *ClientV1) Roles() *RolesServiceV1 {
+	return &RolesServiceV1{client: c}
+}
+
 var (
 	ErrNotFound       = errors.New("not found")
 	ErrRecordMismatch = errors.New("record mismatch")
+	// ErrAborted is returned due to a concurrency conflict.
+	// e.g. Two clients trying to perform an operation at the same time for the same resource.
+	// It is safe to retry the request at a later time.
+	ErrAborted = errors.New("aborted")
 )
 
 // ClientCredentialsTokenSource returns a TokenSource that generates an access

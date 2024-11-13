@@ -421,6 +421,11 @@ func (UnimplementedTokensServiceHandler) IntrospectToken(context.Context, *conne
 
 // RolesServiceClient is a client for the clients.v1.RolesService service.
 type RolesServiceClient interface {
+	// RegisterRoleResources registers resources with SAMS.
+	//
+	// Only one client can register resources at a time for a particular resource type.
+	// If another client is currently registering resources for the same resource type
+	// this request will return an Aborted error.
 	RegisterRoleResources(context.Context) *connect.ClientStreamForClient[v1.RegisterRoleResourcesRequest, v1.RegisterRoleResourcesResponse]
 }
 
@@ -455,6 +460,11 @@ func (c *rolesServiceClient) RegisterRoleResources(ctx context.Context) *connect
 
 // RolesServiceHandler is an implementation of the clients.v1.RolesService service.
 type RolesServiceHandler interface {
+	// RegisterRoleResources registers resources with SAMS.
+	//
+	// Only one client can register resources at a time for a particular resource type.
+	// If another client is currently registering resources for the same resource type
+	// this request will return an Aborted error.
 	RegisterRoleResources(context.Context, *connect.ClientStream[v1.RegisterRoleResourcesRequest]) (*connect.Response[v1.RegisterRoleResourcesResponse], error)
 }
 

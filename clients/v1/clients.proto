@@ -168,6 +168,11 @@ message IntrospectTokenResponse {
 }
 
 service RolesService {
+  // RegisterRoleResources registers resources with SAMS.
+  // 
+  // Only one client can register resources at a time for a particular resource type.
+  // If another client is currently registering resources for the same resource type 
+  // this request will return an Aborted error.
   rpc RegisterRoleResources (stream RegisterRoleResourcesRequest) returns (RegisterRoleResourcesResponse) {
     option (sams_required_scopes) = "sams::roles.resources::write";
   };
