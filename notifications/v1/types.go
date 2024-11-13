@@ -3,6 +3,7 @@ package v1
 import (
 	"go.opentelemetry.io/otel"
 
+	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/roles"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/services"
 )
 
@@ -24,11 +25,26 @@ type UserDeletedData struct {
 }
 
 // UserRolesUpdatedData contains information of a "UserRolesUpdated" notification.
+// When a user's roles have been updated it is neccessary to query SAMS to get the
+// updated roles to determine if it was granted/revoked.
+//
+// For more details see:
+// https://sourcegraph.notion.site/SAMS-Roles-Resources-13ca8e11265880f9a573cac77070ca0c
 type UserRolesUpdatedData struct {
 	// AccountID is the SAMS external ID of the user whose roles have been updated.
 	AccountID string `json:"account_id"`
 	// Service is the service that the user's roles have been updated in.
 	Service services.Service `json:"service"`
+	// RoleID is the  role that has been updated.
+	RoleID roles.Role `json:"role"`
+	// ResourceID is the ID of the resource the role has been updated on,
+	// if applicable. When ResourceID is empty, the role is a service-level
+	// role that does not apply to a specific resource.
+	ResourceID string `json:"resource_id,omitempty"`
+	// ResourceType is the type of the resource the role has been updated on,
+	// if applicable. When ResourceType is empty, the role is a service-level
+	// role that does not apply to a specific resource.
+	ResourceType roles.ResourceType `json:"resource_type,omitempty"`
 }
 
 // SessionInvalidatedData contains information of a "SessionInvalidated"
