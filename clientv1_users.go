@@ -72,7 +72,7 @@ func (s *UsersServiceV1) GetUsersByIDs(ctx context.Context, ids []string) ([]*cl
 // with the given ID and scoped by the service.
 //
 // Required scopes: sams::user.roles::read
-func (s *UsersServiceV1) GetUserRolesByID(ctx context.Context, userID, service string) ([]string, error) {
+func (s *UsersServiceV1) GetUserRolesByID(ctx context.Context, userID, service string) ([]*clientsv1.Role, error) {
 	req := &clientsv1.GetUserRolesRequest{
 		Id:      userID,
 		Service: service,
@@ -82,5 +82,5 @@ func (s *UsersServiceV1) GetUserRolesByID(ctx context.Context, userID, service s
 	if err != nil {
 		return nil, err
 	}
-	return resp.Msg.GetRoles(), nil
+	return resp.Msg.GetUserRoles(), nil
 }
