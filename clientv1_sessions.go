@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/oauth2"
 
 	"github.com/hashicorp/golang-lru/v2/expirable"
@@ -35,9 +37,13 @@ func (s *SessionsServiceV1) newClient(ctx context.Context) clientsv1connect.Sess
 func (s *SessionsServiceV1) GetSessionByID(ctx context.Context, id string) (*clientsv1.Session, error) {
 	if s.sessionsCache != nil {
 		if cached, ok := s.sessionsCache.Get(id); ok {
+			trace.SpanFromContext(ctx).
+				SetAttributes(attribute.Bool("sams.session.fromCache", true))
 			return cached, nil
 		}
 	}
+	trace.SpanFromContext(ctx).
+		SetAttributes(attribute.Bool("sams.session.fromCache", false))
 
 	req := &clientsv1.GetSessionRequest{Id: id}
 	client := s.newClient(ctx)

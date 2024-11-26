@@ -23,7 +23,7 @@ var (
 	sessionsCacheExpiry = 3 * time.Second
 	// Most client credential tokens expire on >1 hour intervals, so 30 seconds
 	// should be reasonable.
-	introspectCacheExpiry = 30 * time.Second
+	introspectTokenCacheExpiry = 30 * time.Second
 )
 
 // ClientV1 provides helpers to talk to a SAMS instance via Clients API v1.
@@ -33,8 +33,8 @@ type ClientV1 struct {
 
 	// sessionsCache may be nil if not enabled.
 	sessionsCache *expirable.LRU[string, *clientsv1.Session]
-	// introspectCache may be nil if not enabled.
-	introspectCache *expirable.LRU[string, *IntrospectTokenResponse]
+	// introspectTokenCache may be nil if not enabled.
+	introspectTokenCache *expirable.LRU[string, *IntrospectTokenResponse]
 
 	// defaultInterceptors is a list of default interceptors to use with all
 	// clients, generally providing enhanced diagnostics.
@@ -54,11 +54,11 @@ type ClientV1Config struct {
 	//
 	// The default of 0 (or less) disables caching.
 	SessionsCacheSize int
-	// IntrospectCacheSize is the number of introspection results to cache in
-	// memory.
+	// IntrospectTokenCacheSize is the number of token introspection results to
+	// cache in memory.
 	//
 	// The default of 0 (or less) disables caching.
-	IntrospectCacheSize int
+	IntrospectTokenCacheSize int
 }
 
 func (c ClientV1Config) Validate() error {
@@ -98,21 +98,21 @@ func NewClientV1(config ClientV1Config) (*ClientV1, error) {
 			sessionsCacheExpiry,
 		)
 	}
-	var introspectCache *expirable.LRU[string, *IntrospectTokenResponse]
-	if config.IntrospectCacheSize > 0 {
-		introspectCache = expirable.NewLRU[string, *IntrospectTokenResponse](
-			config.IntrospectCacheSize,
+	var introspectTokenCache *expirable.LRU[string, *IntrospectTokenResponse]
+	if config.IntrospectTokenCacheSize > 0 {
+		introspectTokenCache = expirable.NewLRU[string, *IntrospectTokenResponse](
+			config.IntrospectTokenCacheSize,
 			nil, // no eviction callback needed
-			introspectCacheExpiry,
+			introspectTokenCacheExpiry,
 		)
 	}
 
 	return &ClientV1{
-		rootURL:             strings.TrimSuffix(apiURL, "/"),
-		tokenSource:         config.TokenSource,
-		defaultInterceptors: []connect.Interceptor{otelinterceptor},
-		sessionsCache:       sessionsCache,
-		introspectCache:     introspectCache,
+		rootURL:              strings.TrimSuffix(apiURL, "/"),
+		tokenSource:          config.TokenSource,
+		defaultInterceptors:  []connect.Interceptor{otelinterceptor},
+		sessionsCache:        sessionsCache,
+		introspectTokenCache: introspectTokenCache,
 	}, nil
 }
 
@@ -168,7 +168,7 @@ func (c *ClientV1) Sessions() *SessionsServiceV1 {
 
 // Tokens returns a client handler to interact with the TokensServiceV1 API.
 func (c *ClientV1) Tokens() *TokensServiceV1 {
-	return &TokensServiceV1{client: c, introspectCache: c.introspectCache}
+	return &TokensServiceV1{client: c, introspectTokenCache: c.introspectTokenCache}
 }
 
 func (c *ClientV1) Roles() *RolesServiceV1 {

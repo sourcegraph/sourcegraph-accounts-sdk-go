@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/oauth2"
 
 	"github.com/hashicorp/golang-lru/v2/expirable"
@@ -17,8 +19,8 @@ import (
 // API v1.
 type TokensServiceV1 struct {
 	client *ClientV1
-	// introspectCache may be nil if not enabled.
-	introspectCache *expirable.LRU[string, *IntrospectTokenResponse]
+	// introspectTokenCache may be nil if not enabled.
+	introspectTokenCache *expirable.LRU[string, *IntrospectTokenResponse]
 }
 
 func (s *TokensServiceV1) newClient(ctx context.Context) clientsv1connect.TokensServiceClient {
@@ -48,11 +50,15 @@ type IntrospectTokenResponse struct {
 // is no longer active. It is critical that the caller not honor tokens where
 // `.Active == false`.
 func (s *TokensServiceV1) IntrospectToken(ctx context.Context, token string) (*IntrospectTokenResponse, error) {
-	if s.introspectCache != nil {
-		if cached, ok := s.introspectCache.Get(token); ok {
+	if s.introspectTokenCache != nil {
+		if cached, ok := s.introspectTokenCache.Get(token); ok {
+			trace.SpanFromContext(ctx).
+				SetAttributes(attribute.Bool("sams.introspectToken.fromCache", true))
 			return cached, nil
 		}
 	}
+	trace.SpanFromContext(ctx).
+		SetAttributes(attribute.Bool("sams.introspectToken.fromCache", false))
 
 	req := &clientsv1.IntrospectTokenRequest{Token: token}
 	client := s.newClient(ctx)
@@ -67,8 +73,8 @@ func (s *TokensServiceV1) IntrospectToken(ctx context.Context, token string) (*I
 		ClientID:  resp.Msg.ClientId,
 		ExpiresAt: resp.Msg.ExpiresAt.AsTime(),
 	}
-	if s.introspectCache != nil {
-		_ = s.introspectCache.Add(token, tokenResponse)
+	if s.introspectTokenCache != nil {
+		_ = s.introspectTokenCache.Add(token, tokenResponse)
 	}
 	return tokenResponse, nil
 }
