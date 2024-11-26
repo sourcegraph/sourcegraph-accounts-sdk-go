@@ -7,6 +7,7 @@ import (
 	"connectrpc.com/connect"
 	"golang.org/x/oauth2"
 
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	clientsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1/clientsv1connect"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
@@ -16,6 +17,8 @@ import (
 // API v1.
 type TokensServiceV1 struct {
 	client *ClientV1
+	// introspectCache may be nil if not enabled.
+	introspectCache *expirable.LRU[string, *IntrospectTokenResponse]
 }
 
 func (s *TokensServiceV1) newClient(ctx context.Context) clientsv1connect.TokensServiceClient {
@@ -45,16 +48,27 @@ type IntrospectTokenResponse struct {
 // is no longer active. It is critical that the caller not honor tokens where
 // `.Active == false`.
 func (s *TokensServiceV1) IntrospectToken(ctx context.Context, token string) (*IntrospectTokenResponse, error) {
+	if s.introspectCache != nil {
+		if cached, ok := s.introspectCache.Get(token); ok {
+			return cached, nil
+		}
+	}
+
 	req := &clientsv1.IntrospectTokenRequest{Token: token}
 	client := s.newClient(ctx)
 	resp, err := parseResponseAndError(client.IntrospectToken(ctx, connect.NewRequest(req)))
 	if err != nil {
 		return nil, err
 	}
-	return &IntrospectTokenResponse{
+
+	tokenResponse := &IntrospectTokenResponse{
 		Active:    resp.Msg.Active,
 		Scopes:    scopes.ToScopes(resp.Msg.Scopes),
 		ClientID:  resp.Msg.ClientId,
 		ExpiresAt: resp.Msg.ExpiresAt.AsTime(),
-	}, nil
+	}
+	if s.introspectCache != nil {
+		_ = s.introspectCache.Add(token, tokenResponse)
+	}
+	return tokenResponse, nil
 }

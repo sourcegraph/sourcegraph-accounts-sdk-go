@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"connectrpc.com/connect"
 	"connectrpc.com/otelconnect"
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	"github.com/sourcegraph/sourcegraph/lib/errors"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
@@ -15,10 +17,24 @@ import (
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
 )
 
+var (
+	// Users can sign out at any time, so we don't want to preserve the sessions
+	// cache for very long.
+	sessionsCacheExpiry = 3 * time.Second
+	// Most client credential tokens expire on >1 hour intervals, so 30 seconds
+	// should be reasonable.
+	introspectCacheExpiry = 30 * time.Second
+)
+
 // ClientV1 provides helpers to talk to a SAMS instance via Clients API v1.
 type ClientV1 struct {
 	rootURL     string
 	tokenSource oauth2.TokenSource
+
+	// sessionsCache may be nil if not enabled.
+	sessionsCache *expirable.LRU[string, *clientsv1.Session]
+	// introspectCache may be nil if not enabled.
+	introspectCache *expirable.LRU[string, *IntrospectTokenResponse]
 
 	// defaultInterceptors is a list of default interceptors to use with all
 	// clients, generally providing enhanced diagnostics.
@@ -34,6 +50,15 @@ type ClientV1Config struct {
 	// The oauth2.TokenSource abstraction will take care of creating short-lived
 	// access tokens as needed.
 	TokenSource oauth2.TokenSource
+	// SessionsCacheSize is the number of sessions to cache in memory.
+	//
+	// The default of 0 (or less) disables caching.
+	SessionsCacheSize int
+	// IntrospectCacheSize is the number of introspection results to cache in
+	// memory.
+	//
+	// The default of 0 (or less) disables caching.
+	IntrospectCacheSize int
 }
 
 func (c ClientV1Config) Validate() error {
@@ -64,10 +89,30 @@ func NewClientV1(config ClientV1Config) (*ClientV1, error) {
 	}
 
 	apiURL := config.getAPIURL()
+
+	var sessionsCache *expirable.LRU[string, *clientsv1.Session]
+	if config.SessionsCacheSize > 0 {
+		sessionsCache = expirable.NewLRU[string, *clientsv1.Session](
+			config.SessionsCacheSize,
+			nil, // no eviction callback needed
+			sessionsCacheExpiry,
+		)
+	}
+	var introspectCache *expirable.LRU[string, *IntrospectTokenResponse]
+	if config.IntrospectCacheSize > 0 {
+		introspectCache = expirable.NewLRU[string, *IntrospectTokenResponse](
+			config.IntrospectCacheSize,
+			nil, // no eviction callback needed
+			introspectCacheExpiry,
+		)
+	}
+
 	return &ClientV1{
 		rootURL:             strings.TrimSuffix(apiURL, "/"),
 		tokenSource:         config.TokenSource,
 		defaultInterceptors: []connect.Interceptor{otelinterceptor},
+		sessionsCache:       sessionsCache,
+		introspectCache:     introspectCache,
 	}, nil
 }
 
@@ -118,12 +163,12 @@ func (c *ClientV1) Users() *UsersServiceV1 {
 
 // Sessions returns a client handler to interact with the SessionsServiceV1 API.
 func (c *ClientV1) Sessions() *SessionsServiceV1 {
-	return &SessionsServiceV1{client: c}
+	return &SessionsServiceV1{client: c, sessionsCache: c.sessionsCache}
 }
 
 // Tokens returns a client handler to interact with the TokensServiceV1 API.
 func (c *ClientV1) Tokens() *TokensServiceV1 {
-	return &TokensServiceV1{client: c}
+	return &TokensServiceV1{client: c, introspectCache: c.introspectCache}
 }
 
 func (c *ClientV1) Roles() *RolesServiceV1 {
