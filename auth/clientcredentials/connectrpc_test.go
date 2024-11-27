@@ -72,6 +72,8 @@ func TestInterceptor(t *testing.T) {
 					connect.WithInterceptors(interceptor)),
 			)
 			srv := httptest.NewServer(mux)
+			t.Cleanup(srv.Close)
+
 			c := clientsv1connect.NewUsersServiceClient(
 				oauth2.NewClient(
 					context.Background(),
