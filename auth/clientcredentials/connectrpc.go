@@ -22,7 +22,7 @@ type Interceptor struct {
 	extension    *protoimpl.ExtensionInfo
 }
 
-// NewInterceptor creates a serverside handler interceptor that ensures every
+// NewInterceptor creates a serverside ConnectRPC interceptor that ensures every
 // incoming request has a valid client credential token with the required scopes
 // indicated in the RPC method options. When used, required scopes CANNOT be
 // empty - if no scopes are required, declare a separate service that does not

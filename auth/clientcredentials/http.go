@@ -16,6 +16,9 @@ type HTTPAuthenticator struct {
 
 // NewHTTPAuthenticator provides a factor for auth middleware that uses SAMS
 // service-to-service tokens to authenticate the requests.
+//
+// If you are using ConnectRPC, use clientcredentials.NewInterceptor() instead.
+// HTTPAuthenticator should only be used for non-ConnectRPC APIs.
 func NewHTTPAuthenticator(logger log.Logger, introspector TokenIntrospector) *HTTPAuthenticator {
 	return &HTTPAuthenticator{
 		logger:       logger,
