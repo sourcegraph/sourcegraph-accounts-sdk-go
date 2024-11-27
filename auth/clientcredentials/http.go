@@ -1,10 +1,12 @@
 package clientcredentials
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/sourcegraph/log"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/scopes"
+	"github.com/sourcegraph/sourcegraph/lib/errors"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -47,9 +49,14 @@ func (a *HTTPAuthenticator) RequireScopes(requiredScopes scopes.Scopes, next htt
 
 		result, err := a.introspector.IntrospectToken(ctx, token)
 		if err != nil || result == nil {
-			logger.Error("error introspecting token", log.Error(err))
-			const ise = http.StatusInternalServerError
-			http.Error(w, http.StatusText(ise), ise)
+			code := http.StatusInternalServerError
+			if errors.Is(err, context.Canceled) {
+				code = http.StatusBadRequest
+				logger.Warn("error introspecting token", log.Error(err))
+			} else {
+				logger.Error("error introspecting token", log.Error(err))
+			}
+			http.Error(w, http.StatusText(code), code)
 			return
 		}
 

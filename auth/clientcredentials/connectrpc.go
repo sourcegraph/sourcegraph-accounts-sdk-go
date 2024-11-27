@@ -184,18 +184,29 @@ func extractSchemaRequiredScopes(spec connect.Spec, extension *protoimpl.Extensi
 // connectInternalError logs an error, adds it to the trace, and returns a connect
 // error with a safe message.
 func connectInternalError(ctx context.Context, logger log.Logger, err error, safeMsg string) error {
-	trace.SpanFromContext(ctx).
-		SetAttributes(
-			attribute.String("full_error", err.Error()),
-		)
-	logger.WithTrace(log.TraceContext{
+	span := trace.SpanFromContext(ctx)
+	span.SetAttributes(
+		attribute.String("safe_msg", safeMsg),
+		attribute.String("full_error", err.Error()))
+	span.SetStatus(otelcodes.Error, err.Error())
+
+	logger = logger.WithTrace(log.TraceContext{
 		TraceID: trace.SpanContextFromContext(ctx).TraceID().String(),
 		SpanID:  trace.SpanContextFromContext(ctx).SpanID().String(),
-	}).
-		AddCallerSkip(1).
-		Error(safeMsg,
-			log.String("code", connect.CodeInternal.String()),
-			log.Error(err),
-		)
-	return connect.NewError(connect.CodeInternal, errors.New(safeMsg))
+	}).AddCallerSkip(1)
+
+	// Log at different levels and return different codes depending on the type
+	// of this unexpected error.
+	if errors.Is(err, context.Canceled) {
+		code := connect.CodeCanceled
+		logger.Warn(safeMsg,
+			log.String("code", code.String()),
+			log.Error(err))
+		return connect.NewError(code, errors.New(safeMsg))
+	}
+	code := connect.CodeInternal
+	logger.Error(safeMsg,
+		log.String("code", code.String()),
+		log.Error(err))
+	return connect.NewError(code, errors.New(safeMsg))
 }
