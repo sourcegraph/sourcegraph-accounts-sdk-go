@@ -83,6 +83,7 @@ type Permission string
 var (
 	codyGatewayPermissions = []Permission{
 		"flaggedprompts",
+		"workspaces",
 	}
 	samsPermissions = []Permission{
 		"user",
