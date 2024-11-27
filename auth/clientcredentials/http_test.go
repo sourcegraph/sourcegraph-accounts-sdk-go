@@ -63,8 +63,7 @@ func TestHTTPAuthenticator(t *testing.T) {
 				scopes.Scopes{scopes.Profile},
 				http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(http.StatusOK)
-					w.Write([]byte(http.StatusText(http.StatusOK)))
-					return
+					_, _ = w.Write([]byte(http.StatusText(http.StatusOK)))
 				}),
 			))
 			srv := httptest.NewServer(mux)
