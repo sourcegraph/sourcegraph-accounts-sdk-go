@@ -51,7 +51,9 @@ type IntrospectTokenResponse struct {
 // `.Active == false`.
 func (s *TokensServiceV1) IntrospectToken(ctx context.Context, token string) (*IntrospectTokenResponse, error) {
 	if s.introspectTokenCache != nil {
-		if cached, ok := s.introspectTokenCache.Get(token); ok && cached.ExpiresAt.Before(time.Now()) {
+		if cached, ok := s.introspectTokenCache.Get(token); ok && // entry exists
+			// and NOT expired
+			cached.ExpiresAt.After(time.Now()) {
 			trace.SpanFromContext(ctx).
 				SetAttributes(attribute.Bool("sams.introspectToken.fromCache", true))
 			return cached, nil
