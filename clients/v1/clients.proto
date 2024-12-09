@@ -55,6 +55,7 @@ service UsersService {
   // variant scope, such as 'sams::user.metadata.dotcom::write'
   rpc UpdateUserMetadata(UpdateUserMetadataRequest) returns (UpdateUserMetadataResponse) {
     // Cannot use 'sams_required_scopes' due to metadata-scope-specific scopes.
+    // See docstring for required scopes.
   }
 }
 
