@@ -4,6 +4,7 @@ package clients.v1;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/descriptor.proto";
+import "google/protobuf/field_mask.proto";
 
 option go_package = "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1;clientsv1";
 
@@ -39,6 +40,21 @@ service UsersService {
   rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse) {
     option (sams_required_scopes) = "sams::user.roles::read";
   };
+  // GetUserMetadata retrieves metadata for a SAMS user.
+  //
+  // Required scopes: 'sams::user.metadata::write' or metadata-scope-specific
+  // variant scope, such as 'sams::user.metadata.dotcom::write'
+  rpc GetUserMetadata(GetUserMetadataRequest) returns (GetUserMetadataResponse) {
+    // Cannot use 'sams_required_scopes' due to metadata-scope-specific scopes.
+    // See docstring for required scopes.
+  }
+  // UpdateUserMetadata updates the metadata of a SAMS user.
+  //
+  // Required scopes: 'sams::user.metadata::write' or metadata-scope-specific
+  // variant scope, such as 'sams::user.metadata.dotcom::write'
+  rpc UpdateUserMetadata(UpdateUserMetadataRequest) returns (UpdateUserMetadataResponse) {
+    // Cannot use 'sams_required_scopes' due to metadata-scope-specific scopes.
+  }
 }
 
 // Exactly one attribute can be set.
@@ -100,6 +116,54 @@ message Role {
   optional string resource_id = 3;
   // If the role applies to a resource the is the ResourceType of the resource.
   optional string resource_type = 4;
+}
+
+message GetUserMetadataRequest {
+  // The user's external ID.
+  string id = 1;
+  // Services is the list of service slugs to filter the metadata. "*" can be used
+  // to return metadata for all services.
+  //
+  // Requires the scope for the requested service(s); for example, '*' requires
+  // 'sams::user.metadata::read', and 'dotcom' requires 'sams::user.metadata.dotcom::read'.
+  repeated string services = 2;
+}
+
+// The metadata associated with a user for a specific service.
+message UserServiceMetadata {
+  // The user's external ID.
+  //
+  // Behaviour: IDENTIFIER
+  string user_id = 1;
+  // The service slug.
+  //
+  // Behaviour: IDENTIFIER
+  string service = 2;
+  // Metadata associated with this user for the specified service.
+  map<string, string> metadata = 3;
+}
+
+message GetUserMetadataResponse {
+  // The requested metadata for the user.
+  repeated UserServiceMetadata metadata = 1;
+}
+
+message UpdateUserMetadataRequest {
+  // The following fields are used to identify the workspace to update:
+  // - user_id
+  // - service
+  // Both user_id and service are required to apply an update.
+  UserServiceMetadata metadata = 1;
+  // The list of fields to update. Field names are specified relative to 
+  // the UserServiceMetadata.
+  // Updatable fields are:
+  // - metadata
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message UpdateUserMetadataResponse {
+  // The updated user metadata.
+  UserServiceMetadata metadata = 1;
 }
 
 service SessionsService {

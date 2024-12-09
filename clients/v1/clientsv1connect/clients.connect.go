@@ -46,6 +46,12 @@ const (
 	// UsersServiceGetUserRolesProcedure is the fully-qualified name of the UsersService's GetUserRoles
 	// RPC.
 	UsersServiceGetUserRolesProcedure = "/clients.v1.UsersService/GetUserRoles"
+	// UsersServiceGetUserMetadataProcedure is the fully-qualified name of the UsersService's
+	// GetUserMetadata RPC.
+	UsersServiceGetUserMetadataProcedure = "/clients.v1.UsersService/GetUserMetadata"
+	// UsersServiceUpdateUserMetadataProcedure is the fully-qualified name of the UsersService's
+	// UpdateUserMetadata RPC.
+	UsersServiceUpdateUserMetadataProcedure = "/clients.v1.UsersService/UpdateUserMetadata"
 	// SessionsServiceGetSessionProcedure is the fully-qualified name of the SessionsService's
 	// GetSession RPC.
 	SessionsServiceGetSessionProcedure = "/clients.v1.SessionsService/GetSession"
@@ -66,6 +72,8 @@ var (
 	usersServiceGetUserMethodDescriptor               = usersServiceServiceDescriptor.Methods().ByName("GetUser")
 	usersServiceGetUsersMethodDescriptor              = usersServiceServiceDescriptor.Methods().ByName("GetUsers")
 	usersServiceGetUserRolesMethodDescriptor          = usersServiceServiceDescriptor.Methods().ByName("GetUserRoles")
+	usersServiceGetUserMetadataMethodDescriptor       = usersServiceServiceDescriptor.Methods().ByName("GetUserMetadata")
+	usersServiceUpdateUserMetadataMethodDescriptor    = usersServiceServiceDescriptor.Methods().ByName("UpdateUserMetadata")
 	sessionsServiceServiceDescriptor                  = v1.File_clients_v1_clients_proto.Services().ByName("SessionsService")
 	sessionsServiceGetSessionMethodDescriptor         = sessionsServiceServiceDescriptor.Methods().ByName("GetSession")
 	sessionsServiceSignOutSessionMethodDescriptor     = sessionsServiceServiceDescriptor.Methods().ByName("SignOutSession")
@@ -94,6 +102,16 @@ type UsersServiceClient interface {
 	//
 	// Required scopes: sams::user.roles::read
 	GetUserRoles(context.Context, *connect.Request[v1.GetUserRolesRequest]) (*connect.Response[v1.GetUserRolesResponse], error)
+	// GetUserMetadata retrieves metadata for a SAMS user.
+	//
+	// Required scopes: 'sams::user.metadata::write' or metadata-scope-specific
+	// variant scope, such as 'sams::user.metadata.dotcom::write'
+	GetUserMetadata(context.Context, *connect.Request[v1.GetUserMetadataRequest]) (*connect.Response[v1.GetUserMetadataResponse], error)
+	// UpdateUserMetadata updates the metadata of a SAMS user.
+	//
+	// Required scopes: 'sams::user.metadata::write' or metadata-scope-specific
+	// variant scope, such as 'sams::user.metadata.dotcom::write'
+	UpdateUserMetadata(context.Context, *connect.Request[v1.UpdateUserMetadataRequest]) (*connect.Response[v1.UpdateUserMetadataResponse], error)
 }
 
 // NewUsersServiceClient constructs a client for the clients.v1.UsersService service. By default, it
@@ -124,14 +142,28 @@ func NewUsersServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(usersServiceGetUserRolesMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		getUserMetadata: connect.NewClient[v1.GetUserMetadataRequest, v1.GetUserMetadataResponse](
+			httpClient,
+			baseURL+UsersServiceGetUserMetadataProcedure,
+			connect.WithSchema(usersServiceGetUserMetadataMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		updateUserMetadata: connect.NewClient[v1.UpdateUserMetadataRequest, v1.UpdateUserMetadataResponse](
+			httpClient,
+			baseURL+UsersServiceUpdateUserMetadataProcedure,
+			connect.WithSchema(usersServiceUpdateUserMetadataMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // usersServiceClient implements UsersServiceClient.
 type usersServiceClient struct {
-	getUser      *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
-	getUsers     *connect.Client[v1.GetUsersRequest, v1.GetUsersResponse]
-	getUserRoles *connect.Client[v1.GetUserRolesRequest, v1.GetUserRolesResponse]
+	getUser            *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
+	getUsers           *connect.Client[v1.GetUsersRequest, v1.GetUsersResponse]
+	getUserRoles       *connect.Client[v1.GetUserRolesRequest, v1.GetUserRolesResponse]
+	getUserMetadata    *connect.Client[v1.GetUserMetadataRequest, v1.GetUserMetadataResponse]
+	updateUserMetadata *connect.Client[v1.UpdateUserMetadataRequest, v1.UpdateUserMetadataResponse]
 }
 
 // GetUser calls clients.v1.UsersService.GetUser.
@@ -147,6 +179,16 @@ func (c *usersServiceClient) GetUsers(ctx context.Context, req *connect.Request[
 // GetUserRoles calls clients.v1.UsersService.GetUserRoles.
 func (c *usersServiceClient) GetUserRoles(ctx context.Context, req *connect.Request[v1.GetUserRolesRequest]) (*connect.Response[v1.GetUserRolesResponse], error) {
 	return c.getUserRoles.CallUnary(ctx, req)
+}
+
+// GetUserMetadata calls clients.v1.UsersService.GetUserMetadata.
+func (c *usersServiceClient) GetUserMetadata(ctx context.Context, req *connect.Request[v1.GetUserMetadataRequest]) (*connect.Response[v1.GetUserMetadataResponse], error) {
+	return c.getUserMetadata.CallUnary(ctx, req)
+}
+
+// UpdateUserMetadata calls clients.v1.UsersService.UpdateUserMetadata.
+func (c *usersServiceClient) UpdateUserMetadata(ctx context.Context, req *connect.Request[v1.UpdateUserMetadataRequest]) (*connect.Response[v1.UpdateUserMetadataResponse], error) {
+	return c.updateUserMetadata.CallUnary(ctx, req)
 }
 
 // UsersServiceHandler is an implementation of the clients.v1.UsersService service.
@@ -168,6 +210,16 @@ type UsersServiceHandler interface {
 	//
 	// Required scopes: sams::user.roles::read
 	GetUserRoles(context.Context, *connect.Request[v1.GetUserRolesRequest]) (*connect.Response[v1.GetUserRolesResponse], error)
+	// GetUserMetadata retrieves metadata for a SAMS user.
+	//
+	// Required scopes: 'sams::user.metadata::write' or metadata-scope-specific
+	// variant scope, such as 'sams::user.metadata.dotcom::write'
+	GetUserMetadata(context.Context, *connect.Request[v1.GetUserMetadataRequest]) (*connect.Response[v1.GetUserMetadataResponse], error)
+	// UpdateUserMetadata updates the metadata of a SAMS user.
+	//
+	// Required scopes: 'sams::user.metadata::write' or metadata-scope-specific
+	// variant scope, such as 'sams::user.metadata.dotcom::write'
+	UpdateUserMetadata(context.Context, *connect.Request[v1.UpdateUserMetadataRequest]) (*connect.Response[v1.UpdateUserMetadataResponse], error)
 }
 
 // NewUsersServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -194,6 +246,18 @@ func NewUsersServiceHandler(svc UsersServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(usersServiceGetUserRolesMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	usersServiceGetUserMetadataHandler := connect.NewUnaryHandler(
+		UsersServiceGetUserMetadataProcedure,
+		svc.GetUserMetadata,
+		connect.WithSchema(usersServiceGetUserMetadataMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	usersServiceUpdateUserMetadataHandler := connect.NewUnaryHandler(
+		UsersServiceUpdateUserMetadataProcedure,
+		svc.UpdateUserMetadata,
+		connect.WithSchema(usersServiceUpdateUserMetadataMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/clients.v1.UsersService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case UsersServiceGetUserProcedure:
@@ -202,6 +266,10 @@ func NewUsersServiceHandler(svc UsersServiceHandler, opts ...connect.HandlerOpti
 			usersServiceGetUsersHandler.ServeHTTP(w, r)
 		case UsersServiceGetUserRolesProcedure:
 			usersServiceGetUserRolesHandler.ServeHTTP(w, r)
+		case UsersServiceGetUserMetadataProcedure:
+			usersServiceGetUserMetadataHandler.ServeHTTP(w, r)
+		case UsersServiceUpdateUserMetadataProcedure:
+			usersServiceUpdateUserMetadataHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -221,6 +289,14 @@ func (UnimplementedUsersServiceHandler) GetUsers(context.Context, *connect.Reque
 
 func (UnimplementedUsersServiceHandler) GetUserRoles(context.Context, *connect.Request[v1.GetUserRolesRequest]) (*connect.Response[v1.GetUserRolesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.UsersService.GetUserRoles is not implemented"))
+}
+
+func (UnimplementedUsersServiceHandler) GetUserMetadata(context.Context, *connect.Request[v1.GetUserMetadataRequest]) (*connect.Response[v1.GetUserMetadataResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.UsersService.GetUserMetadata is not implemented"))
+}
+
+func (UnimplementedUsersServiceHandler) UpdateUserMetadata(context.Context, *connect.Request[v1.UpdateUserMetadataRequest]) (*connect.Response[v1.UpdateUserMetadataResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.UsersService.UpdateUserMetadata is not implemented"))
 }
 
 // SessionsServiceClient is a client for the clients.v1.SessionsService service.
