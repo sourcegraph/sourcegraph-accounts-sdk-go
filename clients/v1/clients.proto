@@ -4,6 +4,7 @@ package clients.v1;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/descriptor.proto";
+import "google/protobuf/struct.proto";
 import "google/protobuf/field_mask.proto";
 
 option go_package = "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1;clientsv1";
@@ -140,7 +141,7 @@ message UserServiceMetadata {
   // Behaviour: IDENTIFIER
   string service = 2;
   // Metadata associated with this user for the specified service.
-  map<string, string> metadata = 3;
+  google.protobuf.Struct metadata = 3;
 }
 
 message GetUserMetadataResponse {
