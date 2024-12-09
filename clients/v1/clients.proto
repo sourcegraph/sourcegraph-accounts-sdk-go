@@ -5,7 +5,6 @@ package clients.v1;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/descriptor.proto";
 import "google/protobuf/struct.proto";
-import "google/protobuf/field_mask.proto";
 
 option go_package = "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1;clientsv1";
 
@@ -156,11 +155,6 @@ message UpdateUserMetadataRequest {
   // - service
   // Both user_id and service are required to apply an update.
   UserServiceMetadata metadata = 1;
-  // The list of fields to update. Field names are specified relative to 
-  // the UserServiceMetadata.
-  // Updatable fields are:
-  // - metadata
-  google.protobuf.FieldMask update_mask = 2;
 }
 
 message UpdateUserMetadataResponse {
