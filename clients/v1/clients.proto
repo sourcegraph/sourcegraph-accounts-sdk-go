@@ -42,8 +42,8 @@ service UsersService {
   };
   // GetUserMetadata retrieves metadata for a SAMS user.
   //
-  // Required scopes: 'sams::user.metadata::write' or metadata-scope-specific
-  // variant scope, such as 'sams::user.metadata.dotcom::write'
+  // Required scopes: 'sams::user.metadata::read' or metadata-scope-specific
+  // variant scope, such as 'sams::user.metadata.dotcom::read'
   rpc GetUserMetadata(GetUserMetadataRequest) returns (GetUserMetadataResponse) {
     // Cannot use 'sams_required_scopes' due to metadata-scope-specific scopes.
     // See docstring for required scopes.
