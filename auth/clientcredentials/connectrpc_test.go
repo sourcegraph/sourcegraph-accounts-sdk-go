@@ -20,10 +20,14 @@ import (
 )
 
 func TestInterceptor(t *testing.T) {
-	// All tests based on UsersService.GetUser()
+	// All tests based on UsersService
 	for _, tc := range []struct {
-		name      string
-		token     *sams.IntrospectTokenResponse
+		name  string
+		token *sams.IntrospectTokenResponse
+
+		// doRPC, if nil, tests against UsersService.GetUser()
+		doRPC func(svc clientsv1connect.UsersServiceClient) error
+
 		wantError autogold.Value
 		wantLogs  autogold.Value
 	}{{
@@ -56,6 +60,34 @@ func TestInterceptor(t *testing.T) {
 		},
 		wantError: autogold.Expect("permission_denied: insufficient scopes: got scopes [not-a-scope], required: [profile]"),
 		wantLogs:  autogold.Expect([]string{}),
+	}, {
+		name: "no scopes required, active session",
+		token: &sams.IntrospectTokenResponse{
+			Active: true,
+			Scopes: scopes.Scopes{},
+		},
+		doRPC: func(svc clientsv1connect.UsersServiceClient) error {
+			// GetUserMetadata has no sams_required_scopes extension
+			_, err := svc.GetUserMetadata(context.Background(), connect.NewRequest(&clientsv1.GetUserMetadataRequest{}))
+			return err
+		},
+		wantError: autogold.Expect(nil), // should not error!
+		wantLogs:  autogold.Expect([]string{}),
+	}, {
+		name: "no scopes required, inactive session",
+		token: &sams.IntrospectTokenResponse{
+			Active: false,
+			Scopes: scopes.Scopes{},
+		},
+		doRPC: func(svc clientsv1connect.UsersServiceClient) error {
+			// GetUserMetadata has no sams_required_scopes extension
+			_, err := svc.GetUserMetadata(context.Background(), connect.NewRequest(&clientsv1.GetUserMetadataRequest{}))
+			return err
+		},
+		// should error - no required scopes still requires an active and valid
+		// client credentials token
+		wantError: autogold.Expect("permission_denied: permission denied"),
+		wantLogs:  autogold.Expect([]string{}),
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
 			logger, exportLogs := logtest.Captured(t)
@@ -83,7 +115,13 @@ func TestInterceptor(t *testing.T) {
 					}),
 				),
 				srv.URL)
-			_, err := c.GetUser(context.Background(), connect.NewRequest(&clientsv1.GetUserRequest{}))
+
+			var err error
+			if tc.doRPC == nil {
+				_, err = c.GetUser(context.Background(), connect.NewRequest(&clientsv1.GetUserRequest{}))
+			} else {
+				err = tc.doRPC(c)
+			}
 
 			// Success cases are connect.CodeUnimplemented
 			require.Error(t, err)

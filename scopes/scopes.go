@@ -92,6 +92,8 @@ var (
 		"user.metadata",
 		"user.metadata.cody",
 		"user.metadata.dotcom",
+		// Metadata owned by the 'Cody Gatekeeper' service.
+		"user.metadata.cody_gatekeeper",
 
 		"session",
 
