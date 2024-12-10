@@ -190,7 +190,7 @@ type SubscriberHandlers struct {
 	OnUserRolesUpdated func(ctx context.Context, data *UserRolesUpdatedData) error
 	// OnUserMetadataUpdated is called when a "UserMetadataUpdated" notification
 	// is received.
-	// 
+	//
 	// It indicates that a user's metadata has been updated for a particular namespace.
 	// The notification data does not specify the updated metadata - the current
 	// metadata must be retrieved from the SAMS API.
@@ -231,7 +231,7 @@ func (s *subscriber) handleReceive(ctx context.Context, name string, metadata js
 		}
 		return "handled", s.handlers.OnUserRolesUpdated(ctx, &data)
 
-	case nameUserMetadataUpdated:	
+	case nameUserMetadataUpdated:
 		if s.handlers.OnUserMetadataUpdated == nil {
 			return "skipped", nil
 		}
