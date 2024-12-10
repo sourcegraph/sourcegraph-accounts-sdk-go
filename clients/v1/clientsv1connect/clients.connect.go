@@ -104,12 +104,12 @@ type UsersServiceClient interface {
 	GetUserRoles(context.Context, *connect.Request[v1.GetUserRolesRequest]) (*connect.Response[v1.GetUserRolesResponse], error)
 	// GetUserMetadata retrieves metadata for a SAMS user.
 	//
-	// Required scopes: 'sams::user.metadata::read' or metadata-scope-specific
+	// Required scopes: 'sams::user.metadata::read' or metadata-namespace-specific
 	// variant scope, such as 'sams::user.metadata.dotcom::read'
 	GetUserMetadata(context.Context, *connect.Request[v1.GetUserMetadataRequest]) (*connect.Response[v1.GetUserMetadataResponse], error)
 	// UpdateUserMetadata updates the metadata of a SAMS user.
 	//
-	// Required scopes: 'sams::user.metadata::write' or metadata-scope-specific
+	// Required scopes: 'sams::user.metadata::write' or metadata-namespace-specific
 	// variant scope, such as 'sams::user.metadata.dotcom::write'
 	UpdateUserMetadata(context.Context, *connect.Request[v1.UpdateUserMetadataRequest]) (*connect.Response[v1.UpdateUserMetadataResponse], error)
 }
@@ -212,12 +212,12 @@ type UsersServiceHandler interface {
 	GetUserRoles(context.Context, *connect.Request[v1.GetUserRolesRequest]) (*connect.Response[v1.GetUserRolesResponse], error)
 	// GetUserMetadata retrieves metadata for a SAMS user.
 	//
-	// Required scopes: 'sams::user.metadata::read' or metadata-scope-specific
+	// Required scopes: 'sams::user.metadata::read' or metadata-namespace-specific
 	// variant scope, such as 'sams::user.metadata.dotcom::read'
 	GetUserMetadata(context.Context, *connect.Request[v1.GetUserMetadataRequest]) (*connect.Response[v1.GetUserMetadataResponse], error)
 	// UpdateUserMetadata updates the metadata of a SAMS user.
 	//
-	// Required scopes: 'sams::user.metadata::write' or metadata-scope-specific
+	// Required scopes: 'sams::user.metadata::write' or metadata-namespace-specific
 	// variant scope, such as 'sams::user.metadata.dotcom::write'
 	UpdateUserMetadata(context.Context, *connect.Request[v1.UpdateUserMetadataRequest]) (*connect.Response[v1.UpdateUserMetadataResponse], error)
 }

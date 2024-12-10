@@ -42,18 +42,18 @@ service UsersService {
   };
   // GetUserMetadata retrieves metadata for a SAMS user.
   //
-  // Required scopes: 'sams::user.metadata::read' or metadata-scope-specific
+  // Required scopes: 'sams::user.metadata::read' or metadata-namespace-specific
   // variant scope, such as 'sams::user.metadata.dotcom::read'
   rpc GetUserMetadata(GetUserMetadataRequest) returns (GetUserMetadataResponse) {
-    // Cannot use 'sams_required_scopes' due to metadata-scope-specific scopes.
+    // Cannot use 'sams_required_scopes' due to metadata-namespace-specific scopes.
     // See docstring for required scopes.
   }
   // UpdateUserMetadata updates the metadata of a SAMS user.
   //
-  // Required scopes: 'sams::user.metadata::write' or metadata-scope-specific
+  // Required scopes: 'sams::user.metadata::write' or metadata-namespace-specific
   // variant scope, such as 'sams::user.metadata.dotcom::write'
   rpc UpdateUserMetadata(UpdateUserMetadataRequest) returns (UpdateUserMetadataResponse) {
-    // Cannot use 'sams_required_scopes' due to metadata-scope-specific scopes.
+    // Cannot use 'sams_required_scopes' due to metadata-namespace-specific scopes.
     // See docstring for required scopes.
   }
 }
@@ -122,25 +122,26 @@ message Role {
 message GetUserMetadataRequest {
   // The user's external ID.
   string id = 1;
-  // Services is the list of service slugs to filter the metadata. "*" can be used
-  // to return metadata for all services.
+  // The list of namespace to filter the metadata. "*" can be used to return
+  // metadata for all namespaces.
   //
-  // Requires the scope for the requested service(s); for example, '*' requires
-  // 'sams::user.metadata::read', and 'dotcom' requires 'sams::user.metadata.dotcom::read'.
-  repeated string services = 2;
+  // Requires the scope for the requested namespace(s); for example:
+  // - namespaces: ['*'] requires 'sams::user.metadata::read'
+  // - namespaces: ['dotcom'] requires 'sams::user.metadata.dotcom::read'.
+  repeated string namespaces = 2;
 }
 
-// The metadata associated with a user for a specific service.
+// The metadata associated with a user for a specific namespace.
 message UserServiceMetadata {
   // The user's external ID.
   //
   // Behaviour: IDENTIFIER
   string user_id = 1;
-  // The service slug.
+  // The metadata namespace.
   //
   // Behaviour: IDENTIFIER
-  string service = 2;
-  // Metadata associated with this user for the specified service.
+  string namespace = 2;
+  // Metadata associated with this user for the specified namespace.
   google.protobuf.Struct metadata = 3;
 }
 
@@ -152,8 +153,13 @@ message GetUserMetadataResponse {
 message UpdateUserMetadataRequest {
   // The following fields are used to identify the workspace to update:
   // - user_id
-  // - service
-  // Both user_id and service are required to apply an update.
+  // - namespace
+  // Both user_id and namespace are required to apply an update.
+  //
+  // An update requires the scope for the requested namespace(s); for example
+  // namespaces: ['dotcom'] requires 'sams::user.metadata.dotcom::write' or the wildcard 'sams::user.metadata::write'.
+  //
+  // The wildcard '*' namespace is not allowed in an update.
   UserServiceMetadata metadata = 1;
 }
 
