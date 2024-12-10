@@ -11,9 +11,10 @@ import (
 // backend/internal/notification/types.go
 
 const (
-	nameUserDeleted        = "UserDeleted"
-	nameUserRolesUpdated   = "UserRolesUpdated"
-	nameSessionInvalidated = "SessionInvalidated"
+	nameUserDeleted         = "UserDeleted"
+	nameUserRolesUpdated    = "UserRolesUpdated"
+	nameUserMetadataUpdated = "UserMetadataUpdated"
+	nameSessionInvalidated  = "SessionInvalidated"
 )
 
 // UserDeletedData contains information of a "UserDeleted" notification.
@@ -45,6 +46,14 @@ type UserRolesUpdatedData struct {
 	// if applicable. When ResourceType is empty, the role is a service-level
 	// role that does not apply to a specific resource.
 	ResourceType roles.ResourceType `json:"resource_type,omitempty"`
+}
+
+type UserMetadataUpdatedData struct {
+	// AccountID is the SAMS external ID of the user whose metadata has been
+	// updated.
+	AccountID string `json:"account_id"`
+	// Namespace is the metadata scope that the user's roles have been updated in.
+	Namespace string `json:"namespace"`
 }
 
 // SessionInvalidatedData contains information of a "SessionInvalidated"
