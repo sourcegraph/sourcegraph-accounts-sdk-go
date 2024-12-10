@@ -1,8 +1,9 @@
 package scopes
 
 import (
-	"errors"
 	"strings"
+
+	"github.com/sourcegraph/sourcegraph/lib/errors"
 )
 
 // PermissionToMetadataScope extracts the metadata scope from a permission.
