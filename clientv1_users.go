@@ -5,9 +5,11 @@ import (
 
 	"connectrpc.com/connect"
 	"golang.org/x/oauth2"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	clientsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
 	"github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1/clientsv1connect"
+	"github.com/sourcegraph/sourcegraph/lib/errors"
 )
 
 // UsersServiceV1 provides client methods to interact with the UsersService API
@@ -83,4 +85,58 @@ func (s *UsersServiceV1) GetUserRolesByID(ctx context.Context, userID, service s
 		return nil, err
 	}
 	return resp.Msg.GetUserRoles(), nil
+}
+
+// GetUserMetadata returns the metadata associated with the given user ID and
+// metadata namespaces.
+//
+// Required scopes: sams::user.metadata.${NAMESPACE}::read for each of the
+// requested namespaces.
+func (s *UsersServiceV1) GetUserMetadata(ctx context.Context, userID string, namespaces []string) ([]*clientsv1.UserServiceMetadata, error) {
+	if userID == "" {
+		return nil, errors.New("user ID cannot be empty")
+	}
+	if len(namespaces) == 0 {
+		return nil, errors.New("at least one namespace must be provided")
+	}
+
+	req := &clientsv1.GetUserMetadataRequest{
+		Id:         userID,
+		Namespaces: namespaces,
+	}
+	client := s.newClient(ctx)
+	resp, err := parseResponseAndError(client.GetUserMetadata(ctx, connect.NewRequest(req)))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Msg.GetMetadata(), nil
+}
+
+// UpdateUserMetadata updates the metadata associated with the given user ID
+// and metadata namespace.
+//
+// Required scopes: sams::user.metadata.${NAMESPACE}::read for the namespace
+// being updated.
+func (s *UsersServiceV1) UpdateUserMetadata(ctx context.Context, userID, namespace string, metadata map[string]any) (*clientsv1.UserServiceMetadata, error) {
+	if userID == "" || namespace == "" {
+		return nil, errors.New("user ID and namespace cannot be empty")
+	}
+
+	md, err := structpb.NewStruct(metadata)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to marshal user metadata")
+	}
+	req := &clientsv1.UpdateUserMetadataRequest{
+		Metadata: &clientsv1.UserServiceMetadata{
+			UserId:    userID,
+			Namespace: namespace,
+			Metadata:  md,
+		},
+	}
+	client := s.newClient(ctx)
+	resp, err := parseResponseAndError(client.UpdateUserMetadata(ctx, connect.NewRequest(req)))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Msg.GetMetadata(), nil
 }
