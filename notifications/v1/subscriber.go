@@ -188,6 +188,13 @@ type SubscriberHandlers struct {
 	// revoked. If the service's roles are relevant to the subscriber the user's
 	// current roles can be retrieved from the SAMS API.
 	OnUserRolesUpdated func(ctx context.Context, data *UserRolesUpdatedData) error
+	// OnUserMetadataUpdated is called when a "UserMetadataUpdated" notification
+	// is received.
+	//
+	// It indicates that a user's metadata has been updated for a particular namespace.
+	// The notification data does not specify the updated metadata - the current
+	// metadata must be retrieved from the SAMS API.
+	OnUserMetadataUpdated func(ctx context.Context, data *UserMetadataUpdatedData) error
 	// OnSessionInvalidated is called when a "SessionInvalidated" notification is
 	// received.
 	//
@@ -208,13 +215,12 @@ func (s *subscriber) handleReceive(ctx context.Context, name string, metadata js
 		if s.handlers.OnUserDeleted == nil {
 			return "skipped", nil
 		}
-
 		var data UserDeletedData
 		if err := json.Unmarshal(metadata, &data); err != nil {
 			return "malformed_message", errors.Wrap(err, "unmarshal metadata")
 		}
-
 		return "handled", s.handlers.OnUserDeleted(ctx, &data)
+
 	case nameUserRolesUpdated:
 		if s.handlers.OnUserRolesUpdated == nil {
 			return "skipped", nil
@@ -223,8 +229,18 @@ func (s *subscriber) handleReceive(ctx context.Context, name string, metadata js
 		if err := json.Unmarshal(metadata, &data); err != nil {
 			return "malformed_message", errors.Wrap(err, "unmarshal metadata")
 		}
-
 		return "handled", s.handlers.OnUserRolesUpdated(ctx, &data)
+
+	case nameUserMetadataUpdated:
+		if s.handlers.OnUserMetadataUpdated == nil {
+			return "skipped", nil
+		}
+		var data UserMetadataUpdatedData
+		if err := json.Unmarshal(metadata, &data); err != nil {
+			return "malformed_message", errors.Wrap(err, "unmarshal metadata")
+		}
+		return "handled", s.handlers.OnUserMetadataUpdated(ctx, &data)
+
 	case nameSessionInvalidated:
 		if s.handlers.OnSessionInvalidated == nil {
 			return "skipped", nil
