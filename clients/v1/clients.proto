@@ -4,6 +4,7 @@ package clients.v1;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/descriptor.proto";
+import "google/protobuf/struct.proto";
 
 option go_package = "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1;clientsv1";
 
@@ -39,6 +40,22 @@ service UsersService {
   rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse) {
     option (sams_required_scopes) = "sams::user.roles::read";
   };
+  // GetUserMetadata retrieves metadata for a SAMS user.
+  //
+  // Required scopes: 'sams::user.metadata::read' or metadata-namespace-specific
+  // variant scope, such as 'sams::user.metadata.dotcom::read'
+  rpc GetUserMetadata(GetUserMetadataRequest) returns (GetUserMetadataResponse) {
+    // Cannot use 'sams_required_scopes' due to metadata-namespace-specific scopes.
+    // See docstring for required scopes.
+  }
+  // UpdateUserMetadata updates the metadata of a SAMS user.
+  //
+  // Required scopes: 'sams::user.metadata::write' or metadata-namespace-specific
+  // variant scope, such as 'sams::user.metadata.dotcom::write'
+  rpc UpdateUserMetadata(UpdateUserMetadataRequest) returns (UpdateUserMetadataResponse) {
+    // Cannot use 'sams_required_scopes' due to metadata-namespace-specific scopes.
+    // See docstring for required scopes.
+  }
 }
 
 // Exactly one attribute can be set.
@@ -100,6 +117,55 @@ message Role {
   optional string resource_id = 3;
   // If the role applies to a resource the is the ResourceType of the resource.
   optional string resource_type = 4;
+}
+
+message GetUserMetadataRequest {
+  // The user's external ID.
+  string id = 1;
+  // The list of namespace to filter the metadata. "*" can be used to return
+  // metadata for all namespaces.
+  //
+  // Requires the scope for the requested namespace(s); for example:
+  // - namespaces: ['*'] requires 'sams::user.metadata::read'
+  // - namespaces: ['dotcom'] requires 'sams::user.metadata.dotcom::read'.
+  repeated string namespaces = 2;
+}
+
+// The metadata associated with a user for a specific namespace.
+message UserServiceMetadata {
+  // The user's external ID.
+  //
+  // Behaviour: IDENTIFIER
+  string user_id = 1;
+  // The metadata namespace.
+  //
+  // Behaviour: IDENTIFIER
+  string namespace = 2;
+  // Metadata associated with this user for the specified namespace.
+  google.protobuf.Struct metadata = 3;
+}
+
+message GetUserMetadataResponse {
+  // The requested metadata for the user.
+  repeated UserServiceMetadata metadata = 1;
+}
+
+message UpdateUserMetadataRequest {
+  // The following fields are used to identify the workspace to update:
+  // - user_id
+  // - namespace
+  // Both user_id and namespace are required to apply an update.
+  //
+  // An update requires the scope for the requested namespace(s); for example
+  // namespaces: ['dotcom'] requires 'sams::user.metadata.dotcom::write' or the wildcard 'sams::user.metadata::write'.
+  //
+  // The wildcard '*' namespace is not allowed in an update.
+  UserServiceMetadata metadata = 1;
+}
+
+message UpdateUserMetadataResponse {
+  // The updated user metadata.
+  UserServiceMetadata metadata = 1;
 }
 
 service SessionsService {

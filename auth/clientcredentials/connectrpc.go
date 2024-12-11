@@ -170,9 +170,6 @@ func extractSchemaRequiredScopes(spec connect.Spec, extension *protoimpl.Extensi
 		return nil, errors.Newf("extension field %s not valid", extension.TypeDescriptor().FullName())
 	}
 	list := value.List()
-	if list.Len() == 0 {
-		return nil, errors.Newf("extension field %s cannot be empty", extension.TypeDescriptor().FullName())
-	}
 
 	requiredScopes := make(scopes.Scopes, list.Len())
 	for i := 0; i < list.Len(); i++ {

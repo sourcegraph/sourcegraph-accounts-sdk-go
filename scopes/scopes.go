@@ -89,9 +89,17 @@ var (
 		"user",
 		"user.profile",
 		"user.roles",
+
+		// Grants access to all scopes - use sparingly.
 		"user.metadata",
+		// Cody Pro and SSC metadata
 		"user.metadata.cody",
+		// Legacy Sourcegraph.com metadata
 		"user.metadata.dotcom",
+		// Metadata owned by the 'Cody Gatekeeper' service.
+		"user.metadata.cody_gatekeeper",
+		// Metadata owned by PLG efforts for supporting community members.
+		"user.metadata.plg",
 
 		"session",
 
