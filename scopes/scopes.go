@@ -92,6 +92,8 @@ var (
 
 		// Grants access to all scopes - use sparingly.
 		"user.metadata",
+		// Read-only SAMS-internal metadata
+		"user.metadata.internal",
 		// Cody Pro and SSC metadata
 		"user.metadata.cody",
 		// Legacy Sourcegraph.com metadata
@@ -155,6 +157,11 @@ func Allowed() AllowedScopes {
 	// Add full { read, write, delete } actions for all permissions for the given service.
 	appendScopes := func(service services.Service, permissions []Permission) {
 		for _, permission := range permissions {
+			// Special case: read-only for SAMS-internal user metadata.
+			if permission == "user.metadata.internal" {
+				allowed = append(allowed, ToScope(service, permission, ActionRead))
+				continue
+			}
 			allowed = append(
 				allowed,
 				[]Scope{

@@ -32,6 +32,7 @@ func TestAllowedGoldenList(t *testing.T) {
 		Scope("sams::user.metadata::read"),
 		Scope("sams::user.metadata::write"),
 		Scope("sams::user.metadata::delete"),
+		Scope("sams::user.metadata.internal::read"),
 		Scope("sams::user.metadata.cody::read"),
 		Scope("sams::user.metadata.cody::write"),
 		Scope("sams::user.metadata.cody::delete"),
