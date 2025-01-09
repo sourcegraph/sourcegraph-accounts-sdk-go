@@ -116,6 +116,8 @@ func (s *subscriber) Start() {
 				SpanID:  span.SpanContext().SpanID().String(),
 			})
 
+		logger.Debug("message received", log.String("data", string(msg.Data)))
+
 		var msgData struct {
 			Name     string          `json:"name"`
 			Metadata json.RawMessage `json:"metadata"`
