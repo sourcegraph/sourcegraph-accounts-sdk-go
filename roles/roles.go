@@ -128,6 +128,18 @@ var (
 	}
 )
 
+// services.Workspaces
+var (
+	RoleWorkspacesServiceAdmin = ToRole(services.Workspaces, "service_admin")
+	workspacesRoles            = []roleInfo{
+		{
+			id:           RoleWorkspacesServiceAdmin,
+			service:      services.Workspaces,
+			resourceType: Service,
+		},
+	}
+)
+
 var registeredRoles = func() []roleInfo {
 	var registered []roleInfo
 
@@ -138,6 +150,7 @@ var registeredRoles = func() []roleInfo {
 	appendRoles(dotcomRoles)
 	appendRoles(sscRoles)
 	appendRoles(enterprisePortalRoles)
+	appendRoles(workspacesRoles)
 	// 👉 ADD YOUR ROLES HERE
 
 	return registered
