@@ -68,7 +68,12 @@ func NewSubscriber(logger log.Logger, opts SubscriberOptions) (background.Routin
 	}
 
 	logger = logger.Scoped("notification.subscriber")
-	client, err := pubsub.NewClient(context.Background(), opts.ProjectID, option.WithCredentials(opts.Credentials))
+	client, err := pubsub.NewClient(context.Background(), opts.ProjectID,
+		// Our subscriber SDK generates our own trace spans, so there is no need
+		// for the SDK instrumentation, which generates long-running trace spans
+		// that don't mean anything.
+		option.WithTelemetryDisabled(),
+		option.WithCredentials(opts.Credentials))
 	if err != nil {
 		return nil, errors.Wrap(err, "create GCP Pub/Sub client")
 	}
