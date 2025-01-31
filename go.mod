@@ -14,7 +14,7 @@ require (
 	github.com/hexops/valast v1.4.4
 	github.com/lestrrat-go/jwx/v2 v2.1.1
 	github.com/sourcegraph/log v0.0.0-20241024013702-574f7079c888
-	github.com/sourcegraph/sourcegraph v0.0.0-20250128080724-db0b35ffef8c
+	github.com/sourcegraph/sourcegraph v0.0.0-20250131130626-1f70961c50c8
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/otel v1.33.0
 	go.opentelemetry.io/otel/trace v1.33.0
