@@ -7,7 +7,6 @@ import (
 	"connectrpc.com/connect"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"golang.org/x/oauth2"
 
 	"github.com/hashicorp/golang-lru/v2/expirable"
 	clientsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
@@ -25,7 +24,7 @@ type TokensServiceV1 struct {
 
 func (s *TokensServiceV1) newClient(ctx context.Context) clientsv1connect.TokensServiceClient {
 	return clientsv1connect.NewTokensServiceClient(
-		oauth2.NewClient(ctx, s.client.tokenSource),
+		s.client.httpClient(),
 		s.client.gRPCURL(),
 		connect.WithInterceptors(s.client.defaultInterceptors...),
 	)
