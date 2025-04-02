@@ -121,6 +121,9 @@ var (
 		"instance",
 		"permission.workspace",
 	}
+	mailGatekeeperPermissions = []Permission{
+		"emails",
+	}
 )
 
 const (
@@ -177,6 +180,7 @@ func Allowed() AllowedScopes {
 	appendScopes(services.SAMS, samsPermissions)
 	appendScopes(services.TelemetryGateway, telemetryGatewayPermissions)
 	appendScopes(services.EnterprisePortal, enterprisePortalPermissions)
+	appendScopes(services.MailGatekeeper, mailGatekeeperPermissions)
 	appendScopes(services.Workspaces, workspacesPermissions)
 	// 👉 ADD YOUR SCOPES HERE
 	return allowed
