@@ -119,11 +119,19 @@ var (
 	// Enterprise Portal customer admin
 	RoleEnterprisePortalCustomerAdmin = ToRole(services.EnterprisePortal, "customer_admin")
 
+	// Enterprise Portal internal Sourcegraph admin
+	RoleEnterprisePortalServiceAdmin = ToRole(services.EnterprisePortal, "service_admin")
+
 	enterprisePortalRoles = []roleInfo{
 		{
 			id:           RoleEnterprisePortalCustomerAdmin,
 			service:      services.EnterprisePortal,
 			resourceType: EnterpriseSubscription,
+		},
+		{
+			id:           RoleEnterprisePortalServiceAdmin,
+			service:      services.EnterprisePortal,
+			resourceType: Service,
 		},
 	}
 )
