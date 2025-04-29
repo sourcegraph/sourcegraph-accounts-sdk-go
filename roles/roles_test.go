@@ -14,6 +14,7 @@ func TestGoldenList(t *testing.T) {
 	slices.Sort(got)
 	autogold.Expect([]Role{
 		Role("dotcom::site_admin"), Role("enterprise_portal::customer_admin"),
+		Role("enterprise_portal::service_admin"),
 		Role("ssc::admin"),
 		Role("workspaces::service_admin"),
 	}).Equal(t, got)
@@ -84,7 +85,8 @@ func TestRolesByResourceType(t *testing.T) {
 			name:     "service",
 			resource: Service,
 			expected: autogold.Expect([]Role{
-				Role("dotcom::site_admin"), Role("ssc::admin"),
+				Role("dotcom::site_admin"), Role("enterprise_portal::service_admin"),
+				Role("ssc::admin"),
 				Role("workspaces::service_admin"),
 			}),
 		},
