@@ -54,6 +54,35 @@ func (s *UsersServiceV1) GetUserByEmail(ctx context.Context, email string) (*cli
 	return resp.Msg.User, nil
 }
 
+// CreateUser creates a new SAMS user with the given email address.
+//
+// Required scope: sams::user::write
+func (s *UsersServiceV1) CreateUser(ctx context.Context, email string) (*clientsv1.User, error) {
+	if email == "" {
+		return nil, errors.New("email cannot be empty")
+	}
+	req := &clientsv1.CreateUserRequest{Email: email}
+	client := s.newClient(ctx)
+	resp, err := parseResponseAndError(client.CreateUser(ctx, connect.NewRequest(req)))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Msg.User, nil
+}
+
+// DeleteUser deletes a SAMS user with the given email address.
+//
+// Required scope: sams::user::write
+func (s *UsersServiceV1) DeleteUser(ctx context.Context, email string) error {
+	if email == "" {
+		return errors.New("email cannot be empty")
+	}
+	req := &clientsv1.DeleteUserRequest{Email: email}
+	client := s.newClient(ctx)
+	_, err := parseResponseAndError(client.DeleteUser(ctx, connect.NewRequest(req)))
+	return err
+}
+
 // GetUsersByIDs returns the list of SAMS users matching the provided IDs.
 //
 // NOTE: It silently ignores any invalid user IDs, i.e. the length of the return
