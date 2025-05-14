@@ -120,7 +120,6 @@ type UsersServiceClient interface {
 	// Required scopes: profile
 	GetUsers(context.Context, *connect.Request[v1.GetUsersRequest]) (*connect.Response[v1.GetUsersResponse], error)
 	// CreateUser creates a new SAMS user with the given email.
-	//
 	// Required scopes: sams::user::write
 	CreateUser(context.Context, *connect.Request[v1.CreateUserRequest]) (*connect.Response[v1.CreateUserResponse], error)
 	// DeleteUser deletes a SAMS user with the given email.
@@ -260,7 +259,6 @@ type UsersServiceHandler interface {
 	// Required scopes: profile
 	GetUsers(context.Context, *connect.Request[v1.GetUsersRequest]) (*connect.Response[v1.GetUsersResponse], error)
 	// CreateUser creates a new SAMS user with the given email.
-	//
 	// Required scopes: sams::user::write
 	CreateUser(context.Context, *connect.Request[v1.CreateUserRequest]) (*connect.Response[v1.CreateUserResponse], error)
 	// DeleteUser deletes a SAMS user with the given email.
