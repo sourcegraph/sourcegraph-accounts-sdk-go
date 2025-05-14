@@ -34,8 +34,8 @@ service UsersService {
     option (sams_required_scopes) = "profile";
   };
   // CreateUser creates a new SAMS user with the given email.
-  //
   // Required scopes: sams::user::write
+  //
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
     option (sams_required_scopes) = "sams::user::write";
   };
@@ -183,6 +183,8 @@ message UpdateUserMetadataResponse {
 message CreateUserRequest {
   // The email address for the new user.
   string email = 1;
+  // The name for the new user
+  string name = 2;
 }
 
 message CreateUserResponse {
