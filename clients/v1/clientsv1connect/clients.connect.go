@@ -124,7 +124,7 @@ type UsersServiceClient interface {
 	CreateUser(context.Context, *connect.Request[v1.CreateUserRequest]) (*connect.Response[v1.CreateUserResponse], error)
 	// DeleteUser deletes a SAMS user with the given email.
 	//
-	// Required scopes: sams::user::write
+	// Required scopes: sams::user::delete
 	DeleteUser(context.Context, *connect.Request[v1.DeleteUserRequest]) (*connect.Response[v1.DeleteUserResponse], error)
 	// GetUserRoles returns all roles that have been assigned to the SAMS user
 	// with the given ID and scoped by the service.
@@ -263,7 +263,7 @@ type UsersServiceHandler interface {
 	CreateUser(context.Context, *connect.Request[v1.CreateUserRequest]) (*connect.Response[v1.CreateUserResponse], error)
 	// DeleteUser deletes a SAMS user with the given email.
 	//
-	// Required scopes: sams::user::write
+	// Required scopes: sams::user::delete
 	DeleteUser(context.Context, *connect.Request[v1.DeleteUserRequest]) (*connect.Response[v1.DeleteUserResponse], error)
 	// GetUserRoles returns all roles that have been assigned to the SAMS user
 	// with the given ID and scoped by the service.
