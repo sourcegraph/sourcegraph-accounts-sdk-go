@@ -41,9 +41,9 @@ service UsersService {
   };
   // DeleteUser deletes a SAMS user with the given email.
   //
-  // Required scopes: sams::user::write
+  // Required scopes: sams::user::delete
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
-    option (sams_required_scopes) = "sams::user::write";
+    option (sams_required_scopes) = "sams::user::delete";
   };
   // GetUserRoles returns all roles that have been assigned to the SAMS user
   // with the given ID and scoped by the service.
@@ -193,8 +193,8 @@ message CreateUserResponse {
 }
 
 message DeleteUserRequest {
-  // The email address of the user to delete.
-  string email = 1;
+  // The user's external ID.
+  string id = 1;
 }
 
 message DeleteUserResponse {
