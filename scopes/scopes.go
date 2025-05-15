@@ -107,6 +107,9 @@ var (
 
 		"roles",
 		"roles.resources",
+
+		"service_access_tokens",
+		"service_access_tokens.analytics",
 	}
 	telemetryGatewayPermissions = []Permission{
 		"events",
@@ -123,6 +126,9 @@ var (
 	}
 	mailGatekeeperPermissions = []Permission{
 		"emails",
+	}
+	analyticsPermissions = []Permission{
+		"analytics",
 	}
 )
 
@@ -182,6 +188,7 @@ func Allowed() AllowedScopes {
 	appendScopes(services.EnterprisePortal, enterprisePortalPermissions)
 	appendScopes(services.MailGatekeeper, mailGatekeeperPermissions)
 	appendScopes(services.Workspaces, workspacesPermissions)
+	appendScopes(services.Analytics, analyticsPermissions)
 	// 👉 ADD YOUR SCOPES HERE
 	return allowed
 }
