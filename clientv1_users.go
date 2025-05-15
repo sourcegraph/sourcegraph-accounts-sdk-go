@@ -72,12 +72,12 @@ func (s *UsersServiceV1) CreateUser(ctx context.Context, email, name string) (*c
 
 // DeleteUser deletes a SAMS user with the given email address.
 //
-// Required scope: sams::user::write
-func (s *UsersServiceV1) DeleteUser(ctx context.Context, email string) error {
-	if email == "" {
-		return errors.New("email cannot be empty")
+// Required scope: sams::user::delete
+func (s *UsersServiceV1) DeleteUser(ctx context.Context, id string) error {
+	if id == "" {
+		return errors.New("id cannot be empty")
 	}
-	req := &clientsv1.DeleteUserRequest{Email: email}
+	req := &clientsv1.DeleteUserRequest{Id: id}
 	client := s.newClient(ctx)
 	_, err := parseResponseAndError(client.DeleteUser(ctx, connect.NewRequest(req)))
 	return err
