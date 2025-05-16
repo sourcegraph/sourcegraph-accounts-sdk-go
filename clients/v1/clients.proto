@@ -33,6 +33,18 @@ service UsersService {
   rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {
     option (sams_required_scopes) = "profile";
   };
+  // CreateUser creates a new SAMS user with the given email.
+  // Required scopes: sams::user::write
+  //
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
+    option (sams_required_scopes) = "sams::user::write";
+  };
+  // DeleteUser deletes a SAMS user with the given email.
+  //
+  // Required scopes: sams::user::delete
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
+    option (sams_required_scopes) = "sams::user::delete";
+  };
   // GetUserRoles returns all roles that have been assigned to the SAMS user
   // with the given ID and scoped by the service.
   //
@@ -166,6 +178,26 @@ message UpdateUserMetadataRequest {
 message UpdateUserMetadataResponse {
   // The updated user metadata.
   UserServiceMetadata metadata = 1;
+}
+
+message CreateUserRequest {
+  // The email address for the new user.
+  string email = 1;
+  // The name for the new user
+  string name = 2;
+}
+
+message CreateUserResponse {
+  // The newly created user.
+  User user = 1;
+}
+
+message DeleteUserRequest {
+  // The user's external ID.
+  string id = 1;
+}
+
+message DeleteUserResponse {
 }
 
 service SessionsService {
