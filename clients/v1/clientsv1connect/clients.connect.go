@@ -29,6 +29,9 @@ const (
 	TokensServiceName = "clients.v1.TokensService"
 	// RolesServiceName is the fully-qualified name of the RolesService service.
 	RolesServiceName = "clients.v1.RolesService"
+	// ServiceAccessTokensServiceName is the fully-qualified name of the ServiceAccessTokensService
+	// service.
+	ServiceAccessTokensServiceName = "clients.v1.ServiceAccessTokensService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -64,23 +67,36 @@ const (
 	// RolesServiceRegisterRoleResourcesProcedure is the fully-qualified name of the RolesService's
 	// RegisterRoleResources RPC.
 	RolesServiceRegisterRoleResourcesProcedure = "/clients.v1.RolesService/RegisterRoleResources"
+	// ServiceAccessTokensServiceCreateServiceAccessTokenProcedure is the fully-qualified name of the
+	// ServiceAccessTokensService's CreateServiceAccessToken RPC.
+	ServiceAccessTokensServiceCreateServiceAccessTokenProcedure = "/clients.v1.ServiceAccessTokensService/CreateServiceAccessToken"
+	// ServiceAccessTokensServiceListServiceAccessTokensProcedure is the fully-qualified name of the
+	// ServiceAccessTokensService's ListServiceAccessTokens RPC.
+	ServiceAccessTokensServiceListServiceAccessTokensProcedure = "/clients.v1.ServiceAccessTokensService/ListServiceAccessTokens"
+	// ServiceAccessTokensServiceRevokeServiceAccessTokenProcedure is the fully-qualified name of the
+	// ServiceAccessTokensService's RevokeServiceAccessToken RPC.
+	ServiceAccessTokensServiceRevokeServiceAccessTokenProcedure = "/clients.v1.ServiceAccessTokensService/RevokeServiceAccessToken"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	usersServiceServiceDescriptor                     = v1.File_clients_v1_clients_proto.Services().ByName("UsersService")
-	usersServiceGetUserMethodDescriptor               = usersServiceServiceDescriptor.Methods().ByName("GetUser")
-	usersServiceGetUsersMethodDescriptor              = usersServiceServiceDescriptor.Methods().ByName("GetUsers")
-	usersServiceGetUserRolesMethodDescriptor          = usersServiceServiceDescriptor.Methods().ByName("GetUserRoles")
-	usersServiceGetUserMetadataMethodDescriptor       = usersServiceServiceDescriptor.Methods().ByName("GetUserMetadata")
-	usersServiceUpdateUserMetadataMethodDescriptor    = usersServiceServiceDescriptor.Methods().ByName("UpdateUserMetadata")
-	sessionsServiceServiceDescriptor                  = v1.File_clients_v1_clients_proto.Services().ByName("SessionsService")
-	sessionsServiceGetSessionMethodDescriptor         = sessionsServiceServiceDescriptor.Methods().ByName("GetSession")
-	sessionsServiceSignOutSessionMethodDescriptor     = sessionsServiceServiceDescriptor.Methods().ByName("SignOutSession")
-	tokensServiceServiceDescriptor                    = v1.File_clients_v1_clients_proto.Services().ByName("TokensService")
-	tokensServiceIntrospectTokenMethodDescriptor      = tokensServiceServiceDescriptor.Methods().ByName("IntrospectToken")
-	rolesServiceServiceDescriptor                     = v1.File_clients_v1_clients_proto.Services().ByName("RolesService")
-	rolesServiceRegisterRoleResourcesMethodDescriptor = rolesServiceServiceDescriptor.Methods().ByName("RegisterRoleResources")
+	usersServiceServiceDescriptor                                      = v1.File_clients_v1_clients_proto.Services().ByName("UsersService")
+	usersServiceGetUserMethodDescriptor                                = usersServiceServiceDescriptor.Methods().ByName("GetUser")
+	usersServiceGetUsersMethodDescriptor                               = usersServiceServiceDescriptor.Methods().ByName("GetUsers")
+	usersServiceGetUserRolesMethodDescriptor                           = usersServiceServiceDescriptor.Methods().ByName("GetUserRoles")
+	usersServiceGetUserMetadataMethodDescriptor                        = usersServiceServiceDescriptor.Methods().ByName("GetUserMetadata")
+	usersServiceUpdateUserMetadataMethodDescriptor                     = usersServiceServiceDescriptor.Methods().ByName("UpdateUserMetadata")
+	sessionsServiceServiceDescriptor                                   = v1.File_clients_v1_clients_proto.Services().ByName("SessionsService")
+	sessionsServiceGetSessionMethodDescriptor                          = sessionsServiceServiceDescriptor.Methods().ByName("GetSession")
+	sessionsServiceSignOutSessionMethodDescriptor                      = sessionsServiceServiceDescriptor.Methods().ByName("SignOutSession")
+	tokensServiceServiceDescriptor                                     = v1.File_clients_v1_clients_proto.Services().ByName("TokensService")
+	tokensServiceIntrospectTokenMethodDescriptor                       = tokensServiceServiceDescriptor.Methods().ByName("IntrospectToken")
+	rolesServiceServiceDescriptor                                      = v1.File_clients_v1_clients_proto.Services().ByName("RolesService")
+	rolesServiceRegisterRoleResourcesMethodDescriptor                  = rolesServiceServiceDescriptor.Methods().ByName("RegisterRoleResources")
+	serviceAccessTokensServiceServiceDescriptor                        = v1.File_clients_v1_clients_proto.Services().ByName("ServiceAccessTokensService")
+	serviceAccessTokensServiceCreateServiceAccessTokenMethodDescriptor = serviceAccessTokensServiceServiceDescriptor.Methods().ByName("CreateServiceAccessToken")
+	serviceAccessTokensServiceListServiceAccessTokensMethodDescriptor  = serviceAccessTokensServiceServiceDescriptor.Methods().ByName("ListServiceAccessTokens")
+	serviceAccessTokensServiceRevokeServiceAccessTokenMethodDescriptor = serviceAccessTokensServiceServiceDescriptor.Methods().ByName("RevokeServiceAccessToken")
 )
 
 // UsersServiceClient is a client for the clients.v1.UsersService service.
@@ -571,4 +587,158 @@ type UnimplementedRolesServiceHandler struct{}
 
 func (UnimplementedRolesServiceHandler) RegisterRoleResources(context.Context, *connect.ClientStream[v1.RegisterRoleResourcesRequest]) (*connect.Response[v1.RegisterRoleResourcesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.RolesService.RegisterRoleResources is not implemented"))
+}
+
+// ServiceAccessTokensServiceClient is a client for the clients.v1.ServiceAccessTokensService
+// service.
+type ServiceAccessTokensServiceClient interface {
+	// CreateServiceAccessToken creates a new service access token.
+	// A client can only create service access tokens for services granted via scopes,
+	// e.g. "sams::service_access_token.analytics::write" allows creating service access
+	// tokens for the Sourcegraph Analytics service. Service access token can only have scopes that
+	// belong to the same service, e.g. "analytics::analytics::read" when the service is
+	// "analytics".
+	CreateServiceAccessToken(context.Context, *connect.Request[v1.CreateServiceAccessTokenRequest]) (*connect.Response[v1.CreateServiceAccessTokenResponse], error)
+	// ListServiceAccessTokens returns a list of service access tokens in reverse chronological
+	// order by creation time. A client can only list service access tokens for services granted
+	// via scopes, e.g. "sams::service_access_token.analytics::read" allows listing service
+	// access tokens for the Sourcegraph Analytics service.
+	ListServiceAccessTokens(context.Context, *connect.Request[v1.ListServiceAccessTokensRequest]) (*connect.Response[v1.ListServiceAccessTokensResponse], error)
+	// RevokeServiceAccessToken revokes the specified service access token. A client can only revoke
+	// service access tokens for services granted via scopes, e.g.
+	// "sams::service_access_tokens.analytic::delete" allows revoking service access tokens for
+	// the Sourcegraph Analytics service.
+	RevokeServiceAccessToken(context.Context, *connect.Request[v1.RevokeServiceAccessTokenRequest]) (*connect.Response[v1.RevokeServiceAccessTokenResponse], error)
+}
+
+// NewServiceAccessTokensServiceClient constructs a client for the
+// clients.v1.ServiceAccessTokensService service. By default, it uses the Connect protocol with the
+// binary Protobuf Codec, asks for gzipped responses, and sends uncompressed requests. To use the
+// gRPC or gRPC-Web protocols, supply the connect.WithGRPC() or connect.WithGRPCWeb() options.
+//
+// The URL supplied here should be the base URL for the Connect or gRPC server (for example,
+// http://api.acme.com or https://acme.com/grpc).
+func NewServiceAccessTokensServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) ServiceAccessTokensServiceClient {
+	baseURL = strings.TrimRight(baseURL, "/")
+	return &serviceAccessTokensServiceClient{
+		createServiceAccessToken: connect.NewClient[v1.CreateServiceAccessTokenRequest, v1.CreateServiceAccessTokenResponse](
+			httpClient,
+			baseURL+ServiceAccessTokensServiceCreateServiceAccessTokenProcedure,
+			connect.WithSchema(serviceAccessTokensServiceCreateServiceAccessTokenMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		listServiceAccessTokens: connect.NewClient[v1.ListServiceAccessTokensRequest, v1.ListServiceAccessTokensResponse](
+			httpClient,
+			baseURL+ServiceAccessTokensServiceListServiceAccessTokensProcedure,
+			connect.WithSchema(serviceAccessTokensServiceListServiceAccessTokensMethodDescriptor),
+			connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+			connect.WithClientOptions(opts...),
+		),
+		revokeServiceAccessToken: connect.NewClient[v1.RevokeServiceAccessTokenRequest, v1.RevokeServiceAccessTokenResponse](
+			httpClient,
+			baseURL+ServiceAccessTokensServiceRevokeServiceAccessTokenProcedure,
+			connect.WithSchema(serviceAccessTokensServiceRevokeServiceAccessTokenMethodDescriptor),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
+			connect.WithClientOptions(opts...),
+		),
+	}
+}
+
+// serviceAccessTokensServiceClient implements ServiceAccessTokensServiceClient.
+type serviceAccessTokensServiceClient struct {
+	createServiceAccessToken *connect.Client[v1.CreateServiceAccessTokenRequest, v1.CreateServiceAccessTokenResponse]
+	listServiceAccessTokens  *connect.Client[v1.ListServiceAccessTokensRequest, v1.ListServiceAccessTokensResponse]
+	revokeServiceAccessToken *connect.Client[v1.RevokeServiceAccessTokenRequest, v1.RevokeServiceAccessTokenResponse]
+}
+
+// CreateServiceAccessToken calls clients.v1.ServiceAccessTokensService.CreateServiceAccessToken.
+func (c *serviceAccessTokensServiceClient) CreateServiceAccessToken(ctx context.Context, req *connect.Request[v1.CreateServiceAccessTokenRequest]) (*connect.Response[v1.CreateServiceAccessTokenResponse], error) {
+	return c.createServiceAccessToken.CallUnary(ctx, req)
+}
+
+// ListServiceAccessTokens calls clients.v1.ServiceAccessTokensService.ListServiceAccessTokens.
+func (c *serviceAccessTokensServiceClient) ListServiceAccessTokens(ctx context.Context, req *connect.Request[v1.ListServiceAccessTokensRequest]) (*connect.Response[v1.ListServiceAccessTokensResponse], error) {
+	return c.listServiceAccessTokens.CallUnary(ctx, req)
+}
+
+// RevokeServiceAccessToken calls clients.v1.ServiceAccessTokensService.RevokeServiceAccessToken.
+func (c *serviceAccessTokensServiceClient) RevokeServiceAccessToken(ctx context.Context, req *connect.Request[v1.RevokeServiceAccessTokenRequest]) (*connect.Response[v1.RevokeServiceAccessTokenResponse], error) {
+	return c.revokeServiceAccessToken.CallUnary(ctx, req)
+}
+
+// ServiceAccessTokensServiceHandler is an implementation of the
+// clients.v1.ServiceAccessTokensService service.
+type ServiceAccessTokensServiceHandler interface {
+	// CreateServiceAccessToken creates a new service access token.
+	// A client can only create service access tokens for services granted via scopes,
+	// e.g. "sams::service_access_token.analytics::write" allows creating service access
+	// tokens for the Sourcegraph Analytics service. Service access token can only have scopes that
+	// belong to the same service, e.g. "analytics::analytics::read" when the service is
+	// "analytics".
+	CreateServiceAccessToken(context.Context, *connect.Request[v1.CreateServiceAccessTokenRequest]) (*connect.Response[v1.CreateServiceAccessTokenResponse], error)
+	// ListServiceAccessTokens returns a list of service access tokens in reverse chronological
+	// order by creation time. A client can only list service access tokens for services granted
+	// via scopes, e.g. "sams::service_access_token.analytics::read" allows listing service
+	// access tokens for the Sourcegraph Analytics service.
+	ListServiceAccessTokens(context.Context, *connect.Request[v1.ListServiceAccessTokensRequest]) (*connect.Response[v1.ListServiceAccessTokensResponse], error)
+	// RevokeServiceAccessToken revokes the specified service access token. A client can only revoke
+	// service access tokens for services granted via scopes, e.g.
+	// "sams::service_access_tokens.analytic::delete" allows revoking service access tokens for
+	// the Sourcegraph Analytics service.
+	RevokeServiceAccessToken(context.Context, *connect.Request[v1.RevokeServiceAccessTokenRequest]) (*connect.Response[v1.RevokeServiceAccessTokenResponse], error)
+}
+
+// NewServiceAccessTokensServiceHandler builds an HTTP handler from the service implementation. It
+// returns the path on which to mount the handler and the handler itself.
+//
+// By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
+// and JSON codecs. They also support gzip compression.
+func NewServiceAccessTokensServiceHandler(svc ServiceAccessTokensServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	serviceAccessTokensServiceCreateServiceAccessTokenHandler := connect.NewUnaryHandler(
+		ServiceAccessTokensServiceCreateServiceAccessTokenProcedure,
+		svc.CreateServiceAccessToken,
+		connect.WithSchema(serviceAccessTokensServiceCreateServiceAccessTokenMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	serviceAccessTokensServiceListServiceAccessTokensHandler := connect.NewUnaryHandler(
+		ServiceAccessTokensServiceListServiceAccessTokensProcedure,
+		svc.ListServiceAccessTokens,
+		connect.WithSchema(serviceAccessTokensServiceListServiceAccessTokensMethodDescriptor),
+		connect.WithIdempotency(connect.IdempotencyNoSideEffects),
+		connect.WithHandlerOptions(opts...),
+	)
+	serviceAccessTokensServiceRevokeServiceAccessTokenHandler := connect.NewUnaryHandler(
+		ServiceAccessTokensServiceRevokeServiceAccessTokenProcedure,
+		svc.RevokeServiceAccessToken,
+		connect.WithSchema(serviceAccessTokensServiceRevokeServiceAccessTokenMethodDescriptor),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/clients.v1.ServiceAccessTokensService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case ServiceAccessTokensServiceCreateServiceAccessTokenProcedure:
+			serviceAccessTokensServiceCreateServiceAccessTokenHandler.ServeHTTP(w, r)
+		case ServiceAccessTokensServiceListServiceAccessTokensProcedure:
+			serviceAccessTokensServiceListServiceAccessTokensHandler.ServeHTTP(w, r)
+		case ServiceAccessTokensServiceRevokeServiceAccessTokenProcedure:
+			serviceAccessTokensServiceRevokeServiceAccessTokenHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+}
+
+// UnimplementedServiceAccessTokensServiceHandler returns CodeUnimplemented from all methods.
+type UnimplementedServiceAccessTokensServiceHandler struct{}
+
+func (UnimplementedServiceAccessTokensServiceHandler) CreateServiceAccessToken(context.Context, *connect.Request[v1.CreateServiceAccessTokenRequest]) (*connect.Response[v1.CreateServiceAccessTokenResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.ServiceAccessTokensService.CreateServiceAccessToken is not implemented"))
+}
+
+func (UnimplementedServiceAccessTokensServiceHandler) ListServiceAccessTokens(context.Context, *connect.Request[v1.ListServiceAccessTokensRequest]) (*connect.Response[v1.ListServiceAccessTokensResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.ServiceAccessTokensService.ListServiceAccessTokens is not implemented"))
+}
+
+func (UnimplementedServiceAccessTokensServiceHandler) RevokeServiceAccessToken(context.Context, *connect.Request[v1.RevokeServiceAccessTokenRequest]) (*connect.Response[v1.RevokeServiceAccessTokenResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.ServiceAccessTokensService.RevokeServiceAccessToken is not implemented"))
 }

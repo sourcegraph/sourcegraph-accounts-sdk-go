@@ -241,6 +241,8 @@ message IntrospectTokenResponse {
   repeated string scopes = 2;
   // ClientID is the identifier of the SAMS client that the token was issued to.
   string client_id = 3;
+  // When not empty, indicates the external ID of the token owner.
+  string user_id = 5;
   // ExpiresAt indicates when the token expires.
   google.protobuf.Timestamp expires_at = 4;
 }
@@ -289,3 +291,104 @@ message RoleResource {
   // A human readable name for the resource
   string display_name = 2;
 }
+
+service ServiceAccessTokensService {
+  // CreateServiceAccessToken creates a new service access token.
+  // A client can only create service access tokens for services granted via scopes,
+  // e.g. "sams::service_access_token.analytics::write" allows creating service access
+  // tokens for the Sourcegraph Analytics service. Service access token can only have scopes that
+  // belong to the same service, e.g. "analytics::analytics::read" when the service is
+  // "analytics".
+  rpc CreateServiceAccessToken(CreateServiceAccessTokenRequest) returns (CreateServiceAccessTokenResponse) {
+    option (sams_required_scopes) = "sams::service_access_token::write";
+  }
+  // ListServiceAccessTokens returns a list of service access tokens in reverse chronological
+  // order by creation time. A client can only list service access tokens for services granted
+  // via scopes, e.g. "sams::service_access_token.analytics::read" allows listing service
+  // access tokens for the Sourcegraph Analytics service.
+  rpc ListServiceAccessTokens(ListServiceAccessTokensRequest) returns (ListServiceAccessTokensResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+    option (sams_required_scopes) = "sams::service_access_token::read";
+  }
+  // RevokeServiceAccessToken revokes the specified service access token. A client can only revoke
+  // service access tokens for services granted via scopes, e.g.
+  // "sams::service_access_tokens.analytic::delete" allows revoking service access tokens for
+  // the Sourcegraph Analytics service.
+  rpc RevokeServiceAccessToken(RevokeServiceAccessTokenRequest) returns (RevokeServiceAccessTokenResponse) {
+    option idempotency_level = IDEMPOTENT;
+    option (sams_required_scopes) = "sams::service_access_token::delete";
+  }
+}
+
+message ServiceAccessToken {
+  // The unique identifier of the token.
+  string id = 1;
+  // The service slug.
+  string service = 2;
+  // The list of scopes granted by the token.
+  repeated string scopes = 3;
+  // The external ID of the token owner.
+  string user_id = 4;
+  // The human-friendly name of the token.
+  string display_name = 5;
+  // The time the token was created.
+  google.protobuf.Timestamp creation_time = 6;
+  // The time the token will expire.
+  google.protobuf.Timestamp expire_time = 7;
+}
+
+message CreateServiceAccessTokenRequest {
+  // Only the following fields are accepted in the request:
+  // - service
+  // - scopes
+  // - user_id
+  // - display_name (optional)
+  // - expires_at (optional, defaults to never expire)
+  ServiceAccessToken token = 1;
+}
+
+message CreateServiceAccessTokenResponse {
+  ServiceAccessToken token = 1;
+  // The token's secret.
+  string secret = 2;
+}
+
+message ListServiceAccessTokensRequest {
+  // Clients use this field to specify the maximum number of results to be
+  // returned by the server. The server may further constrain the maximum number
+  // of results returned in a single page. If the page_size is 0, the server
+  // will decide the number of results to be returned.
+  //
+  // See pagination concepts from https://cloud.google.com/apis/design/design_patterns#list_pagination
+  int32 page_size = 1;
+  // The client uses this field to request a specific page of the list results.
+  // A zero value requests the first page.
+  //
+  // See pagination concepts from https://cloud.google.com/apis/design/design_patterns#list_pagination
+  string page_token = 2;
+  // Filters define the lookup strategy for this list request. Multiple filters
+  // are treated as AND-concatenated.
+  repeated ListServiceAccessTokensFilter filters = 3;
+}
+
+message ListServiceAccessTokensFilter {
+  oneof filter {
+    // The service slug.
+    string service = 1;
+    // The external ID of the token owner.
+    string user_id = 2;
+    // If true, expired tokens are also returned.
+    bool show_expired = 3;
+  }
+}
+
+message ListServiceAccessTokensResponse {
+  repeated ServiceAccessToken tokens = 1;
+}
+
+message RevokeServiceAccessTokenRequest {
+  // The unique identifier of the token.
+  string id = 1;
+}
+
+message RevokeServiceAccessTokenResponse {}
