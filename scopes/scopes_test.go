@@ -54,6 +54,12 @@ func TestAllowedGoldenList(t *testing.T) {
 		Scope("sams::roles.resources::read"),
 		Scope("sams::roles.resources::write"),
 		Scope("sams::roles.resources::delete"),
+		Scope("sams::service_access_tokens::read"),
+		Scope("sams::service_access_tokens::write"),
+		Scope("sams::service_access_tokens::delete"),
+		Scope("sams::service_access_tokens.analytics::read"),
+		Scope("sams::service_access_tokens.analytics::write"),
+		Scope("sams::service_access_tokens.analytics::delete"),
 		Scope("telemetry_gateway::events::read"),
 		Scope("telemetry_gateway::events::write"),
 		Scope("telemetry_gateway::events::delete"),
@@ -78,6 +84,9 @@ func TestAllowedGoldenList(t *testing.T) {
 		Scope("workspaces::permission.workspace::read"),
 		Scope("workspaces::permission.workspace::write"),
 		Scope("workspaces::permission.workspace::delete"),
+		Scope("analytics::analytics::read"),
+		Scope("analytics::analytics::write"),
+		Scope("analytics::analytics::delete"),
 	}).Equal(t, Allowed())
 }
 

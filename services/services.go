@@ -13,6 +13,7 @@ const (
 	MailGatekeeper   Service = "mail_gatekeeper"
 	Workspaces       Service = "workspaces"
 	SSC              Service = "ssc"
+	Analytics        Service = "analytics"
 )
 
 var serviceNames = map[Service]string{
@@ -24,6 +25,7 @@ var serviceNames = map[Service]string{
 	MailGatekeeper:   "Mail Gatekeeper",
 	Workspaces:       "Workspaces",
 	SSC:              "Self Serve Cody",
+	Analytics:        "Sourcegraph Analytics",
 }
 
 func (s Service) DisplayName() string {
