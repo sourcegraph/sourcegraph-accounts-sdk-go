@@ -57,11 +57,11 @@ func (s *UsersServiceV1) GetUserByEmail(ctx context.Context, email string) (*cli
 // CreateUser creates a new SAMS user with the given email address.
 //
 // Required scope: sams::user::write
-func (s *UsersServiceV1) CreateUser(ctx context.Context, email, name string) (*clientsv1.User, error) {
+func (s *UsersServiceV1) CreateUser(ctx context.Context, email string) (*clientsv1.User, error) {
 	if email == "" {
 		return nil, errors.New("email cannot be empty")
 	}
-	req := &clientsv1.CreateUserRequest{Email: email, Name: name}
+	req := &clientsv1.CreateUserRequest{Email: email}
 	client := s.newClient(ctx)
 	resp, err := parseResponseAndError(client.CreateUser(ctx, connect.NewRequest(req)))
 	if err != nil {
