@@ -183,8 +183,6 @@ message UpdateUserMetadataResponse {
 message CreateUserRequest {
   // The email address for the new user.
   string email = 1;
-  // The name for the new user
-  string name = 2;
 }
 
 message CreateUserResponse {
