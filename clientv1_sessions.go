@@ -6,7 +6,6 @@ import (
 	"connectrpc.com/connect"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"golang.org/x/oauth2"
 
 	"github.com/hashicorp/golang-lru/v2/expirable"
 	clientsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
@@ -21,9 +20,9 @@ type SessionsServiceV1 struct {
 	sessionsCache *expirable.LRU[string, *clientsv1.Session]
 }
 
-func (s *SessionsServiceV1) newClient(ctx context.Context) clientsv1connect.SessionsServiceClient {
+func (s *SessionsServiceV1) newClient() clientsv1connect.SessionsServiceClient {
 	return clientsv1connect.NewSessionsServiceClient(
-		oauth2.NewClient(ctx, s.client.tokenSource),
+		s.client.httpClient(),
 		s.client.gRPCURL(),
 		connect.WithInterceptors(s.client.defaultInterceptors...),
 	)
@@ -46,7 +45,7 @@ func (s *SessionsServiceV1) GetSessionByID(ctx context.Context, id string) (*cli
 		SetAttributes(attribute.Bool("sams.session.fromCache", false))
 
 	req := &clientsv1.GetSessionRequest{Id: id}
-	client := s.newClient(ctx)
+	client := s.newClient()
 	resp, err := parseResponseAndError(client.GetSession(ctx, connect.NewRequest(req)))
 	if err != nil {
 		return nil, err
@@ -68,7 +67,7 @@ func (s *SessionsServiceV1) SignOutSession(ctx context.Context, sessionID, userI
 		Id:     sessionID,
 		UserId: userID,
 	}
-	client := s.newClient(ctx)
+	client := s.newClient()
 	_, err := parseResponseAndError(client.SignOutSession(ctx, connect.NewRequest(req)))
 	if err == nil && s.sessionsCache != nil {
 		_ = s.sessionsCache.Remove(sessionID)
