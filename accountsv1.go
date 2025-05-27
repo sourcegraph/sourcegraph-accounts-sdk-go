@@ -1,6 +1,8 @@
 package sams
 
 import (
+	"net/http"
+
 	"github.com/sourcegraph/sourcegraph/lib/errors"
 	"golang.org/x/oauth2"
 
@@ -17,6 +19,9 @@ type AccountsV1Config struct {
 	// as needed. But if you only have the access token, you will need to use a
 	// StaticTokenSource instead.
 	TokenSource oauth2.TokenSource
+	// BaseTransport is the base transport to use for HTTP requests. If not
+	// provided, http.DefaultTransport will be used.
+	BaseTransport http.RoundTripper
 }
 
 func (c AccountsV1Config) Validate() error {
@@ -34,5 +39,5 @@ func NewAccountsV1(config AccountsV1Config) (*accountsv1.Client, error) {
 	if err := config.Validate(); err != nil {
 		return nil, err
 	}
-	return accountsv1.NewClient(config.getAPIURL(), config.TokenSource), nil
+	return accountsv1.NewClient(config.getAPIURL(), config.TokenSource, config.BaseTransport), nil
 }
