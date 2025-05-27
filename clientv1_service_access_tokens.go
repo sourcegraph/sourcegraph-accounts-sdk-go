@@ -98,7 +98,7 @@ type ListServiceAccessTokensOptions struct {
 // ListServiceAccessTokens returns a list of service access tokens in reverse chronological
 // order by creation time.
 //
-// Required scope: sams::service_access_token::read
+// Required scope: sams::service_access_tokens::read
 func (s *ServiceAccessTokensServiceV1) ListServiceAccessTokens(ctx context.Context, opts ListServiceAccessTokensOptions) ([]*clientsv1.ServiceAccessToken, error) {
 	req := &clientsv1.ListServiceAccessTokensRequest{
 		PageSize:  opts.PageSize,
