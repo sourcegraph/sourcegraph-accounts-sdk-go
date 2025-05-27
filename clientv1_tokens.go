@@ -40,8 +40,11 @@ type IntrospectTokenResponse struct {
 	Scopes scopes.Scopes
 	// ClientID is the identifier of the SAMS client that the token was issued to.
 	ClientID string
-	// ExpiresAt indicates when the token expires.
+	// ExpiresAt indicates when the token expires. If the token has no expiry, this
+	// will be the zero value.
 	ExpiresAt time.Time
+	// UserID if set is the identifier of the user that the Service Access Token was issued to.
+	UserID string
 }
 
 // IntrospectToken takes a SAMS access token and returns relevant metadata.
@@ -74,6 +77,7 @@ func (s *TokensServiceV1) IntrospectToken(ctx context.Context, token string) (*I
 		Scopes:    scopes.ToScopes(resp.Msg.Scopes),
 		ClientID:  resp.Msg.ClientId,
 		ExpiresAt: resp.Msg.ExpiresAt.AsTime(),
+		UserID:    resp.Msg.UserId,
 	}
 	if s.introspectTokenCache != nil && tokenResponse.ExpiresAt.After(time.Now()) {
 		_ = s.introspectTokenCache.Add(token, tokenResponse)
