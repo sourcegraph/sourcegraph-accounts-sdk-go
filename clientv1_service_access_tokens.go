@@ -45,7 +45,7 @@ type CreateServiceAccessTokenResponse struct {
 
 // CreateServiceAccessToken creates a new service access token.
 //
-// Required scope: sams::service_access_token::write
+// Required scope: sams::service_access_tokens::write
 func (s *ServiceAccessTokensServiceV1) CreateServiceAccessToken(ctx context.Context, service services.Service, tokenScopes []scopes.Scope, userID string, opts CreateServiceAccessTokenOptions) (*CreateServiceAccessTokenResponse, error) {
 	if service == "" {
 		return nil, errors.New("service cannot be empty")
