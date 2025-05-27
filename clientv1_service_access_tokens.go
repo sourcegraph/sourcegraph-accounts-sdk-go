@@ -134,7 +134,7 @@ func (s *ServiceAccessTokensServiceV1) ListServiceAccessTokens(ctx context.Conte
 
 // RevokeServiceAccessToken revokes the specified service access token.
 //
-// Required scope: sams::service_access_token::delete
+// Required scope: sams::service_access_tokens::delete
 func (s *ServiceAccessTokensServiceV1) RevokeServiceAccessToken(ctx context.Context, tokenID string) error {
 	if tokenID == "" {
 		return errors.New("token ID cannot be empty")
