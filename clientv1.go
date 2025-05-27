@@ -175,6 +175,11 @@ func (c *ClientV1) Roles() *RolesServiceV1 {
 	return &RolesServiceV1{client: c}
 }
 
+// ServiceAccessTokens returns a client handler to interact with the ServiceAccessTokensServiceV1 API.
+func (c *ClientV1) ServiceAccessTokens() *ServiceAccessTokensServiceV1 {
+	return &ServiceAccessTokensServiceV1{client: c}
+}
+
 var (
 	ErrNotFound       = errors.New("not found")
 	ErrRecordMismatch = errors.New("record mismatch")
