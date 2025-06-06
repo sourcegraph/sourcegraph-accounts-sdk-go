@@ -127,6 +127,9 @@ var (
 	mailGatekeeperPermissions = []Permission{
 		"emails",
 	}
+	ampPermissions = []Permission{
+		"user",
+	}
 	analyticsPermissions = []Permission{
 		"analytics",
 	}
@@ -182,6 +185,7 @@ func Allowed() AllowedScopes {
 		}
 	}
 
+	appendScopes(services.Amp, ampPermissions)
 	appendScopes(services.CodyGateway, codyGatewayPermissions)
 	appendScopes(services.SAMS, samsPermissions)
 	appendScopes(services.TelemetryGateway, telemetryGatewayPermissions)

@@ -5,6 +5,7 @@ type Service string
 
 // The list of registered services that publish scopes and/or roles.
 const (
+	Amp              Service = "amp"
 	CodyGateway      Service = "cody_gateway"
 	Dotcom           Service = "dotcom"
 	SAMS             Service = "sams"
@@ -17,6 +18,7 @@ const (
 )
 
 var serviceNames = map[Service]string{
+	Amp:              "Amp",
 	CodyGateway:      "Cody Gateway",
 	Dotcom:           "Sourcegraph Dotcom",
 	SAMS:             "Sourcegraph Accounts Management System",
