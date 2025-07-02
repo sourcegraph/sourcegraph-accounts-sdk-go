@@ -327,7 +327,7 @@ message RoleResource {
 service ServiceAccessTokensService {
   // CreateServiceAccessToken creates a new service access token.
   // A client can only create service access tokens for services granted via scopes,
-  // e.g. "sams::service_access_token.analytics::write" allows creating service access
+  // e.g. "sams::service_access_tokens.analytics::write" allows creating service access
   // tokens for the Sourcegraph Analytics service. Service access token can only have scopes that
   // belong to the same service, e.g. "analytics::analytics::read" when the service is
   // "analytics".
@@ -336,7 +336,7 @@ service ServiceAccessTokensService {
   }
   // ListServiceAccessTokens returns a list of service access tokens in reverse chronological
   // order by creation time. A client can only list service access tokens for services granted
-  // via scopes, e.g. "sams::service_access_token.analytics::read" allows listing service
+  // via scopes, e.g. "sams::service_access_tokens.analytics::read" allows listing service
   // access tokens for the Sourcegraph Analytics service.
   rpc ListServiceAccessTokens(ListServiceAccessTokensRequest) returns (ListServiceAccessTokensResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
