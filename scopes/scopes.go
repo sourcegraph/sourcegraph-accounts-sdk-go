@@ -118,6 +118,7 @@ var (
 		PermissionEnterprisePortalSubscription,
 		PermissionEnterprisePortalSubscriptionPermission,
 		PermissionEnterprisePortalCodyAccess,
+		PermissionEnterprisePortalMetering,
 	}
 	workspacesPermissions = []Permission{
 		"workspace",
@@ -152,6 +153,10 @@ const (
 	// PermissionEnterprisePortalCodyAccess designates permissions for Enterprise
 	// Cody Access for managed Cody features.
 	PermissionEnterprisePortalCodyAccess Permission = "codyaccess"
+
+	// PermissionEnterprisePortalMetering designates permissions for Deep Search
+	// quota management and metering functionality.
+	PermissionEnterprisePortalMetering Permission = "metering"
 )
 
 // Allowed returns all allowed scopes for a client. The caller should use
