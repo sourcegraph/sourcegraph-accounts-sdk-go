@@ -124,6 +124,7 @@ var (
 		"workspace",
 		"instance",
 		"permission.workspace",
+		"metering",
 	}
 	mailGatekeeperPermissions = []Permission{
 		"emails",

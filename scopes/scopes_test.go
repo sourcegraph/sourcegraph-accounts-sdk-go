@@ -90,6 +90,8 @@ func TestAllowedGoldenList(t *testing.T) {
 		Scope("workspaces::permission.workspace::read"),
 		Scope("workspaces::permission.workspace::write"),
 		Scope("workspaces::permission.workspace::delete"),
+		Scope("workspaces::metering::read"),
+		Scope("workspaces::metering::write"),
 		Scope("analytics::analytics::read"),
 		Scope("analytics::analytics::write"),
 		Scope("analytics::analytics::delete"),
