@@ -16,14 +16,19 @@ import (
 // e.g. "https://accounts.sourcegraph.com".
 //
 // Users should prefer to use the top-level 'sams.NewAccountsV1' constructor instead.
-func NewClient(samsHost string, tokenSource oauth2.TokenSource) *Client {
+func NewClient(samsHost string, tokenSource oauth2.TokenSource, baseTransport http.RoundTripper) *Client {
 	// Canonicalize the host so we only need to check if it ends in a slash or not once.
 	samsHost = strings.ToLower(samsHost)
 	samsHost = strings.TrimSuffix(samsHost, "/")
 
+	if baseTransport == nil {
+		baseTransport = http.DefaultTransport
+	}
+
 	return &Client{
-		host:        samsHost,
-		tokenSource: tokenSource,
+		host:          samsHost,
+		tokenSource:   tokenSource,
+		baseTransport: baseTransport,
 	}
 }
 
@@ -35,8 +40,9 @@ func NewClient(samsHost string, tokenSource oauth2.TokenSource) *Client {
 // checks based on the identity of the SAMS user. (The returned User.Sub, the
 // SAMS account external ID.)
 type Client struct {
-	host        string
-	tokenSource oauth2.TokenSource
+	host          string
+	tokenSource   oauth2.TokenSource
+	baseTransport http.RoundTripper
 }
 
 // GetUser returns the basic user profile of the calling user. (Who owns the
@@ -59,7 +65,7 @@ func (c *Client) GetUser(ctx context.Context) (*User, error) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
 	req.Header.Add("User-Agent", "sourcegraph-accounts-sdk-go/1")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := (&http.Client{Transport: c.baseTransport}).Do(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "fetching user details")
 	}
