@@ -70,19 +70,6 @@ func (s *UsersServiceV1) CreateUser(ctx context.Context, email, name string) (*c
 	return resp.Msg.User, nil
 }
 
-// DeleteUser deletes a SAMS user with the given email address.
-//
-// Required scope: sams::user::delete
-func (s *UsersServiceV1) DeleteUser(ctx context.Context, id string) error {
-	if id == "" {
-		return errors.New("id cannot be empty")
-	}
-	req := &clientsv1.DeleteUserRequest{Id: id}
-	client := s.newClient(ctx)
-	_, err := parseResponseAndError(client.DeleteUser(ctx, connect.NewRequest(req)))
-	return err
-}
-
 // GetUsersByIDs returns the list of SAMS users matching the provided IDs.
 //
 // NOTE: It silently ignores any invalid user IDs, i.e. the length of the return
