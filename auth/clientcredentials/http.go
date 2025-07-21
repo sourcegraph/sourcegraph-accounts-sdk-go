@@ -68,6 +68,14 @@ func (a *HTTPAuthenticator) RequireScopes(requiredScopes scopes.Scopes, next htt
 			return
 		}
 
+		if result.UserID != "" {
+			logger.Warn("attempt to authenticate using SAMS token with user ID",
+				log.String("client", result.ClientID),
+				log.String("userID", result.UserID))
+			http.Error(w, "Forbidden: User tokens not allowed", http.StatusForbidden)
+			return
+		}
+
 		// Check for our required scope.
 		for _, required := range requiredScopes {
 			if !result.Scopes.Match(required) {

@@ -52,6 +52,16 @@ func TestHTTPAuthenticator(t *testing.T) {
 		},
 		wantError: autogold.Expect("Forbidden: Missing required scope\n"),
 		wantLogs:  autogold.Expect([]string{"attempt to authenticate using SAMS token without required scope"}),
+	}, {
+		name: "SAT token with userID rejected",
+		token: &sams.IntrospectTokenResponse{
+			Active:   true,
+			ClientID: "test-client",
+			UserID:   "test-user",
+			Scopes:   scopes.Scopes{"profile"},
+		},
+		wantError: autogold.Expect("Forbidden: User tokens not allowed\n"),
+		wantLogs:  autogold.Expect([]string{"attempt to authenticate using SAMS token with user ID"}),
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
 			logger, exportLogs := logtest.Captured(t)
