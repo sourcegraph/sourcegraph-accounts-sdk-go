@@ -662,19 +662,19 @@ func (UnimplementedRolesServiceHandler) RegisterRoleResources(context.Context, *
 type ServiceAccessTokensServiceClient interface {
 	// CreateServiceAccessToken creates a new service access token.
 	// A client can only create service access tokens for services granted via scopes,
-	// e.g. "sams::service_access_token.analytics::write" allows creating service access
+	// e.g. "sams::service_access_tokens.analytics::write" allows creating service access
 	// tokens for the Sourcegraph Analytics service. Service access token can only have scopes that
 	// belong to the same service, e.g. "analytics::analytics::read" when the service is
 	// "analytics".
 	CreateServiceAccessToken(context.Context, *connect.Request[v1.CreateServiceAccessTokenRequest]) (*connect.Response[v1.CreateServiceAccessTokenResponse], error)
 	// ListServiceAccessTokens returns a list of service access tokens in reverse chronological
 	// order by creation time. A client can only list service access tokens for services granted
-	// via scopes, e.g. "sams::service_access_token.analytics::read" allows listing service
+	// via scopes, e.g. "sams::service_access_tokens.analytics::read" allows listing service
 	// access tokens for the Sourcegraph Analytics service.
 	ListServiceAccessTokens(context.Context, *connect.Request[v1.ListServiceAccessTokensRequest]) (*connect.Response[v1.ListServiceAccessTokensResponse], error)
 	// RevokeServiceAccessToken revokes the specified service access token. A client can only revoke
 	// service access tokens for services granted via scopes, e.g.
-	// "sams::service_access_tokens.analytic::delete" allows revoking service access tokens for
+	// "sams::service_access_tokens.analytics::delete" allows revoking service access tokens for
 	// the Sourcegraph Analytics service.
 	RevokeServiceAccessToken(context.Context, *connect.Request[v1.RevokeServiceAccessTokenRequest]) (*connect.Response[v1.RevokeServiceAccessTokenResponse], error)
 }
@@ -739,19 +739,19 @@ func (c *serviceAccessTokensServiceClient) RevokeServiceAccessToken(ctx context.
 type ServiceAccessTokensServiceHandler interface {
 	// CreateServiceAccessToken creates a new service access token.
 	// A client can only create service access tokens for services granted via scopes,
-	// e.g. "sams::service_access_token.analytics::write" allows creating service access
+	// e.g. "sams::service_access_tokens.analytics::write" allows creating service access
 	// tokens for the Sourcegraph Analytics service. Service access token can only have scopes that
 	// belong to the same service, e.g. "analytics::analytics::read" when the service is
 	// "analytics".
 	CreateServiceAccessToken(context.Context, *connect.Request[v1.CreateServiceAccessTokenRequest]) (*connect.Response[v1.CreateServiceAccessTokenResponse], error)
 	// ListServiceAccessTokens returns a list of service access tokens in reverse chronological
 	// order by creation time. A client can only list service access tokens for services granted
-	// via scopes, e.g. "sams::service_access_token.analytics::read" allows listing service
+	// via scopes, e.g. "sams::service_access_tokens.analytics::read" allows listing service
 	// access tokens for the Sourcegraph Analytics service.
 	ListServiceAccessTokens(context.Context, *connect.Request[v1.ListServiceAccessTokensRequest]) (*connect.Response[v1.ListServiceAccessTokensResponse], error)
 	// RevokeServiceAccessToken revokes the specified service access token. A client can only revoke
 	// service access tokens for services granted via scopes, e.g.
-	// "sams::service_access_tokens.analytic::delete" allows revoking service access tokens for
+	// "sams::service_access_tokens.analytics::delete" allows revoking service access tokens for
 	// the Sourcegraph Analytics service.
 	RevokeServiceAccessToken(context.Context, *connect.Request[v1.RevokeServiceAccessTokenRequest]) (*connect.Response[v1.RevokeServiceAccessTokenResponse], error)
 }
