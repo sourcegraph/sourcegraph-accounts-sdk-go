@@ -130,7 +130,7 @@ func (i *Interceptor) requireScope(ctx context.Context, headers http.Header, req
 		return nil, connectInternalError(ctx, i.logger, err, "unable to validate token")
 	}
 	if result.UserID != "" {
-		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("SAT token not allowed"))
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("a user-scoped token is not allowed"))
 	}
 
 	span.SetAttributes(
