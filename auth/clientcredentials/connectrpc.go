@@ -129,6 +129,10 @@ func (i *Interceptor) requireScope(ctx context.Context, headers http.Header, req
 	if err != nil {
 		return nil, connectInternalError(ctx, i.logger, err, "unable to validate token")
 	}
+	if result.UserID != "" {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("a user-scoped token is not allowed"))
+	}
+
 	span.SetAttributes(
 		attribute.String("client_id", result.ClientID),
 		attribute.String("token_expires_at", result.ExpiresAt.String()),
