@@ -96,7 +96,7 @@ func TestInterceptor(t *testing.T) {
 			UserID:   "test-user",
 			Scopes:   scopes.Scopes{"profile"},
 		},
-		wantError: autogold.Expect("unauthenticated: SAT token not allowed"),
+		wantError: autogold.Expect("unauthenticated: a user-scoped token is not allowed"),
 		wantLogs:  autogold.Expect([]string{}),
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
