@@ -96,6 +96,9 @@ func TestAllowedGoldenList(t *testing.T) {
 		Scope("analytics::analytics::read"),
 		Scope("analytics::analytics::write"),
 		Scope("analytics::analytics::delete"),
+		Scope("cloud_api::instance::read"),
+		Scope("cloud_api::instance::write"),
+		Scope("cloud_api::instance::delete"),
 	}).Equal(t, Allowed())
 }
 
