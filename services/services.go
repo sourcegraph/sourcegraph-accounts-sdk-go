@@ -15,6 +15,7 @@ const (
 	Workspaces       Service = "workspaces"
 	SSC              Service = "ssc"
 	Analytics        Service = "analytics"
+	CloudAPI         Service = "cloud_api"
 )
 
 var serviceNames = map[Service]string{
@@ -28,6 +29,7 @@ var serviceNames = map[Service]string{
 	Workspaces:       "Workspaces",
 	SSC:              "Self Serve Cody",
 	Analytics:        "Sourcegraph Analytics",
+	CloudAPI:         "Cloud API",
 }
 
 func (s Service) DisplayName() string {

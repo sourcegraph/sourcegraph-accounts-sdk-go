@@ -135,6 +135,9 @@ var (
 	analyticsPermissions = []Permission{
 		"analytics",
 	}
+	cloudAPIPermissions = []Permission{
+		"instance",
+	}
 )
 
 const (
@@ -199,6 +202,7 @@ func Allowed() AllowedScopes {
 	appendScopes(services.MailGatekeeper, mailGatekeeperPermissions)
 	appendScopes(services.Workspaces, workspacesPermissions)
 	appendScopes(services.Analytics, analyticsPermissions)
+	appendScopes(services.CloudAPI, cloudAPIPermissions)
 	// 👉 ADD YOUR SCOPES HERE
 	return allowed
 }
