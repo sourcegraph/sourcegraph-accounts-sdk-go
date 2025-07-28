@@ -88,6 +88,16 @@ func TestInterceptor(t *testing.T) {
 		// client credentials token
 		wantError: autogold.Expect("permission_denied: permission denied"),
 		wantLogs:  autogold.Expect([]string{}),
+	}, {
+		name: "SAT token with userID rejected",
+		token: &sams.IntrospectTokenResponse{
+			Active:   true,
+			ClientID: "test-client",
+			UserID:   "test-user",
+			Scopes:   scopes.Scopes{"profile"},
+		},
+		wantError: autogold.Expect("unauthenticated: a user-scoped token is not allowed"),
+		wantLogs:  autogold.Expect([]string{}),
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
 			logger, exportLogs := logtest.Captured(t)

@@ -639,7 +639,7 @@ type ServiceAccessTokensServiceClient interface {
 	ListServiceAccessTokens(context.Context, *connect.Request[v1.ListServiceAccessTokensRequest]) (*connect.Response[v1.ListServiceAccessTokensResponse], error)
 	// RevokeServiceAccessToken revokes the specified service access token. A client can only revoke
 	// service access tokens for services granted via scopes, e.g.
-	// "sams::service_access_tokens.analytic::delete" allows revoking service access tokens for
+	// "sams::service_access_tokens.analytics::delete" allows revoking service access tokens for
 	// the Sourcegraph Analytics service.
 	RevokeServiceAccessToken(context.Context, *connect.Request[v1.RevokeServiceAccessTokenRequest]) (*connect.Response[v1.RevokeServiceAccessTokenResponse], error)
 }
@@ -716,7 +716,7 @@ type ServiceAccessTokensServiceHandler interface {
 	ListServiceAccessTokens(context.Context, *connect.Request[v1.ListServiceAccessTokensRequest]) (*connect.Response[v1.ListServiceAccessTokensResponse], error)
 	// RevokeServiceAccessToken revokes the specified service access token. A client can only revoke
 	// service access tokens for services granted via scopes, e.g.
-	// "sams::service_access_tokens.analytic::delete" allows revoking service access tokens for
+	// "sams::service_access_tokens.analytics::delete" allows revoking service access tokens for
 	// the Sourcegraph Analytics service.
 	RevokeServiceAccessToken(context.Context, *connect.Request[v1.RevokeServiceAccessTokenRequest]) (*connect.Response[v1.RevokeServiceAccessTokenResponse], error)
 }

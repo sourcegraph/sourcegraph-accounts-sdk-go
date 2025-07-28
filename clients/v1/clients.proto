@@ -320,24 +320,20 @@ service ServiceAccessTokensService {
   // tokens for the Sourcegraph Analytics service. Service access token can only have scopes that
   // belong to the same service, e.g. "analytics::analytics::read" when the service is
   // "analytics".
-  rpc CreateServiceAccessToken(CreateServiceAccessTokenRequest) returns (CreateServiceAccessTokenResponse) {
-    option (sams_required_scopes) = "sams::service_access_tokens::write";
-  }
+  rpc CreateServiceAccessToken(CreateServiceAccessTokenRequest) returns (CreateServiceAccessTokenResponse) {}
   // ListServiceAccessTokens returns a list of service access tokens in reverse chronological
   // order by creation time. A client can only list service access tokens for services granted
   // via scopes, e.g. "sams::service_access_tokens.analytics::read" allows listing service
   // access tokens for the Sourcegraph Analytics service.
   rpc ListServiceAccessTokens(ListServiceAccessTokensRequest) returns (ListServiceAccessTokensResponse) {
     option idempotency_level = NO_SIDE_EFFECTS;
-    option (sams_required_scopes) = "sams::service_access_tokens::read";
   }
   // RevokeServiceAccessToken revokes the specified service access token. A client can only revoke
   // service access tokens for services granted via scopes, e.g.
-  // "sams::service_access_tokens.analytic::delete" allows revoking service access tokens for
+  // "sams::service_access_tokens.analytics::delete" allows revoking service access tokens for
   // the Sourcegraph Analytics service.
   rpc RevokeServiceAccessToken(RevokeServiceAccessTokenRequest) returns (RevokeServiceAccessTokenResponse) {
     option idempotency_level = IDEMPOTENT;
-    option (sams_required_scopes) = "sams::service_access_tokens::delete";
   }
 }
 
