@@ -48,8 +48,6 @@ const (
 	UsersServiceGetUsersProcedure = "/clients.v1.UsersService/GetUsers"
 	// UsersServiceCreateUserProcedure is the fully-qualified name of the UsersService's CreateUser RPC.
 	UsersServiceCreateUserProcedure = "/clients.v1.UsersService/CreateUser"
-	// UsersServiceDeleteUserProcedure is the fully-qualified name of the UsersService's DeleteUser RPC.
-	UsersServiceDeleteUserProcedure = "/clients.v1.UsersService/DeleteUser"
 	// UsersServiceGetUserRolesProcedure is the fully-qualified name of the UsersService's GetUserRoles
 	// RPC.
 	UsersServiceGetUserRolesProcedure = "/clients.v1.UsersService/GetUserRoles"
@@ -88,7 +86,6 @@ var (
 	usersServiceGetUserMethodDescriptor                                = usersServiceServiceDescriptor.Methods().ByName("GetUser")
 	usersServiceGetUsersMethodDescriptor                               = usersServiceServiceDescriptor.Methods().ByName("GetUsers")
 	usersServiceCreateUserMethodDescriptor                             = usersServiceServiceDescriptor.Methods().ByName("CreateUser")
-	usersServiceDeleteUserMethodDescriptor                             = usersServiceServiceDescriptor.Methods().ByName("DeleteUser")
 	usersServiceGetUserRolesMethodDescriptor                           = usersServiceServiceDescriptor.Methods().ByName("GetUserRoles")
 	usersServiceGetUserMetadataMethodDescriptor                        = usersServiceServiceDescriptor.Methods().ByName("GetUserMetadata")
 	usersServiceUpdateUserMetadataMethodDescriptor                     = usersServiceServiceDescriptor.Methods().ByName("UpdateUserMetadata")
@@ -122,10 +119,6 @@ type UsersServiceClient interface {
 	// CreateUser creates a new SAMS user with the given email.
 	// Required scopes: sams::user::write
 	CreateUser(context.Context, *connect.Request[v1.CreateUserRequest]) (*connect.Response[v1.CreateUserResponse], error)
-	// DeleteUser deletes a SAMS user with the given email.
-	//
-	// Required scopes: sams::user::delete
-	DeleteUser(context.Context, *connect.Request[v1.DeleteUserRequest]) (*connect.Response[v1.DeleteUserResponse], error)
 	// GetUserRoles returns all roles that have been assigned to the SAMS user
 	// with the given ID and scoped by the service.
 	//
@@ -171,12 +164,6 @@ func NewUsersServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(usersServiceCreateUserMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		deleteUser: connect.NewClient[v1.DeleteUserRequest, v1.DeleteUserResponse](
-			httpClient,
-			baseURL+UsersServiceDeleteUserProcedure,
-			connect.WithSchema(usersServiceDeleteUserMethodDescriptor),
-			connect.WithClientOptions(opts...),
-		),
 		getUserRoles: connect.NewClient[v1.GetUserRolesRequest, v1.GetUserRolesResponse](
 			httpClient,
 			baseURL+UsersServiceGetUserRolesProcedure,
@@ -203,7 +190,6 @@ type usersServiceClient struct {
 	getUser            *connect.Client[v1.GetUserRequest, v1.GetUserResponse]
 	getUsers           *connect.Client[v1.GetUsersRequest, v1.GetUsersResponse]
 	createUser         *connect.Client[v1.CreateUserRequest, v1.CreateUserResponse]
-	deleteUser         *connect.Client[v1.DeleteUserRequest, v1.DeleteUserResponse]
 	getUserRoles       *connect.Client[v1.GetUserRolesRequest, v1.GetUserRolesResponse]
 	getUserMetadata    *connect.Client[v1.GetUserMetadataRequest, v1.GetUserMetadataResponse]
 	updateUserMetadata *connect.Client[v1.UpdateUserMetadataRequest, v1.UpdateUserMetadataResponse]
@@ -222,11 +208,6 @@ func (c *usersServiceClient) GetUsers(ctx context.Context, req *connect.Request[
 // CreateUser calls clients.v1.UsersService.CreateUser.
 func (c *usersServiceClient) CreateUser(ctx context.Context, req *connect.Request[v1.CreateUserRequest]) (*connect.Response[v1.CreateUserResponse], error) {
 	return c.createUser.CallUnary(ctx, req)
-}
-
-// DeleteUser calls clients.v1.UsersService.DeleteUser.
-func (c *usersServiceClient) DeleteUser(ctx context.Context, req *connect.Request[v1.DeleteUserRequest]) (*connect.Response[v1.DeleteUserResponse], error) {
-	return c.deleteUser.CallUnary(ctx, req)
 }
 
 // GetUserRoles calls clients.v1.UsersService.GetUserRoles.
@@ -261,10 +242,6 @@ type UsersServiceHandler interface {
 	// CreateUser creates a new SAMS user with the given email.
 	// Required scopes: sams::user::write
 	CreateUser(context.Context, *connect.Request[v1.CreateUserRequest]) (*connect.Response[v1.CreateUserResponse], error)
-	// DeleteUser deletes a SAMS user with the given email.
-	//
-	// Required scopes: sams::user::delete
-	DeleteUser(context.Context, *connect.Request[v1.DeleteUserRequest]) (*connect.Response[v1.DeleteUserResponse], error)
 	// GetUserRoles returns all roles that have been assigned to the SAMS user
 	// with the given ID and scoped by the service.
 	//
@@ -306,12 +283,6 @@ func NewUsersServiceHandler(svc UsersServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(usersServiceCreateUserMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
-	usersServiceDeleteUserHandler := connect.NewUnaryHandler(
-		UsersServiceDeleteUserProcedure,
-		svc.DeleteUser,
-		connect.WithSchema(usersServiceDeleteUserMethodDescriptor),
-		connect.WithHandlerOptions(opts...),
-	)
 	usersServiceGetUserRolesHandler := connect.NewUnaryHandler(
 		UsersServiceGetUserRolesProcedure,
 		svc.GetUserRoles,
@@ -338,8 +309,6 @@ func NewUsersServiceHandler(svc UsersServiceHandler, opts ...connect.HandlerOpti
 			usersServiceGetUsersHandler.ServeHTTP(w, r)
 		case UsersServiceCreateUserProcedure:
 			usersServiceCreateUserHandler.ServeHTTP(w, r)
-		case UsersServiceDeleteUserProcedure:
-			usersServiceDeleteUserHandler.ServeHTTP(w, r)
 		case UsersServiceGetUserRolesProcedure:
 			usersServiceGetUserRolesHandler.ServeHTTP(w, r)
 		case UsersServiceGetUserMetadataProcedure:
@@ -365,10 +334,6 @@ func (UnimplementedUsersServiceHandler) GetUsers(context.Context, *connect.Reque
 
 func (UnimplementedUsersServiceHandler) CreateUser(context.Context, *connect.Request[v1.CreateUserRequest]) (*connect.Response[v1.CreateUserResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.UsersService.CreateUser is not implemented"))
-}
-
-func (UnimplementedUsersServiceHandler) DeleteUser(context.Context, *connect.Request[v1.DeleteUserRequest]) (*connect.Response[v1.DeleteUserResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("clients.v1.UsersService.DeleteUser is not implemented"))
 }
 
 func (UnimplementedUsersServiceHandler) GetUserRoles(context.Context, *connect.Request[v1.GetUserRolesRequest]) (*connect.Response[v1.GetUserRolesResponse], error) {
