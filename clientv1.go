@@ -3,6 +3,7 @@ package sams
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -28,8 +29,9 @@ var (
 
 // ClientV1 provides helpers to talk to a SAMS instance via Clients API v1.
 type ClientV1 struct {
-	rootURL     string
-	tokenSource oauth2.TokenSource
+	rootURL       string
+	tokenSource   oauth2.TokenSource
+	baseTransport http.RoundTripper
 
 	// sessionsCache may be nil if not enabled.
 	sessionsCache *expirable.LRU[string, *clientsv1.Session]
@@ -59,6 +61,9 @@ type ClientV1Config struct {
 	//
 	// The default of 0 (or less) disables caching.
 	IntrospectTokenCacheSize int
+	// BaseTransport is the base transport to use for HTTP requests. If not
+	// provided, http.DefaultTransport will be used.
+	BaseTransport http.RoundTripper
 }
 
 func (c ClientV1Config) Validate() error {
@@ -106,6 +111,9 @@ func NewClientV1(config ClientV1Config) (*ClientV1, error) {
 			introspectTokenCacheExpiry,
 		)
 	}
+	if config.BaseTransport == nil {
+		config.BaseTransport = http.DefaultTransport
+	}
 
 	return &ClientV1{
 		rootURL:              strings.TrimSuffix(apiURL, "/"),
@@ -113,7 +121,17 @@ func NewClientV1(config ClientV1Config) (*ClientV1, error) {
 		defaultInterceptors:  []connect.Interceptor{otelinterceptor},
 		sessionsCache:        sessionsCache,
 		introspectTokenCache: introspectTokenCache,
+		baseTransport:        config.BaseTransport,
 	}, nil
+}
+
+func (c *ClientV1) httpClient() *http.Client {
+	return &http.Client{
+		Transport: &oauth2.Transport{
+			Base:   c.baseTransport,
+			Source: c.tokenSource,
+		},
+	}
 }
 
 func parseResponseAndError[T any](resp *connect.Response[T], err error) (*connect.Response[T], error) {
