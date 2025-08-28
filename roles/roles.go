@@ -148,6 +148,18 @@ var (
 	}
 )
 
+// services.ReleaseOperations
+var (
+	RoleReleaseOperationsAdmin = ToRole(services.ReleaseOperations, "release_admin")
+	releaseOperationsRoles     = []roleInfo{
+		{
+			id:           RoleReleaseOperationsAdmin,
+			service:      services.ReleaseOperations,
+			resourceType: Service,
+		},
+	}
+)
+
 var registeredRoles = func() []roleInfo {
 	var registered []roleInfo
 
@@ -159,6 +171,7 @@ var registeredRoles = func() []roleInfo {
 	appendRoles(sscRoles)
 	appendRoles(enterprisePortalRoles)
 	appendRoles(workspacesRoles)
+	appendRoles(releaseOperationsRoles)
 	// 👉 ADD YOUR ROLES HERE
 
 	return registered
