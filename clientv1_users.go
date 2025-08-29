@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	"golang.org/x/oauth2"
 	"google.golang.org/protobuf/types/known/structpb"
 
 	clientsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
@@ -18,9 +17,9 @@ type UsersServiceV1 struct {
 	client *ClientV1
 }
 
-func (s *UsersServiceV1) newClient(ctx context.Context) clientsv1connect.UsersServiceClient {
+func (s *UsersServiceV1) newClient() clientsv1connect.UsersServiceClient {
 	return clientsv1connect.NewUsersServiceClient(
-		oauth2.NewClient(ctx, s.client.tokenSource),
+		s.client.httpClient(),
 		s.client.gRPCURL(),
 		connect.WithInterceptors(s.client.defaultInterceptors...),
 	)
@@ -32,7 +31,7 @@ func (s *UsersServiceV1) newClient(ctx context.Context) clientsv1connect.UsersSe
 // Required scope: profile
 func (s *UsersServiceV1) GetUserByID(ctx context.Context, id string) (*clientsv1.User, error) {
 	req := &clientsv1.GetUserRequest{Id: id}
-	client := s.newClient(ctx)
+	client := s.newClient()
 	resp, err := parseResponseAndError(client.GetUser(ctx, connect.NewRequest(req)))
 	if err != nil {
 		return nil, err
@@ -46,7 +45,7 @@ func (s *UsersServiceV1) GetUserByID(ctx context.Context, id string) (*clientsv1
 // Required scope: profile
 func (s *UsersServiceV1) GetUserByEmail(ctx context.Context, email string) (*clientsv1.User, error) {
 	req := &clientsv1.GetUserRequest{Email: email}
-	client := s.newClient(ctx)
+	client := s.newClient()
 	resp, err := parseResponseAndError(client.GetUser(ctx, connect.NewRequest(req)))
 	if err != nil {
 		return nil, err
@@ -78,7 +77,7 @@ func (s *UsersServiceV1) CreateUser(ctx context.Context, email, name string) (*c
 // Required scopes: profile
 func (s *UsersServiceV1) GetUsersByIDs(ctx context.Context, ids []string) ([]*clientsv1.User, error) {
 	req := &clientsv1.GetUsersRequest{Ids: ids}
-	client := s.newClient(ctx)
+	client := s.newClient()
 	resp, err := parseResponseAndError(client.GetUsers(ctx, connect.NewRequest(req)))
 	if err != nil {
 		return nil, err
@@ -95,7 +94,7 @@ func (s *UsersServiceV1) GetUserRolesByID(ctx context.Context, userID, service s
 		Id:      userID,
 		Service: service,
 	}
-	client := s.newClient(ctx)
+	client := s.newClient()
 	resp, err := parseResponseAndError(client.GetUserRoles(ctx, connect.NewRequest(req)))
 	if err != nil {
 		return nil, err
@@ -120,7 +119,7 @@ func (s *UsersServiceV1) GetUserMetadata(ctx context.Context, userID string, nam
 		Id:         userID,
 		Namespaces: namespaces,
 	}
-	client := s.newClient(ctx)
+	client := s.newClient()
 	resp, err := parseResponseAndError(client.GetUserMetadata(ctx, connect.NewRequest(req)))
 	if err != nil {
 		return nil, err
@@ -149,7 +148,7 @@ func (s *UsersServiceV1) UpdateUserMetadata(ctx context.Context, userID, namespa
 			Metadata:  md,
 		},
 	}
-	client := s.newClient(ctx)
+	client := s.newClient()
 	resp, err := parseResponseAndError(client.UpdateUserMetadata(ctx, connect.NewRequest(req)))
 	if err != nil {
 		return nil, err

@@ -6,7 +6,6 @@ import (
 	"slices"
 
 	"connectrpc.com/connect"
-	"golang.org/x/oauth2"
 
 	"github.com/google/uuid"
 	clientsv1 "github.com/sourcegraph/sourcegraph-accounts-sdk-go/clients/v1"
@@ -21,9 +20,9 @@ type RolesServiceV1 struct {
 	client *ClientV1
 }
 
-func (s *RolesServiceV1) newClient(ctx context.Context) clientsv1connect.RolesServiceClient {
+func (s *RolesServiceV1) newClient() clientsv1connect.RolesServiceClient {
 	return clientsv1connect.NewRolesServiceClient(
-		oauth2.NewClient(ctx, s.client.tokenSource),
+		s.client.httpClient(),
 		s.client.gRPCURL(),
 		connect.WithInterceptors(s.client.defaultInterceptors...),
 	)
@@ -61,7 +60,7 @@ func (s *RolesServiceV1) RegisterRoleResources(ctx context.Context, metadata Reg
 		return 0, errors.Wrap(err, "failed to generate revision for request metadata")
 	}
 
-	client := s.newClient(ctx)
+	client := s.newClient()
 	stream := client.RegisterRoleResources(ctx)
 	// Metadata must be submitted first in the stream.
 	err = stream.Send(&clientsv1.RegisterRoleResourcesRequest{
