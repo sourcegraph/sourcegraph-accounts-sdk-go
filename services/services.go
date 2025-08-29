@@ -16,7 +16,7 @@ const (
 	SSC               Service = "ssc"
 	Analytics         Service = "analytics"
 	CloudAPI          Service = "cloud_api"
-	ReleaseOperations Service = "releaseoperations"
+	ReleaseOperations Service = "release_operations"
 )
 
 var serviceNames = map[Service]string{
