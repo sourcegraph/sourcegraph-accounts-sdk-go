@@ -24,6 +24,7 @@ service UsersService {
   rpc GetUser(GetUserRequest) returns (GetUserResponse) {
     option (sams_required_scopes) = "profile";
   };
+
   // GetUsers returns the list of SAMS users matching the provided IDs.
   //
   // NOTE: It silently ignores any invalid user IDs, i.e. the length of the return
@@ -33,6 +34,7 @@ service UsersService {
   rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {
     option (sams_required_scopes) = "profile";
   };
+
   // CreateUser creates a new SAMS user with the given email.
   // Required scopes: sams::user::write
   //
@@ -47,6 +49,7 @@ service UsersService {
   rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse) {
     option (sams_required_scopes) = "sams::user.roles::read";
   };
+
   // GetUserMetadata retrieves metadata for a SAMS user.
   //
   // Required scopes: 'sams::user.metadata::read' or metadata-namespace-specific
@@ -55,6 +58,7 @@ service UsersService {
     // Cannot use 'sams_required_scopes' due to metadata-namespace-specific scopes.
     // See docstring for required scopes.
   }
+  
   // UpdateUserMetadata updates the metadata of a SAMS user.
   //
   // Required scopes: 'sams::user.metadata::write' or metadata-namespace-specific
