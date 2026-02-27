@@ -11,7 +11,6 @@ const (
 	SAMS              Service = "sams"
 	TelemetryGateway  Service = "telemetry_gateway"
 	EnterprisePortal  Service = "enterprise_portal"
-	MailGatekeeper    Service = "mail_gatekeeper"
 	Workspaces        Service = "workspaces"
 	SSC               Service = "ssc"
 	Analytics         Service = "analytics"
@@ -26,7 +25,6 @@ var serviceNames = map[Service]string{
 	SAMS:              "Sourcegraph Accounts Management System",
 	TelemetryGateway:  "Telemetry Gateway",
 	EnterprisePortal:  "Enterprise Portal",
-	MailGatekeeper:    "Mail Gatekeeper",
 	Workspaces:        "Workspaces",
 	SSC:               "Self Serve Cody",
 	Analytics:         "Sourcegraph Analytics",
