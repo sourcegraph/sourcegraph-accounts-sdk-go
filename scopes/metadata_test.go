@@ -15,7 +15,6 @@ func TestTokenScopeToMetadataScope(t *testing.T) {
 		{"user.metadata", "*"},
 		{"user.metadata.cody", "cody"},
 		{"user.metadata.dotcom", "dotcom"},
-		{"user.metadata.cody_gatekeeper", "cody_gatekeeper"},
 	} {
 		got, err := PermissionToMetadataScope(tc.permission)
 		require.NoError(t, err)

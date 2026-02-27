@@ -98,8 +98,6 @@ var (
 		"user.metadata.cody",
 		// Legacy Sourcegraph.com metadata
 		"user.metadata.dotcom",
-		// Metadata owned by the 'Cody Gatekeeper' service.
-		"user.metadata.cody_gatekeeper",
 		// Metadata owned by PLG efforts for supporting community members.
 		"user.metadata.plg",
 
@@ -125,9 +123,6 @@ var (
 		"instance",
 		"permission.workspace",
 		"metering",
-	}
-	mailGatekeeperPermissions = []Permission{
-		"emails",
 	}
 	ampPermissions = []Permission{
 		"user",
@@ -199,7 +194,6 @@ func Allowed() AllowedScopes {
 	appendScopes(services.SAMS, samsPermissions)
 	appendScopes(services.TelemetryGateway, telemetryGatewayPermissions)
 	appendScopes(services.EnterprisePortal, enterprisePortalPermissions)
-	appendScopes(services.MailGatekeeper, mailGatekeeperPermissions)
 	appendScopes(services.Workspaces, workspacesPermissions)
 	appendScopes(services.Analytics, analyticsPermissions)
 	appendScopes(services.CloudAPI, cloudAPIPermissions)
