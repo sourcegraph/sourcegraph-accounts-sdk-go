@@ -139,7 +139,9 @@ type UsersServiceClient interface {
 	// variant scope, such as 'sams::user.metadata.dotcom::write'
 	UpdateUserMetadata(context.Context, *connect.Request[v1.UpdateUserMetadataRequest]) (*connect.Response[v1.UpdateUserMetadataResponse], error)
 	// GetUserExternalAccounts returns the external account connections for a SAMS
-	// user, e.g. Google, GitHub, email/password.
+	// user, e.g. Google, GitHub, email/password. It returns connect.CodeNotFound
+	// if no such user exists. An empty list is returned if the user has no
+	// external accounts.
 	//
 	// Required scopes: sams::user.external_accounts::read
 	GetUserExternalAccounts(context.Context, *connect.Request[v1.GetUserExternalAccountsRequest]) (*connect.Response[v1.GetUserExternalAccountsResponse], error)
@@ -279,7 +281,9 @@ type UsersServiceHandler interface {
 	// variant scope, such as 'sams::user.metadata.dotcom::write'
 	UpdateUserMetadata(context.Context, *connect.Request[v1.UpdateUserMetadataRequest]) (*connect.Response[v1.UpdateUserMetadataResponse], error)
 	// GetUserExternalAccounts returns the external account connections for a SAMS
-	// user, e.g. Google, GitHub, email/password.
+	// user, e.g. Google, GitHub, email/password. It returns connect.CodeNotFound
+	// if no such user exists. An empty list is returned if the user has no
+	// external accounts.
 	//
 	// Required scopes: sams::user.external_accounts::read
 	GetUserExternalAccounts(context.Context, *connect.Request[v1.GetUserExternalAccountsRequest]) (*connect.Response[v1.GetUserExternalAccountsResponse], error)

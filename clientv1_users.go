@@ -129,7 +129,9 @@ func (s *UsersServiceV1) GetUserMetadata(ctx context.Context, userID string, nam
 }
 
 // GetUserExternalAccountsByID returns the external account connections for the
-// SAMS user with the given ID, e.g. Google, GitHub, email/password.
+// SAMS user with the given ID, e.g. Google, GitHub, email/password. It returns
+// ErrNotFound if no such user exists. An empty list is returned if the user has
+// no external accounts.
 //
 // Required scopes: sams::user.external_accounts::read
 func (s *UsersServiceV1) GetUserExternalAccountsByID(ctx context.Context, id string) ([]*clientsv1.ExternalAccount, error) {

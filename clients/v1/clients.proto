@@ -64,7 +64,9 @@ service UsersService {
     // See docstring for required scopes.
   }
   // GetUserExternalAccounts returns the external account connections for a SAMS
-  // user, e.g. Google, GitHub, email/password.
+  // user, e.g. Google, GitHub, email/password. It returns connect.CodeNotFound
+  // if no such user exists. An empty list is returned if the user has no
+  // external accounts.
   //
   // Required scopes: sams::user.external_accounts::read
   rpc GetUserExternalAccounts(GetUserExternalAccountsRequest) returns (GetUserExternalAccountsResponse) {
