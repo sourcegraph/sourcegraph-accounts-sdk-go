@@ -89,6 +89,7 @@ var (
 		"user",
 		"user.profile",
 		"user.roles",
+		"user.external_accounts",
 
 		// Grants access to all scopes - use sparingly.
 		"user.metadata",

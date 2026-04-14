@@ -63,6 +63,13 @@ service UsersService {
     // Cannot use 'sams_required_scopes' due to metadata-namespace-specific scopes.
     // See docstring for required scopes.
   }
+  // GetUserExternalAccounts returns the external account connections for a SAMS
+  // user, e.g. Google, GitHub, email/password.
+  //
+  // Required scopes: sams::user.external_accounts::read
+  rpc GetUserExternalAccounts(GetUserExternalAccountsRequest) returns (GetUserExternalAccountsResponse) {
+    option (sams_required_scopes) = "sams::user.external_accounts::read";
+  }
 }
 
 // Exactly one attribute can be set.
@@ -173,6 +180,37 @@ message UpdateUserMetadataRequest {
 message UpdateUserMetadataResponse {
   // The updated user metadata.
   UserServiceMetadata metadata = 1;
+}
+
+message GetUserExternalAccountsRequest {
+  // The user's external ID.
+  string id = 1;
+}
+
+// ExternalAccountType identifies the type of external account provider.
+enum ExternalAccountType {
+  EXTERNAL_ACCOUNT_TYPE_UNSPECIFIED = 0;
+  EXTERNAL_ACCOUNT_TYPE_PASSWORD = 1;
+  EXTERNAL_ACCOUNT_TYPE_GITHUB = 2;
+  EXTERNAL_ACCOUNT_TYPE_GITLAB = 3;
+  EXTERNAL_ACCOUNT_TYPE_GOOGLE = 4;
+}
+
+// ExternalAccount represents a connection between a SAMS user and an external
+// account provider.
+message ExternalAccount {
+  // The type of the external account.
+  ExternalAccountType type = 1;
+  // The account identifier from the external provider (e.g. the GitHub user ID).
+  string account_id = 2;
+  // The time the external account was connected.
+  google.protobuf.Timestamp created_at = 3;
+  // The time the external account was last updated.
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message GetUserExternalAccountsResponse {
+  repeated ExternalAccount external_accounts = 1;
 }
 
 message CreateUserRequest {
