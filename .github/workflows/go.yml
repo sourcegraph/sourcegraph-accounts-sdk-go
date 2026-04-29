@@ -29,7 +29,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.22.x
+          go-version: 1.25.9
       - name: Enable pulling Go modules from private sourcegrahp/sourcegraph 
         run: git config --global url."https://${PRIVATE_TOKEN}@github.com/sourcegraph/".insteadOf "https://github.com/sourcegraph/"
       - name: Check Go module tidiness
@@ -53,7 +53,7 @@ jobs:
     name: Test
     strategy:
       matrix:
-        go-version: [ 1.22.x ]
+        go-version: [ 1.25.9 ]
         platform: [ ubuntu-latest ]
     runs-on: ${{ matrix.platform }}
     steps:
