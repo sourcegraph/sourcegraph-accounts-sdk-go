@@ -117,6 +117,7 @@ var (
 		PermissionEnterprisePortalSubscriptionPermission,
 		PermissionEnterprisePortalCodyAccess,
 		PermissionEnterprisePortalMetering,
+		PermissionEnterprisePortalSlackIntegrations,
 	}
 	workspacesPermissions = []Permission{
 		"workspace",
@@ -156,6 +157,12 @@ const (
 	// PermissionEnterprisePortalMetering designates permissions for Deep Search
 	// quota management and metering functionality.
 	PermissionEnterprisePortalMetering Permission = "metering"
+
+	// PermissionEnterprisePortalSlackIntegrations designates permissions for
+	// Enterprise Portal customer Slack notification integrations
+	// (enterpriseportal.slacknotifications.v1.SlackIntegrationsService),
+	// consumed by cloud-notifications over M2M.
+	PermissionEnterprisePortalSlackIntegrations Permission = "slack_integrations"
 )
 
 // Allowed returns all allowed scopes for a client. The caller should use

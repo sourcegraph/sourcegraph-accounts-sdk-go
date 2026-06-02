@@ -75,6 +75,9 @@ func TestAllowedGoldenList(t *testing.T) {
 		Scope("enterprise_portal::metering::read"),
 		Scope("enterprise_portal::metering::write"),
 		Scope("enterprise_portal::metering::delete"),
+		Scope("enterprise_portal::slack_integrations::read"),
+		Scope("enterprise_portal::slack_integrations::write"),
+		Scope("enterprise_portal::slack_integrations::delete"),
 		Scope("workspaces::workspace::read"),
 		Scope("workspaces::workspace::write"),
 		Scope("workspaces::workspace::delete"),
@@ -117,6 +120,23 @@ func TestAllowed(t *testing.T) {
 			t.Run(string(test.scope), func(t *testing.T) {
 				got := allowedScopes.Contains(test.scope)
 				assert.Equal(t, test.allowed, got)
+			})
+		}
+	})
+
+	t.Run("slack_integrations", func(t *testing.T) {
+		tests := []struct {
+			scope   Scope
+			allowed bool
+		}{
+			{"enterprise_portal::slack_integrations::read", true},
+			{"enterprise_portal::slack_integrations::write", true},
+			{"enterprise_portal::slack_integrations::delete", true},
+			{"enterprise_portal::slack_integrations::bogus", false},
+		}
+		for _, test := range tests {
+			t.Run(string(test.scope), func(t *testing.T) {
+				assert.Equal(t, test.allowed, allowedScopes.Contains(test.scope))
 			})
 		}
 	})
