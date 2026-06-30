@@ -118,6 +118,7 @@ var (
 		PermissionEnterprisePortalCodyAccess,
 		PermissionEnterprisePortalMetering,
 		PermissionEnterprisePortalSlackIntegrations,
+		PermissionEnterprisePortalSubscriptionNotifications,
 	}
 	workspacesPermissions = []Permission{
 		"workspace",
@@ -163,6 +164,10 @@ const (
 	// (enterpriseportal.slacknotifications.v1.SlackIntegrationsService),
 	// consumed by cloud-notifications over M2M.
 	PermissionEnterprisePortalSlackIntegrations Permission = "slack_integrations"
+
+	// PermissionEnterprisePortalSubscriptionNotifications designates permissions
+	// for managing subscription notifications in Enterprise Portal.
+	PermissionEnterprisePortalSubscriptionNotifications Permission = "subscription_notifications"
 )
 
 // Allowed returns all allowed scopes for a client. The caller should use
