@@ -5,7 +5,6 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/sourcegraph/sourcegraph/lib/errors"
-	"github.com/sourcegraph/sourcegraph/lib/pointers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -71,7 +70,7 @@ func TestParseResponseAndError(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := parseResponseAndError(connect.NewResponse(pointers.Ptr("foo")), test.err())
+			_, err := parseResponseAndError(connect.NewResponse(new("foo")), test.err())
 			if test.wantErr == "" {
 				assert.NoError(t, err)
 			} else {
