@@ -29,7 +29,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.22.x
+          go-version: 1.25.x
       - name: Enable pulling Go modules from private sourcegrahp/sourcegraph 
         run: git config --global url."https://${PRIVATE_TOKEN}@github.com/sourcegraph/".insteadOf "https://github.com/sourcegraph/"
       - name: Check Go module tidiness
@@ -47,13 +47,14 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
+          install-mode: goinstall
           args: --timeout=30m
 
   test:
     name: Test
     strategy:
       matrix:
-        go-version: [ 1.22.x ]
+        go-version: [ 1.25.x ]
         platform: [ ubuntu-latest ]
     runs-on: ${{ matrix.platform }}
     steps:
