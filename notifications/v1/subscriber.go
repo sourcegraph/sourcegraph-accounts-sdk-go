@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 	"github.com/sourcegraph/log"
 	"github.com/sourcegraph/sourcegraph/lib/background"
 	"github.com/sourcegraph/sourcegraph/lib/errors"
@@ -19,7 +19,7 @@ import (
 type subscriber struct {
 	logger       log.Logger
 	handlers     SubscriberHandlers
-	subscription *pubsub.Subscription
+	subscription *pubsub.Subscriber
 
 	// state indicates the state of workers.
 	state state
@@ -77,7 +77,7 @@ func NewSubscriber(logger log.Logger, opts SubscriberOptions) (background.Routin
 	if err != nil {
 		return nil, errors.Wrap(err, "create GCP Pub/Sub client")
 	}
-	subscription := client.Subscription(opts.SubscriptionID)
+	subscription := client.Subscriber(opts.SubscriptionID)
 	subscription.ReceiveSettings = opts.ReceiveSettings
 	return &subscriber{
 		logger:       logger,
