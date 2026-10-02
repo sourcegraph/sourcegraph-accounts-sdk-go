@@ -1,6 +1,6 @@
 module github.com/sourcegraph/sourcegraph-accounts-sdk-go
 
-go 1.25.0
+go 1.27.0
 
 require (
 	cloud.google.com/go/pubsub/v2 v2.6.0
