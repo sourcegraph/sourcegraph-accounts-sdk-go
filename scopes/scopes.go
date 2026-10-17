@@ -82,6 +82,7 @@ type Permission string
 
 var (
 	codyGatewayPermissions = []Permission{
+		"dotcom",
 		"flaggedprompts",
 		"workspaces",
 	}
