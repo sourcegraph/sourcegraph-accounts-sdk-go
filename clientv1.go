@@ -79,11 +79,7 @@ func NewClientV1(config ClientV1Config) (*ClientV1, error) {
 		return nil, errors.Wrap(err, "ClientV1ConnectionConfig is invalid")
 	}
 
-	otelinterceptor, err := otelconnect.NewInterceptor(
-		// Start with simple, lower-cardinality metrics
-		otelconnect.WithoutServerPeerAttributes(),
-		// Start with lower-volume trace data
-		otelconnect.WithoutTraceEvents())
+	otelinterceptor, err := otelconnect.NewInterceptor()
 	if err != nil {
 		return nil, errors.Wrap(err, "initiate OTEL interceptor")
 	}
