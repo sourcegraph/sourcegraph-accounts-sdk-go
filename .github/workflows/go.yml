@@ -51,10 +51,7 @@ jobs:
 
   test:
     name: Test
-    strategy:
-      matrix:
-        platform: [ ubuntu-latest ]
-    runs-on: ${{ matrix.platform }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
