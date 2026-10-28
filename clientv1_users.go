@@ -128,6 +128,25 @@ func (s *UsersServiceV1) GetUserMetadata(ctx context.Context, userID string, nam
 	return resp.Msg.GetMetadata(), nil
 }
 
+// GetUserExternalAccountsByID returns the external account connections for the
+// SAMS user with the given ID, e.g. Google, GitHub, email/password. It returns
+// ErrNotFound if no such user exists. An empty list is returned if the user has
+// no external accounts.
+//
+// Required scopes: sams::user.external_accounts::read
+func (s *UsersServiceV1) GetUserExternalAccountsByID(ctx context.Context, id string) ([]*clientsv1.ExternalAccount, error) {
+	if id == "" {
+		return nil, errors.New("user ID cannot be empty")
+	}
+	req := &clientsv1.GetUserExternalAccountsRequest{Id: id}
+	client := s.newClient(ctx)
+	resp, err := parseResponseAndError(client.GetUserExternalAccounts(ctx, connect.NewRequest(req)))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Msg.GetExternalAccounts(), nil
+}
+
 // UpdateUserMetadata updates the metadata associated with the given user ID
 // and metadata namespace.
 //
