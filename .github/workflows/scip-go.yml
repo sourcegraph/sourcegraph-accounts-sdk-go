@@ -20,13 +20,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Setup Go
-        uses: jdx/mise-action@v5
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
 
       - name: Run scip-go and upload
-        uses: sourcegraph/scip-go-action@v2
+        uses: sourcegraph/scip-go-action@4003ef41d13a54673971ef1b143fdfcc868bab22 # v2.0.0
         with:
           sourcegraph-url: https://sourcegraph.sourcegraph.com/
           sourcegraph-token: ${{ secrets.SRC_ACCESS_TOKEN_S2 }}
